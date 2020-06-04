@@ -1,0 +1,7 @@
+git clone --verbose https://supermastermind@github.com/supermastermind/playonline.git
+(with VPN enabled if done at work)
+git config --global user.name "supermastermind"
+... modifs ... 
+git add + git commit -m "xxx"
+git push origin master
+=> may take quite some time for github web site contents to be refreshed if plenty of files

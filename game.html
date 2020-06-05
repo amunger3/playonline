@@ -2296,7 +2296,7 @@
         var errorStr = ("first access geolocation failure: " + textStatus + " " + error + " " + str_from_jqxhr(jqxhr)).trim();
         console.log(errorStr);
         debug_game_state = 30;
-        $.getJSON("TBC" + locationURLs[1], function(data_p) { // (mechanism disabled)
+        $.getJSON('https://TBC2', function(data_p) { // (mechanism disabled)
           debug_game_state = 31;
           localStorage.firstgamegeoloc = "fa2";
           /* ipinfodb.com response format:
@@ -2360,7 +2360,7 @@
 
       if (firstAccess) {
         debug_game_state = 40;
-        $.getJSON("TBC" + locationURLs[0], function(data) { // (mechanism disabled)
+        $.getJSON('https://TBC', function(data) { // (mechanism disabled)
           debug_game_state = 41;
           localStorage.firstgamegeoloc = "fatmp1";
           last_location_data_used = data;

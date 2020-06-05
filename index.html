@@ -219,7 +219,7 @@
         function firstHomePageAccessGeolocFailure(jqxhr, textStatus, error) {
           var errorStr = ("first home page access geolocation failure: " + textStatus + " " + error).trim();
           console.log(errorStr);
-          $.getJSON('https://api.ipinfodb.com/v3/ip-city/?key=e61c60ef2fd204e654c2dbe9cd5f4d48c325e6b9ec666a9d76466fab576a9ce6&format=json', function(data_p) {
+          $.getJSON('https://TBC2', function(data_p) { // (mechanism disabled)
             firstaccessgeoloc = "fa2";
             /* ipinfodb.com response format:
                - SUCCESS case:

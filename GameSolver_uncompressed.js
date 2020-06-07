@@ -63,8 +63,8 @@ try {
   let baseOfMaxPerformanceEvaluationTime = 30000; // 30 seconds / much higher in (precalculation mode)
   let maxPerformanceEvaluationTime = -1;
 
-  let refNbOfCodesForSystematicEvaluation = 2555; // (high values may induce latencies)
-  let refNbOfCodesForSystematicEvaluation_AllCodesEvaluated = 2555; // (shall be <= refNbOfCodesForSystematicEvaluation - high values may induce latencies)
+  let refNbOfCodesForSystematicEvaluation = 2555; // (high values may induce latencies) (***)
+  let refNbOfCodesForSystematicEvaluation_AllCodesEvaluated = 2555; // (shall be <= refNbOfCodesForSystematicEvaluation - high values may induce latencies) (***)
   let nbOfCodesForSystematicEvaluation = -1;
   let nbOfCodesForSystematicEvaluation_AllCodesEvaluated = -1;
   let nbOfCodesForSystematicEvaluation_ForMemAlloc = -1;
@@ -2513,7 +2513,7 @@ try {
             }
           }
         }
-        // Precalculation optimization (2/4): skip impossible cur code if acceptable (i.e. if its performance can be evaluated relatively quickly with precalculated game)
+        // Precalculation optimization (2/4): skip impossible cur code if acceptable (i.e. if its performance [in most cases if not all] can be evaluated relatively quickly with precalculated game)
         if ( (next_cur_game_idx >= 2) && (nbCodes <= nbCodesForPrecalculationThreshold) ) { // (***)
           skip_cur_code = true;
         }

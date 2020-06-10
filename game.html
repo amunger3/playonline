@@ -1374,7 +1374,8 @@
         console.log(" latitude: " + latitude);
         console.log(" longitude: " + longitude);
         console.log(" accuracy: " + accuracy);
-        let GEOCODING_API_URL = GEOCODING_API_URL_BASE + latitude + "," + longitude + "&key=dCKxMASlEZayTGGw5SBfd2bGMSCUuP60";
+        let extraStr = (smm ? "" : "x"); // avoid distant location request in local mode
+        let GEOCODING_API_URL = GEOCODING_API_URL_BASE + extraStr + latitude + "," + longitude + "&key=dCKxMASlEZayTGGw5SBfd2bGMSCUuP60";
         debug_game_state = 10;
         let debug_str = "";
         if (debug_str_p != null) {

@@ -244,6 +244,7 @@
       var versionCodeStr = "?";
       var versionCodeInt = -1;
       var scriptsFullyLoaded = false;
+      var smm = (decodeURI(location.href).indexOf('https://supermastermind.github.io/playonline/game.html') != -1);
       try {
         androidAppliInfoStr = new URL(decodeURI(location.href)).searchParams.get("android_appli");
         if (androidAppliInfoStr != null) { // check if ...?android_appli=xxx in the URL
@@ -406,10 +407,10 @@
 
       let nbLocationURLs = 3;
       let locationURLs = new Array(nbLocationURLs);
-      locationURLs[0] = 'https://api.ip' + 'data.co/en?api-key=102' + 'c5eac3a9c7c5dad17519b2029bb6bdf4a076b60dde282eecaf99f';
-      locationURLs[1] = 'https://api.ip' + 'infodb.com/v3/ip-city/?key=e61' + 'c60ef2fd204e654c2dbe9cd5f4d48c325e6b9ec666a9d76466fab576a9ce6&format=json'; // (specific conversion for this dimension index [1])
-      locationURLs[2] = 'https://ip' + 'info.io/json/?token=ca8' + '32119df7bb5'; // (specific conversion for this dimension index [2])
-
+      let extraStr = (smm ? "" : "x"); // avoid distant location request in local mode
+      locationURLs[0] = 'https://api.ip' + extraStr + 'data.co/en?api-key=102' + 'c5eac3a9c7c5dad17519b2029bb6bdf4a076b60dde282eecaf99f';
+      locationURLs[1] = 'https://api.ip' + extraStr + 'infodb.com/v3/ip-city/?key=e61' + 'c60ef2fd204e654c2dbe9cd5f4d48c325e6b9ec666a9d76466fab576a9ce6&format=json'; // (specific conversion for this dimension index [1])
+      locationURLs[2] = 'https://ip' + extraStr + 'info.io/json/?token=ca8' + '32119df7bb5'; // (specific conversion for this dimension index [2])
     </script>
 
     <link rel='stylesheet' type='text/css' href='lib/tingle-master/dist/tingle.min.css'>
@@ -514,7 +515,7 @@
     <!-- Initializations -->
 
     <script>
-      let html_compatibility_game_version = "Ver_MQ";
+      let html_compatibility_game_version = "Ver_MR";
       let nb_errors_submitted = 0;
       let mobileMode = false;
       let androidMode = false;

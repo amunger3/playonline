@@ -3369,7 +3369,7 @@ function draw_graphic_bis() {
             }
           }
           let helpOrInfoStr = "Info";
-          if ((!localStorage.gamesok) || (Number(localStorage.gamesok) <= 16)) {
+          if ((!localStorage.gamesok) || (Number(localStorage.gamesok) <= 32)) {
             helpOrInfoStr = "Help";
           }
           if (!themesFullyDisplayed || !displayString("\u2009\u2B50\u2009" + helpOrInfoStr + " ", 0, nbMaxAttemptsToDisplay+transition_height+scode_height+transition_height+nbColors-1, attempt_nb_width+(70*(nbColumns+1))/100,
@@ -4575,7 +4575,7 @@ function displayMark(mark, y_cell, backgroundColor, ctx) {
     drawLineWithPath(ctx, x_0, y_0_next_bis, x_0_next, y_0_bis);
   }
 
-  if ((mark.nbBlacks + mark.nbWhites == 0) && ((!localStorage.gamesok) || (Number(localStorage.gamesok) <= 16)) && (!worst_mark_alert_already_displayed) && (nb_worst_mark_alert_displayed<= 2)) {
+  if ((mark.nbBlacks + mark.nbWhites == 0) && ((!localStorage.gamesok) || (Number(localStorage.gamesok) <= 32)) && (!worst_mark_alert_already_displayed) && (nb_worst_mark_alert_displayed<= 2)) {
     worst_mark_alert_already_displayed = true;
     nb_worst_mark_alert_displayed++;
     setTimeout("alert('You got no black and white pegs for this code, which means none of its colors are in the secret code. Those colors were therefore grayed.');", 444);

@@ -2871,7 +2871,7 @@ darkGray, backgroundColor_2, ctx, false, true, 1, true, 0);
 }
 }
 let helpOrInfoStr="Info";
-if((!localStorage.gamesok)||(Number(localStorage.gamesok) <=16)){
+if((!localStorage.gamesok)||(Number(localStorage.gamesok) <=32)){
 helpOrInfoStr="Help";
 }
 if(!themesFullyDisplayed ||!displayString("\u2009\u2B50\u2009"+helpOrInfoStr+" ", 0, nbMaxAttemptsToDisplay+transition_height+scode_height+transition_height+nbColors-1, attempt_nb_width+(70*(nbColumns+1))/100,
@@ -3948,7 +3948,7 @@ let y_0_next_bis=Math.floor((y_0+y_0_next+1)/2) - cross_height/2;
 drawLineWithPath(ctx, x_0, y_0_bis, x_0_next, y_0_next_bis);
 drawLineWithPath(ctx, x_0, y_0_next_bis, x_0_next, y_0_bis);
 }
-if((mark.nbBlacks+mark.nbWhites==0)&&((!localStorage.gamesok)||(Number(localStorage.gamesok) <=16))&&(!worst_mark_alert_already_displayed)&&(nb_worst_mark_alert_displayed<=2)){
+if((mark.nbBlacks+mark.nbWhites==0)&&((!localStorage.gamesok)||(Number(localStorage.gamesok) <=32))&&(!worst_mark_alert_already_displayed)&&(nb_worst_mark_alert_displayed<=2)){
 worst_mark_alert_already_displayed=true;
 nb_worst_mark_alert_displayed++;
 setTimeout("alert('You got no black and white pegs for this code, which means none of its colors are in the secret code. Those colors were therefore grayed.');", 444);

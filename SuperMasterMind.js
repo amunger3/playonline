@@ -918,7 +918,7 @@ $(".page_transition").fadeOut("fast");
 catch (exc){
 }
 }
-function newGameButtonClick(nbColumns_p){
+newGameButtonClick=function(nbColumns_p){
 if(!document.getElementById("newGameButton").disabled){
 if( (nbColumns_p==0)
 ||(currentAttemptNumber <=1) ){

@@ -1104,7 +1104,7 @@ function newGameButtonClick_delayed() {
   }
 }
 
-function newGameButtonClick(nbColumns_p) {
+newGameButtonClick = function(nbColumns_p) { // (override temporary definition)
   if (!document.getElementById("newGameButton").disabled) {
     if ( (nbColumns_p == 0) // ("NEW GAME" button event)
          || (currentAttemptNumber <= 1) ) { // (radio buttons events)

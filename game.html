@@ -311,6 +311,10 @@
       var HTML_geoloc_successes = 0;
       var HTML_geoloc_errors = 0;
 
+      var newGameButtonClick = function(nbColumns_p) {
+        console.log("newGameButtonClick event skipped (" + nbColumns_p + ")");
+      }
+
       var storageErrorMet = true;
       try {
         if (typeof(Storage) !== 'undefined') {

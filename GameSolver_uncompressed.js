@@ -2513,7 +2513,10 @@ try {
             }
           }
         }
-        // Precalculation optimization (2/4): skip impossible cur code if acceptable (i.e. if its performance [in most cases if not all] can be evaluated relatively quickly with precalculated game)
+        // Precalculation optimization (2/4): skip impossible cur code if acceptable (i.e. if its performance [in most cases if not all - "in most cases" meaning possibly "when the code played is not too poor"] can be evaluated relatively quickly with precalculated game)
+        // Too high nbCodesForPrecalculationThreshold values can lead to such precalculated game issues as early as 1100 possible codes, e.g. in this game:
+        // 1B1W 72625; 0B2W 36157 => 1166 possible codes => 42734 is very quick to evaluate but 46257 is very long to evaluate, and even too long on some computers.
+        // Ideally, to always have successful performance evaluations, we should use a lower nbCodesForPrecalculationThreshold value here than the value used in the other parts of the program (not done because of lack of computing resources).
         if ( (next_cur_game_idx >= 2) && (nbCodes <= nbCodesForPrecalculationThreshold) ) { // (***)
           skip_cur_code = true;
         }

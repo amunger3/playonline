@@ -2391,7 +2391,7 @@ canvas.height=height;/* (necessary as canvas may have been expanded to fill its 
 ctx.setTransform(1,0,0,1,0,0);
 updateAttributesWidthAndHeightValues(width, height);
 }
-} while (resize_detected&&(resize_cnt <=7));
+} while (resize_detected&&(resize_cnt <=5));
 if(window.innerWidth < 0.70*window.innerHeight){
 rulesTableWidthStr="100%";
 scoresTableWidthStr="100%";

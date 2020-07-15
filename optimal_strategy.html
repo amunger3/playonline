@@ -3,17 +3,17 @@
 
   <head>
 
-    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">    
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
     <title>Play Super Master Mind online - Optimal strategy</title>
     <meta name="title" content="Play Super Master Mind online - Optimal strategy">
     <meta name="description" content="Play Super Master Mind / Code breaker online, assisted by a calculator which knows the optimal strategy!">
-    <meta name="keywords" content="super master mind, code breaker, optimal strategy, score, efficient">    
+    <meta name="keywords" content="super master mind, code breaker, optimal strategy, score, efficient">
 
     <meta name="viewport" content="width=device-width, initial-scale=1.0"> <!-- scale for smartphones -->
-    
+
     <link rel="stylesheet" type="text/css" href="style/style.css">
     <script src="common_functions.js"></script>
-    
+
     <script src='lib/jquery-3.4.1.min.js'></script>
     <!-- <script>
       // Animation during page loading:
@@ -27,7 +27,7 @@
         console.log("(on load)");
         $(".loading").fadeOut("slow"); // loading div fades out
         $(".main").fadeIn("slow"); // main div fades in
-      }); 
+      });
       // 2') Defense timeout to allow interactions with the page
       setTimeout("console.log('(on load timeout)');$('.loading').fadeOut('slow');", 5000); // loading div fades out
     </script> -->
@@ -42,27 +42,27 @@
         return text;
       }
 
-      let firstOptimalStrategyAccess = false;      
+      let firstOptimalStrategyAccess = false;
       if (typeof(Storage) !== 'undefined') {
         if (!localStorage.firstoptimalstrategydone) {
           localStorage.firstoptimalstrategydone = "first optimal strategy access done";
           firstOptimalStrategyAccess = true;
-        }      
+        }
         if (!localStorage.firstaccessid) {
           let firstaccessid = 'OP - ' + makeid() + ' - ' + new Date();
           localStorage.firstaccessid = firstaccessid;
         }
-      }    
+      }
     </script>
   </head>
 
   <body>
-  
+
     <!-- <div class="loading">
       <img src="img/loading.gif" style='width:5.5rem'><br>
       Loading...
-    </div> -->    
-  
+    </div> -->
+
     <div id="main">
 
       <!-- HEADER -->
@@ -79,20 +79,20 @@
           <script>write_introduction()</script>
 
           <a href='index.html' style="text-decoration:none;"><b>See rules & play online</b>
-          </a>          
+          </a>
 
           <hr style="height:0.5rem; visibility:hidden;" />
           <h2>Optimal strategy</h2>
-                    
+
           <!-- OPTIMAL STRATEGY DETAILS -->
           <script>write_optimal_strategy_details_2();</script>
-          
+
           <h3>Very easy game (3 columns, 5 colors):</h3>
-          
+
           <b>
           <table style='margin-right:3vw;padding:0;border-collapse:collapse'>
             <tr>
-              <td style='border:1px solid black;margin:0;padding:0.5rem;background:#FFCC00;color:black;text-align:center'>Code</td>
+              <td style='border:1px solid black;margin:0;padding:0.5rem;background:#FFCC00;color:black;text-align:center'>First code</td>
               <td style='border:1px solid black;margin:0;padding:0.5rem;background:#FFCC00;color:black;text-align:center'>Average number of attempts to find secret codes</td>
               <td style='border:1px solid black;margin:0;padding:0.5rem;background:#FFCC00;color:black;text-align:center'>&Delta;</td>
             </tr>
@@ -115,13 +115,13 @@
           </b>
           <hr style="height:0.5rem; visibility:hidden;" />
           For very easy games (3 columns, 5 colors, 5<sup>3</sup>&nbsp;=&nbsp;<b>125 codes</b>, <font color=#CC0099><b>optimal logical strategy</b></font> applied), <b>the optimal code to play at first attempt is 123</b> (or any other equivalent code with 3 different colors) with an average number of attempts to find secret codes of <b><sup>455</sup>&frasl;<sub>5<sup>3</sup></sub>&nbsp;=&nbsp;3.640</b> and a maximal number of attempts of <b>5</b>.
-          
+
           <h3>Master Mind game (4 columns, 6 colors):</h3>
-          
+
           <b>
           <table style='margin-right:3vw;padding:0;border-collapse:collapse'>
             <tr>
-              <td style='border:1px solid black;margin:0;padding:0.5rem;background:#FFCC00;color:black;text-align:center'>Code</td>
+              <td style='border:1px solid black;margin:0;padding:0.5rem;background:#FFCC00;color:black;text-align:center'>First code</td>
               <td style='border:1px solid black;margin:0;padding:0.5rem;background:#FFCC00;color:black;text-align:center'>Average number of attempts to find secret codes</td>
               <td style='border:1px solid black;margin:0;padding:0.5rem;background:#FFCC00;color:black;text-align:center'>&Delta;</td>
             </tr>
@@ -149,7 +149,7 @@
               <td style='border:1px solid black;margin:0;padding:0.5rem;background:#FFFFFF;color:black;text-align:center'>1111</td>
               <td style='border:1px solid black;margin:0;padding:0.5rem;background:#FFFFFF;color:black;text-align:center'>4.907</td>
               <td style='border:1px solid black;margin:0;padding:0.5rem;background:#FFFFFF;color:#F00000;text-align:center'>-0.54</td>
-            </tr>              
+            </tr>
           </table>
           </b>
           <hr style="height:0.5rem; visibility:hidden;" />
@@ -164,51 +164,59 @@
           With a mathematically optimal strategy like Koyama and Lai's, between 0 and 2 impossible/illogical codes are played at the second and/or third attempts of the 6<sup>4</sup> games (0 being by far the most common case, then coinciding with the <font color=#CC0099><b>optimal logical strategy</b></font>). Here is an example showing how such a mathematically optimal strategy behaves in an "extreme" case where 2 impossible/illogical codes are played (without those 2 impossible/illogical codes, the mathematically optimal <sup>5625</sup>&frasl;<sub>6<sup>4</sup></sub> performance is not reached):
           <hr style="height:0.5rem; visibility:hidden;" />
           <a href="img/MasterMind_game_illogical_strategy_2.png"><img src="img/MasterMind_game_illogical_strategy_2.png" style="width:45%;border-color:#AAAAAA;border-style:solid;border-width:thin;margin-top:4px;margin-right:4px"><small>click to enlarge</small></a>
-          
+
           <h3>Super Master Mind game (5 columns, 8 colors):</h3>
-          
+
           <b>
           <table style='margin:0;padding:0;border-collapse:collapse'>
             <tr>
-              <td style='border:1px solid black;margin:0;padding:0.5rem;background:#FFCC00;color:black;text-align:center'>Code</td>
+              <td style='border:1px solid black;margin:0;padding:0.5rem;background:#FFCC00;color:black;text-align:center'>First code</td>
               <td style='border:1px solid black;margin:0;padding:0.5rem;background:#FFCC00;color:black;text-align:center'>Average number of attempts to find secret codes</td>
               <td style='border:1px solid black;margin:0;padding:0.5rem;background:#FFCC00;color:black;text-align:center'>&Delta;</td>
+              <td style='border:1px solid black;margin:0;padding:0.5rem;color:black;text-align:center'><font color=gray><small>First code %</small></font></td>
             </tr>
             <tr>
               <td style='border:1px solid black;margin:0;padding:0.5rem;background:#FFFFFF;color:black;text-align:center'>12233</td>
               <td style='border:1px solid black;margin:0;padding:0.5rem;background:#FFFFFF;color:black;text-align:center'>5.491</td>
               <td style='border:1px solid black;margin:0;padding:0.5rem;background:#FFFFFF;color:black;text-align:center'>0.00</td>
+              <td style='border:1px solid black;margin:0;padding:0.5rem;color:black;text-align:center'><font color=gray><small><sup>5040</sup>&frasl;<sub>8<sup>5</sup></sub>&nbsp;&asymp;&nbsp;15.4%</small></font></td>
             </tr>
             <tr>
               <td style='border:1px solid black;margin:0;padding:0.5rem;background:#FFFFFF;color:black;text-align:center'>12344</td>
               <td style='border:1px solid black;margin:0;padding:0.5rem;background:#FFFFFF;color:black;text-align:center'>5.495</td>
               <td style='border:1px solid black;margin:0;padding:0.5rem;background:#FFFFFF;color:black;text-align:center'>0.00</td>
+              <td style='border:1px solid black;margin:0;padding:0.5rem;color:black;text-align:center'><font color=gray><small><sup>16800</sup>&frasl;<sub>8<sup>5</sup></sub>&nbsp;&asymp;&nbsp;51.3%</small></font></td>
             </tr>
             <tr>
               <td style='border:1px solid black;margin:0;padding:0.5rem;background:#FFFFFF;color:black;text-align:center'>12345</td>
               <td style='border:1px solid black;margin:0;padding:0.5rem;background:#FFFFFF;color:black;text-align:center'>5.537</td>
               <td style='border:1px solid black;margin:0;padding:0.5rem;background:#FFFFFF;color:black;text-align:center'>-0.05</td>
+              <td style='border:1px solid black;margin:0;padding:0.5rem;color:black;text-align:center'><font color=gray><small><sup>6720</sup>&frasl;<sub>8<sup>5</sup></sub>&nbsp;&asymp;&nbsp;20.5%</small></font></td>
             </tr>
             <tr>
               <td style='border:1px solid black;margin:0;padding:0.5rem;background:#FFFFFF;color:black;text-align:center'>12333</td>
               <td style='border:1px solid black;margin:0;padding:0.5rem;background:#FFFFFF;color:black;text-align:center'>5.539</td>
               <td style='border:1px solid black;margin:0;padding:0.5rem;background:#FFFFFF;color:black;text-align:center'>-0.05</td>
+              <td style='border:1px solid black;margin:0;padding:0.5rem;color:black;text-align:center'><font color=gray><small><sup>3360</sup>&frasl;<sub>8<sup>5</sup></sub>&nbsp;&asymp;&nbsp;10.3%</small></font></td>
             </tr>
             <tr>
               <td style='border:1px solid black;margin:0;padding:0.5rem;background:#FFFFFF;color:black;text-align:center'>11222</td>
               <td style='border:1px solid black;margin:0;padding:0.5rem;background:#FFFFFF;color:black;text-align:center'>5.593</td>
               <td style='border:1px solid black;margin:0;padding:0.5rem;background:#FFFFFF;color:black;text-align:center'>-0.10</td>
+              <td style='border:1px solid black;margin:0;padding:0.5rem;color:black;text-align:center'><font color=gray><small><sup>560</sup>&frasl;<sub>8<sup>5</sup></sub>&nbsp;&asymp;&nbsp;1.7%</small></font></td>
             </tr>
             <tr>
               <td style='border:1px solid black;margin:0;padding:0.5rem;background:#FFFFFF;color:black;text-align:center'>12222</td>
               <td style='border:1px solid black;margin:0;padding:0.5rem;background:#FFFFFF;color:black;text-align:center'>5.704</td>
               <td style='border:1px solid black;margin:0;padding:0.5rem;background:#FFFFFF;color:black;text-align:center'>-0.21</td>
+              <td style='border:1px solid black;margin:0;padding:0.5rem;color:black;text-align:center'><font color=gray><small><sup>280</sup>&frasl;<sub>8<sup>5</sup></sub>&nbsp;&asymp;&nbsp;0.9%</small></font></td>
             </tr>
             <tr>
               <td style='border:1px solid black;margin:0;padding:0.5rem;background:#FFFFFF;color:black;text-align:center'>11111</td>
               <td style='border:1px solid black;margin:0;padding:0.5rem;background:#FFFFFF;color:black;text-align:center'>6.086</td>
               <td style='border:1px solid black;margin:0;padding:0.5rem;background:#FFFFFF;color:#F00000;text-align:center'>-0.60</td>
-            </tr>              
+              <td style='border:1px solid black;margin:0;padding:0.5rem;color:black;text-align:center'><font color=gray><small><sup>8</sup>&frasl;<sub>8<sup>5</sup></sub>&nbsp;&asymp;&nbsp;0.0%</small></font></td>
+            </tr>
           </table>
           </b>
           <hr style="height:0.5rem; visibility:hidden;" />
@@ -216,7 +224,7 @@
           <hr style="height:0.5rem; visibility:hidden;" />
           It is very close to the average number of attempts of <b>12344</b> as first attempt: <b><sup>180053</sup>&frasl;<sub>8<sup>5</sup></sub>&nbsp;&asymp;&nbsp;5.495</b>. In the online game, as their difference is&nbsp;0.004&nbsp;<&nbsp;0.005, both 12233 and 12344 will be indicated as "optimal" first codes, even if only 12233 is actually (optimality indication with &plusmn;0.005&nbsp;precision to simplify).
 
-          <h3>Strategy performances:</h3>          
+          <h3>Strategy performances:</h3>
           <ul style='margin:0'>
             <li style='list-style-type:disc'>With a mathematically optimal strategy (like Koyama and Lai's for Master Mind games), &Delta; values (i.e. performances of codes played relative to the performance of optimal code(s)) are always in the range <b>[-1;0]</b>. That rule applies whichever numbers of columns and colors.</li>
             <li style='list-style-type:disc'>With the <font color=#CC0099><b>optimal logical strategy</b></font>, when you play codes, &Delta; values are in a wider range <b>[X;Y] with X<-1 and Y>0</b> (Y=0 only if the codes played are possible/logical). For example, some observed values for Super Master Mind games were:
@@ -224,7 +232,7 @@
                 <li style='list-style-type:circle'>&Delta;&nbsp;=&nbsp;-1.35 for an impossible/illogical code which reduces the number of possible codes but makes the rest of the game harder to solve, which at the end makes it even worse than a totally useless code which would not have modified the number of possible codes (&Delta;&nbsp;=&nbsp;-1),</li>
                 <li style='list-style-type:circle'>&Delta;&nbsp;=&nbsp;+0.94 for a very efficient impossible/illogical code, in a typical situation where some colors are known and distinguishing the remaining colors is more efficient to do by playing an impossible/illogical code:
                   <hr style="height:0.25rem; visibility:hidden;" />
-                  <a href="img/MasterMind_game_illogical_strategy_3.png"><img src="img/MasterMind_game_illogical_strategy_3.png" style="width:45%;border-color:#AAAAAA;border-style:solid;border-width:thin;margin-top:4px;margin-right:4px"><small>click to enlarge</small></a>                
+                  <a href="img/MasterMind_game_illogical_strategy_3.png"><img src="img/MasterMind_game_illogical_strategy_3.png" style="width:45%;border-color:#AAAAAA;border-style:solid;border-width:thin;margin-top:4px;margin-right:4px"><small>click to enlarge</small></a>
                 </li>
               </ul>
             </li>

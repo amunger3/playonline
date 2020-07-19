@@ -428,6 +428,9 @@ if( ((""+GUIErrorStr).indexOf("TypeError: null is not an object (evaluating 'rea
 &&((""+errStack).indexOf("game.html")!=-1) ){
 skip_useless_errors=true;
 }
+else if(("" + GUIErrorStr).indexOf("ResizeObserver loop limit exceeded") != -1){
+skip_useless_errors=true;
+}
 }
 catch (tmp_exc){}
 if(!skip_useless_errors){
@@ -2391,7 +2394,7 @@ canvas.height=height;/* (necessary as canvas may have been expanded to fill its 
 ctx.setTransform(1,0,0,1,0,0);
 updateAttributesWidthAndHeightValues(width, height);
 }
-} while (resize_detected&&(resize_cnt <=0));
+} while (resize_detected&&(resize_cnt <=16));
 if(window.innerWidth < 0.70*window.innerHeight){
 rulesTableWidthStr="100%";
 scoresTableWidthStr="100%";

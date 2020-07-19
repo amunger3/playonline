@@ -498,6 +498,10 @@ function displayGUIError__windowonerror(GUIErrorStr, errStack) {
          && (("" + errStack).indexOf("game.html") != -1) ) {
       skip_useless_errors = true;
     }
+    // Error "ResizeObserver loop limit exceeded": minor error (which would be caused by some browser extensions) that can be skipped
+    else if (("" + GUIErrorStr).indexOf("ResizeObserver loop limit exceeded") != -1) {
+      skip_useless_errors = true;
+    }
   }
   catch (tmp_exc) {}
   if (!skip_useless_errors) {
@@ -2811,7 +2815,7 @@ function draw_graphic_bis() {
 
       }
 
-    } while (resize_detected && (resize_cnt <= 0)); // several iterative calls are necessary to redraw the canvas with proper width and height on window resize => disabled
+    } while (resize_detected && (resize_cnt <= 16)); // several iterative calls are necessary to redraw the canvas with proper width and height on window resize
 
     // Set adaptative widths
     if (window.innerWidth < 0.70*window.innerHeight) {

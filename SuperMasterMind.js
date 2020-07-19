@@ -2269,6 +2269,7 @@ ctx.webkitImageSmoothingEnabled=false;
 ctx.msImageSmoothingEnabled=false;
 ctx.oImageSmoothingEnabled=false;
 ctx.globalAlpha=1;
+ctx.setTransform(1,0,0,1,0,0);
 let resize_detected=false;
 let resize_cnt=0;
 do{
@@ -2391,7 +2392,6 @@ allRadioButtons[i].style.fontSize=(CompressedDisplayMode ? "2.5vh" : "2vh");
 }
 canvas.width=width;/* (necessary as canvas may have been expanded to fill its container) */
 canvas.height=height;/* (necessary as canvas may have been expanded to fill its container) */
-ctx.setTransform(1,0,0,1,0,0);
 updateAttributesWidthAndHeightValues(width, height);
 }
 } while (resize_detected&&(resize_cnt <=16));

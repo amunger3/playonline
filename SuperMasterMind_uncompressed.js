@@ -2663,6 +2663,7 @@ function draw_graphic_bis() {
     ctx.msImageSmoothingEnabled = false;
     ctx.oImageSmoothingEnabled = false;
     ctx.globalAlpha = 1;
+    ctx.setTransform(1,0,0,1,0,0); // resets the canvas current transform to the identity matrix
 
     let resize_detected = false;
     let resize_cnt = 0;
@@ -2810,7 +2811,6 @@ function draw_graphic_bis() {
 
         canvas.width = width; /* (necessary as canvas may have been expanded to fill its container) */
         canvas.height = height; /* (necessary as canvas may have been expanded to fill its container) */
-        ctx.setTransform(1,0,0,1,0,0); // resets the canvas current transform to the identity matrix
         updateAttributesWidthAndHeightValues(width, height);
 
       }

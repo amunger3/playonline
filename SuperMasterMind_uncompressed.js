@@ -2811,7 +2811,7 @@ function draw_graphic_bis() {
 
       }
 
-    } while (resize_detected && (resize_cnt <= 5)); // several iterative calls are necessary to redraw the canvas with proper width and height on window resize
+    } while (resize_detected && (resize_cnt <= 0)); // several iterative calls are necessary to redraw the canvas with proper width and height on window resize => disabled
 
     // Set adaptative widths
     if (window.innerWidth < 0.70*window.innerHeight) {

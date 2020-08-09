@@ -519,7 +519,7 @@
     <!-- Initializations -->
 
     <script>
-      let html_compatibility_game_version = "Ver_MT";
+      let html_compatibility_game_version = "Ver_MU";
       let nb_errors_submitted = 0;
       let mobileMode = false;
       let androidMode = false;
@@ -872,6 +872,21 @@
         }
       }
 
+      function getCountryNameFromBrowserLanguage(defaultCountryName) {
+        let browserlanguage = navigator.language;
+        let dashIdx = browserlanguage.indexOf("-");
+        if (dashIdx != -1) {
+          browserlanguage = browserlanguage.substring(dashIdx+1);
+        }
+        let prop = browserlanguage.toUpperCase();
+        if (isoCountries.hasOwnProperty(prop)) {
+          return isoCountries[prop];
+        }
+        else {
+          return defaultCountryName;
+        }
+      }
+
       function getHTMLListOfCountries() {
         let str = "";
         for (let prop in isoCountries) {
@@ -1015,6 +1030,7 @@
              || (str.toLowerCase().indexOf('zzz') != -1)
              || (str.toLowerCase().indexOf('bastard') != -1)
              || (str.toLowerCase().indexOf('fuck') != -1)
+             || (str.toLowerCase().indexOf('sex') != -1)
              || (str.toLowerCase().endsWith("bite"))
              || (str.toLowerCase().indexOf('noname') != -1)
              || (str.toLowerCase().indexOf('unknown') != -1)
@@ -2088,7 +2104,7 @@
                 alert("Oops... your score could not be stored properly due to geolocation failure!");
                 let dummy_location_data = { latitude: '0.0',
                                             longitude: '0.0',
-                                            country_name: ((bestEffortCountryNameFound != null) ? bestEffortCountryNameFound : 'unknown'),
+                                            country_name: ((bestEffortCountryNameFound != null) ? bestEffortCountryNameFound : getCountryNameFromBrowserLanguage('unknown')),
                                             region: 'unknown',
                                             city: 'unknown',
                                             ip: ((bestEffortIpAddressFound != null) ? bestEffortIpAddressFound : '0.0.0.' + Math.floor(Math.random() * 9999999)) }; // 9999999 dummy ip addresses (will then stay stored in localStorage.ip if not reset)

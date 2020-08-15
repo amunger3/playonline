@@ -63,8 +63,8 @@ try {
   let baseOfMaxPerformanceEvaluationTime = 30000; // 30 seconds / much higher in (precalculation mode)
   let maxPerformanceEvaluationTime = -1;
 
-  let refNbOfCodesForSystematicEvaluation = 2555; // (high values may induce latencies) (***)
-  let refNbOfCodesForSystematicEvaluation_AllCodesEvaluated = 2555; // (shall be <= refNbOfCodesForSystematicEvaluation - high values may induce latencies) (***)
+  let refNbOfCodesForSystematicEvaluation = 2599; // (high values may induce latencies) (***)
+  let refNbOfCodesForSystematicEvaluation_AllCodesEvaluated = 2599; // (shall be <= refNbOfCodesForSystematicEvaluation - high values may induce latencies) (***)
   let nbOfCodesForSystematicEvaluation = -1;
   let nbOfCodesForSystematicEvaluation_AllCodesEvaluated = -1;
   let nbOfCodesForSystematicEvaluation_ForMemAlloc = -1;

@@ -120,5 +120,5 @@ function write_optimal_strategy_details_1() {
 }
 
 function write_optimal_strategy_details_2() {
-  document.write(optimal_strategy_descr + "This strategy could thus be called the <b><font color=#CC0099>optimal logical strategy</font></b>.<hr style='height:0.75vh; visibility:hidden;' />Other strategies exist which also allow playing impossible/illogical codes at each stage of the game (in addition to the possible/logical codes). \"Mathematically optimal strategies\" are among them (but processing times to fully evaluate them can be very long). They offer slightly better statistics than the <b><font color=#CC0099>optimal logical strategy</font></b> (see below for some comparison).");
+  document.write(optimal_strategy_descr + "This strategy could thus be called the <b><font color=#CC0099>optimal logical strategy</font></b>.<hr style='height:0.75vh; visibility:hidden;' />Other strategies exist which also allow playing impossible/illogical codes at each stage of the game (in addition to the possible/logical codes). \"Mathematically optimal strategies\" are among them (but processing times to fully evaluate them can be very long). They offer slightly better statistics than the <b><font color=#CC0099>optimal logical strategy</font></b> (some comparison is made in this page).");
 }

@@ -2824,7 +2824,7 @@ try {
         best_sum = sum;
         best_code = cur_code;
         if ((idx1 < nbCodes) && (average_group_size != 0)) {
-          best_average_group_size_possible_codes = average_group_size * 1.08; // (with extra margin: works from 1.08 for MasterMind games)
+          best_average_group_size_possible_codes = average_group_size * 1.30; // (with extra margin: works from 1.30 for MasterMind games)
         }
       }
 

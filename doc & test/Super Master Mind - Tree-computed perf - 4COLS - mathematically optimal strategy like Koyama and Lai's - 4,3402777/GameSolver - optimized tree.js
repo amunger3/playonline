@@ -2485,7 +2485,7 @@ try {
     // ***************************************
 
     let nbCodesToGoThrough = nbCodes; // (precalculation mode)
-    if ((nbCodes >= 3) && (next_cur_game_idx <= 3) && (!first_call)) { // (precalculation mode) MasterMind games: <= 2 (except for 1111 as first code: 3 is needed), SuperMasterMind games: <=3
+    if ((nbCodes >= 3) && (next_cur_game_idx <= 3) && (!first_call)) { // (precalculation mode) MasterMind games: <= 3 (or <= 2 if 1111 is ignored), SuperMasterMind games: <= 3 to be tried
       nbCodesToGoThrough = nbCodesToGoThrough + initialNbPossibleCodes; // add also impossible codes
     }
     for (idx1 = 0; idx1 < nbCodesToGoThrough; idx1++) { // (precalculation mode)

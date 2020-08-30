@@ -157,7 +157,7 @@ try {
   // - 0 if only game was precalculated
   // - -1 if nothing was precalculated
   function lookForCodeInPrecalculatedGames(code_p, cur_game_size, nb_possible_codes_p, reuse_mode) {
-    
+
     return -1;
 
     if (cur_game_size > maxDepthForGamePrecalculation) {
@@ -2668,9 +2668,26 @@ try {
             if (best_max_group_size_possible_codes == -1) {
               throw new Error("recursiveEvaluatePerformances: inconsistent best_max_group_size_possible_codes");
             }
+            if (average_group_size == 0) {
+              throw new Error("recursiveEvaluatePerformances: inconsistent average_group_size");
+            }
+            if (max_group_size == -1) {
+              throw new Error("recursiveEvaluatePerformances: inconsistent max_group_size");
+            }
             if ((average_group_size > best_average_group_size_possible_codes) && (max_group_size > best_max_group_size_possible_codes)) {
               continue; // skip current impossible code assuming it is inefficient so useless in mathematical optimal strategies
             }
+            /* HAS AN IMPACT OF PERFS else {
+              // Further optimisation
+              let new_average_group_size = average_group_size * 1.0; // (duplicated code)
+              let new_max_group_size = ((max_group_size < 100) ? max_group_size + 2 : max_group_size * 1.02); // (duplicated code)
+              if (new_average_group_size < best_average_group_size_possible_codes) {
+                best_average_group_size_possible_codes = new_average_group_size;
+              }
+              if (new_max_group_size < best_max_group_size_possible_codes) {
+                best_max_group_size_possible_codes = new_max_group_size;
+              }
+            } */
           }
           // if (depth <= 0) {console.log("average_group_size=" + average_group_size + " for nbCodes=" + nbCodes);}
           // if (depth <= 0) {console.log("max_group_size=" + max_group_size + " for nbCodes=" + nbCodes);}
@@ -2813,7 +2830,7 @@ try {
               if (first_call) {
                 console.log("FIRST CALL FOR CURENT CODE " + codeHandler.compressCodeToString(cur_code) + " MARK " + codeHandler.markToString(marksTable_NbToMark[mark_idx]));
               }
-              
+
               sum = sum + nextNbCodes * recursiveEvaluatePerformances(next_depth, nextListsOfCodes[mark_idx], nextNbCodes /*, ((idx1 < nbCodes) && possibleGame) (precalculation mode) */); // (Note: possibleGame = ((idx1 < nbCodes) && possibleGame))
               if (sum_marks == nbCodes) break;
 
@@ -2859,8 +2876,8 @@ try {
         } */
         if ((idx1 < nbCodes) && (average_group_size != 0) && (max_group_size != -1)) {
           // For MasterMind games:
-          best_average_group_size_possible_codes = average_group_size * 1.0;
-          best_max_group_size_possible_codes = ((max_group_size < 100) ? max_group_size + 2 : max_group_size * 1.02);
+          best_average_group_size_possible_codes = average_group_size * 1.0; // (duplicated code)
+          best_max_group_size_possible_codes = ((max_group_size < 100) ? max_group_size + 2 : max_group_size * 1.02); // (duplicated code)
           // For Super MasterMind games: TBC
         }
       }

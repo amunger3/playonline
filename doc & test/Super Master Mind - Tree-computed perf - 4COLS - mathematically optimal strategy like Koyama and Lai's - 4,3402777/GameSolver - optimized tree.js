@@ -2323,7 +2323,7 @@ try {
   let recursiveEvaluatePerformancesWasAborted = false;
 
   let final_best_code = 0; // empty code
-  
+
   let areCurrentGameOrCodePrecalculated = -1;
 
   // Outputs: listOfGlobalPerformances[]
@@ -2397,7 +2397,7 @@ try {
       // ***************
 
       final_best_code = 0; // empty code
-      
+
       particularCodeToAssess = particularCode;
       res = recursiveEvaluatePerformances(depth, listOfCodes, nbCodes /*,  true (precalculation mode) */);
       console.log("BEST CODE = " + codeHandler.codeToString(final_best_code));
@@ -2481,11 +2481,18 @@ try {
     // ***************************************
 
     let nbCodesToGoThrough = nbCodes; // (precalculation mode)
-    if ((nbCodes >= 3)&& (next_cur_game_idx <= 2)) { // (precalculation mode) MasterMind games: <= 2, SuperMasterMind games: <=3
+    if ((nbCodes >= 3) && (next_cur_game_idx <= 2) && (!first_call)) { // (precalculation mode) MasterMind games: <= 2, SuperMasterMind games: <=3
       nbCodesToGoThrough = nbCodesToGoThrough + initialNbPossibleCodes; // add also impossible codes
     }
     for (idx1 = 0; idx1 < nbCodesToGoThrough; idx1++) { // (precalculation mode)
       // Split precalculation if needed
+      // MasterMind games:
+      // 0:  1111
+      // 1:  1112
+      // 7:  1122
+      // 8:  1123
+      // 51: 1234
+      // SuperMasterMind games:
       // 0:  11111
       // 1:  11112
       // 9:  11122
@@ -2493,9 +2500,9 @@ try {
       // 74: 11223
       // 83: 11234
       // 668: 12345
-      // if (first_call && (idx1 != 10) && (idx1 != 74) && (idx1 != 83) && (idx1 != 668)) {
-      //  continue;
-      // }
+      if (first_call && (idx1 != 0) && (idx1 != 1) && (idx1 != 7) && (idx1 != 8) && (idx1 != 51)) {
+        continue;
+      }
       if (idx1 < nbCodes) {
         cur_code = listOfCodes[idx1];
       }
@@ -2509,7 +2516,7 @@ try {
           //  skip_cur_code = true; // code replayed
           //  break;
           // }
-          if (marksIdxs[i] == worst_mark_idx) { // 0 black + 0 white mark => all colors in this code are obviously impossible
+          TO BE KEPT COMMENTED FOR MATHEMATICALLY OPTIMAL STRATEGY!!! if (marksIdxs[i] == worst_mark_idx) { // 0 black + 0 white mark => all colors in this code are obviously impossible
             codeHandler.fillMark(cur_code, curGame[i], precalculation_mode_mark);
             if ((precalculation_mode_mark.nbBlacks > 0) || (precalculation_mode_mark.nbWhites > 0)) {
               skip_cur_code = true; // obviously impossible color played
@@ -2579,7 +2586,7 @@ try {
           }
         }
       }
-     
+
       average_group_size = 0;
       if (compute_sum) { // compute_sum
 
@@ -2649,16 +2656,16 @@ try {
             if (average_group_size > best_average_group_size_possible_codes) {
               continue; // skip current impossible code assuming it is inefficient so useless in mathematical optimal strategies
             }
-          }  
+          }
           // if (depth <= 0) {console.log("average_group_size=" + average_group_size + " for nbCodes=" + nbCodes);}
         }
-        
+
         let useless_cur_code = false; // (precalculation mode)
         for (mark_idx = nbMaxMarks-1; mark_idx >= 0; mark_idx--) {
           let nextNbCodes = nextNbsCodes[mark_idx];
           // Go through all sets of possible marks
           if (nextNbCodes > 0) {
-            
+
             if (nextNbCodes == nbCodes) { // (precalculation mode)
               useless_cur_code = true;
               break;
@@ -2823,6 +2830,13 @@ try {
       if (sum < best_sum) {
         best_sum = sum;
         best_code = cur_code;
+        /* if (idx1 > nbCodes) {
+          let str = "";
+          for (let i = 0; i < next_cur_game_idx; i++) {
+            str = str + codeHandler.compressCodeToString(curGame[i]) + ":" + codeHandler.markToString(marksTable_NbToMark[marksIdxs[i]]) + " ";
+          }
+          console.log(str + "   best_code:" + codeHandler.compressCodeToString(best_code));
+        } */
         if ((idx1 < nbCodes) && (average_group_size != 0)) {
           best_average_group_size_possible_codes = average_group_size * 1.20; // (with extra margin: works from 1.20 for MasterMind games)
         }
@@ -2950,6 +2964,7 @@ try {
             let time_elapsed = new Date().getTime() - evaluatePerformancesStartTime;
             console.log("perf #" + idx1 + ": " + listOfGlobalPerformances[idx1] + " / " + time_elapsed + "ms");
           } */
+          console.log("perf of " + codeHandler.compressCodeToString(cur_code) + ": " + listOfGlobalPerformances[idx1] + " (" + Math.round(listOfGlobalPerformances[idx1]*initialNbPossibleCodes*100000000)/100000000 + ")");
 
         }
         else if ((depth == 0) || (depth == 1)) { // first and second levels of recursivity
@@ -2993,8 +3008,8 @@ try {
 
     if (first_call) {
       final_best_code = best_code;
-    }    
-    
+    }
+
     // Evaluate performance of impossible code if needed
     // *************************************************
 

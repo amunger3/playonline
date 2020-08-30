@@ -157,41 +157,6 @@
           <hr style="height:0.5rem; visibility:hidden;" />
           This average number of attempts is slightly higher than the number offered by the Koyama and Lai's mathematically optimal strategy which allows playing impossible/illogical codes at each stage of the game (<b><sup>5625</sup>&frasl;<sub>6<sup>4</sup></sub>&nbsp;&asymp;&nbsp;4.340</b>, up to <b>6</b> attempts, <b>1233</b> as first attempt).
           <hr style="height:0.5rem; visibility:hidden;" />
-          <b>
-          <table style='margin-right:3vw;padding:0;border-collapse:collapse'>
-            <tr>
-              <td style='border:1px solid black;margin:0;padding:0.5rem;background:#FFFFFF;color:black;text-align:center'><small>First code</small></td>
-              <td style='border:1px solid black;margin:0;padding:0.5rem;background:#FFFFFF;color:black;text-align:center'><small>Average number with a mathematically optimal strategy</small></td>
-              <td style='border:1px solid black;margin:0;padding:0.5rem;background:#FFFFFF;color:black;text-align:center'><small>&Delta;</small></td>
-            </tr>
-            <tr>
-              <td style='border:1px solid black;margin:0;padding:0.5rem;background:#FFFFFF;color:black;text-align:center'><small>1233</small></td>
-              <td style='border:1px solid black;margin:0;padding:0.5rem;background:#FFFFFF;color:black;text-align:center'><small>4.340 <font color=#999999>(5625)</font></small></td>
-              <td style='border:1px solid black;margin:0;padding:0.5rem;background:#FFFFFF;color:black;text-align:center'><small>0.00</small></td>
-            </tr>
-            <tr>
-              <td style='border:1px solid black;margin:0;padding:0.5rem;background:#FFFFFF;color:black;text-align:center'><small>1234</small></td>
-              <td style='border:1px solid black;margin:0;padding:0.5rem;background:#FFFFFF;color:black;text-align:center'><small>4.377 <font color=#999999>(5673)</font></small></td>
-              <td style='border:1px solid black;margin:0;padding:0.5rem;background:#FFFFFF;color:black;text-align:center'><small>-0.04</small></td>
-            </tr>
-            <tr>
-              <td style='border:1px solid black;margin:0;padding:0.5rem;background:#FFFFFF;color:black;text-align:center'><small>1122</small></td>
-              <td style='border:1px solid black;margin:0;padding:0.5rem;background:#FFFFFF;color:black;text-align:center'><small>4.400 <font color=#999999>(5702)</font></small></td>
-              <td style='border:1px solid black;margin:0;padding:0.5rem;background:#FFFFFF;color:black;text-align:center'><small>-0.06</small></td>
-            </tr>
-            <tr>
-              <td style='border:1px solid black;margin:0;padding:0.5rem;background:#FFFFFF;color:black;text-align:center'><small>1222</small></td>
-              <td style='border:1px solid black;margin:0;padding:0.5rem;background:#FFFFFF;color:black;text-align:center'><small>4.468 <font color=#999999>(5791)</font></small></td>
-              <td style='border:1px solid black;margin:0;padding:0.5rem;background:#FFFFFF;color:black;text-align:center'><small>-0.13</small></td>
-            </tr>
-            <tr>
-              <td style='border:1px solid black;margin:0;padding:0.5rem;background:#FFFFFF;color:black;text-align:center'><small>1111</small></td>
-              <td style='border:1px solid black;margin:0;padding:0.5rem;background:#FFFFFF;color:black;text-align:center'><small>4.877 <font color=#999999>(6320)</font></small></td>
-              <td style='border:1px solid black;margin:0;padding:0.5rem;background:#FFFFFF;color:#F00000;text-align:center'><small>-0.54</small></td>
-            </tr>
-          </table>
-          </b>
-          <hr style="height:0.5rem; visibility:hidden;" />
           Indeed, the option of playing impossible/illogical codes (in addition to the possible/logical codes) brings more flexibility which results in benefits in some situations. This is illustrated in the below example (which corresponds to a game where the maximal number of attempts of the <font color=#CC0099><b>optimal logical strategy</b></font> is reached):
           <hr style="height:0.5rem; visibility:hidden;" />
           <a href="img/MasterMind_game_illogical_strategy.png"><img src="img/MasterMind_game_illogical_strategy.png" style="width:45%;border-color:#AAAAAA;border-style:solid;border-width:thin;margin-top:4px;margin-right:4px"><small>click to enlarge</small></a>
@@ -200,7 +165,11 @@
           <hr style="height:0.5rem; visibility:hidden;" />
           <a href="img/MasterMind_game_illogical_strategy_2.png"><img src="img/MasterMind_game_illogical_strategy_2.png" style="width:45%;border-color:#AAAAAA;border-style:solid;border-width:thin;margin-top:4px;margin-right:4px"><small>click to enlarge</small></a>
           <hr style="height:0.5rem; visibility:hidden;" />
-          A last, here is a comment which is interesting from a "human playing" perspective: playing obviously impossible colors (i.e. colors present in a code for which you got a "0 black + 0 white peg" mark) is not needed to reach the mathematically optimal <sup>5625</sup>&frasl;<sub>6<sup>4</sup></sub> performance. However it can bring some performance gains if you do not start with 1233 as a first code (-<sup>4</sup>&frasl;<sub>6<sup>4</sup></sub> performance gain for 1111 and 1234 first codes).
+          A last, here are some comments which are interesting from a "human playing" perspective:
+          <ul style='margin:0'>
+          <li style='list-style-type:disc'>if you start with suboptimal 1111 as first code instead of 1233, playing impossible/illogical codes at the second and/or third and/or fourth attempts can be necessary to be mathematically optimal in the rest of the game</li>
+          <li style='list-style-type:disc'>playing obviously impossible colors (i.e. colors present in a code for which you got a "0 black + 0 white peg" mark) is not needed to reach the mathematically optimal <sup>5625</sup>&frasl;<sub>6<sup>4</sup></sub> performance. However it can bring some minor performance gains (<-0.01) if you do not start with 1233 as first code</li>
+          </ul>
 
           <h3>Super Master Mind game (5 columns, 8 colors):</h3>
 

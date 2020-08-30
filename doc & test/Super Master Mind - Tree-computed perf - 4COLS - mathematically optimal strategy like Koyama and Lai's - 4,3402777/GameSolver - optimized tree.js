@@ -89,7 +89,7 @@ try {
   let nbOfPossibleCodes;
   let listOfEquivalentCodesAndPerformances;
   let marks_already_computed_table = null;
-  let nbCodesLimitForEquivalentCodesCheck = 40; // (value determined empirically)
+  let nbCodesLimitForEquivalentCodesCheck = 10; // (value determined empirically) MasterMind games: 10, SuperMasterMind games: TBC (25)
 
   let PerformanceNA = -3.00; // (duplicated in SuperMasterMind.js)
   let PerformanceUNKNOWN = -2.00; // (duplicated in SuperMasterMind.js)
@@ -157,6 +157,8 @@ try {
   // - 0 if only game was precalculated
   // - -1 if nothing was precalculated
   function lookForCodeInPrecalculatedGames(code_p, cur_game_size, nb_possible_codes_p, reuse_mode) {
+    
+    return -1;
 
     if (cur_game_size > maxDepthForGamePrecalculation) {
       throw new Error("lookForCodeInPrecalculatedGames: invalid game size: " + cur_game_size);
@@ -2442,9 +2444,11 @@ try {
     let sum;
     let sum_marks;
     let average_group_size;
+    let max_group_size;
     let best_sum = 100000000000.0;
     let best_code = 0;
     let best_average_group_size_possible_codes = -1;
+    let best_max_group_size_possible_codes = -1;
     let nb_classes_cnt = 0;
     let reuse_mode = 1;
 
@@ -2481,10 +2485,14 @@ try {
     // ***************************************
 
     let nbCodesToGoThrough = nbCodes; // (precalculation mode)
-    if ((nbCodes >= 3) && (next_cur_game_idx <= 2) && (!first_call)) { // (precalculation mode) MasterMind games: <= 2, SuperMasterMind games: <=3
+    if ((nbCodes >= 3) && (next_cur_game_idx <= 3) && (!first_call)) { // (precalculation mode) MasterMind games: <= 2 (except for 1111 as first code: 3 is needed), SuperMasterMind games: <=3
       nbCodesToGoThrough = nbCodesToGoThrough + initialNbPossibleCodes; // add also impossible codes
     }
     for (idx1 = 0; idx1 < nbCodesToGoThrough; idx1++) { // (precalculation mode)
+
+      if ((next_cur_game_idx == 1) && (idx1 > 0) && ((idx1 % 100) == 0)) {
+        console.log("   " + idx1 + " out of " + nbCodesToGoThrough + " (nbCodes=" + nbCodes + ", nbOfEquivalentCodesAndPerformances=" + nbOfEquivalentCodesAndPerformances + ")");
+      }
       // Split precalculation if needed
       // MasterMind games:
       // 0:  1111
@@ -2588,6 +2596,7 @@ try {
       }
 
       average_group_size = 0;
+      max_group_size = -1;
       if (compute_sum) { // compute_sum
 
         /* if (first_call) { // (traces useful for debug)
@@ -2647,17 +2656,24 @@ try {
             if (nextNbCodes > 0) {
               // if (depth <= 0) {console.log(" " + nextNbCodes);}
               average_group_size = average_group_size + nextNbCodes*nextNbCodes;
+              if (nextNbCodes > max_group_size) {
+                max_group_size = nextNbCodes;
+              }
             }
           }
           if (!(idx1 < nbCodes)) { // impossible code
             if (best_average_group_size_possible_codes == -1) {
               throw new Error("recursiveEvaluatePerformances: inconsistent best_average_group_size_possible_codes");
             }
-            if (average_group_size > best_average_group_size_possible_codes) {
+            if (best_max_group_size_possible_codes == -1) {
+              throw new Error("recursiveEvaluatePerformances: inconsistent best_max_group_size_possible_codes");
+            }
+            if ((average_group_size > best_average_group_size_possible_codes) && (max_group_size > best_max_group_size_possible_codes)) {
               continue; // skip current impossible code assuming it is inefficient so useless in mathematical optimal strategies
             }
           }
           // if (depth <= 0) {console.log("average_group_size=" + average_group_size + " for nbCodes=" + nbCodes);}
+          // if (depth <= 0) {console.log("max_group_size=" + max_group_size + " for nbCodes=" + nbCodes);}
         }
 
         let useless_cur_code = false; // (precalculation mode)
@@ -2794,6 +2810,10 @@ try {
               // 3) Recursive call
               // *****************
 
+              if (first_call) {
+                console.log("FIRST CALL FOR CURENT CODE " + codeHandler.compressCodeToString(cur_code) + " MARK " + codeHandler.markToString(marksTable_NbToMark[mark_idx]));
+              }
+              
               sum = sum + nextNbCodes * recursiveEvaluatePerformances(next_depth, nextListsOfCodes[mark_idx], nextNbCodes /*, ((idx1 < nbCodes) && possibleGame) (precalculation mode) */); // (Note: possibleGame = ((idx1 < nbCodes) && possibleGame))
               if (sum_marks == nbCodes) break;
 
@@ -2837,8 +2857,11 @@ try {
           }
           console.log(str + "   best_code:" + codeHandler.compressCodeToString(best_code));
         } */
-        if ((idx1 < nbCodes) && (average_group_size != 0)) {
-          best_average_group_size_possible_codes = average_group_size * 1.20; // (with extra margin: works from 1.20 for MasterMind games)
+        if ((idx1 < nbCodes) && (average_group_size != 0) && (max_group_size != -1)) {
+          // For MasterMind games:
+          best_average_group_size_possible_codes = average_group_size * 1.0;
+          best_max_group_size_possible_codes = ((max_group_size < 100) ? max_group_size + 2 : max_group_size * 1.02);
+          // For Super MasterMind games: TBC
         }
       }
 
@@ -2964,7 +2987,7 @@ try {
             let time_elapsed = new Date().getTime() - evaluatePerformancesStartTime;
             console.log("perf #" + idx1 + ": " + listOfGlobalPerformances[idx1] + " / " + time_elapsed + "ms");
           } */
-          console.log("perf of " + codeHandler.compressCodeToString(cur_code) + ": " + listOfGlobalPerformances[idx1] + " (" + Math.round(listOfGlobalPerformances[idx1]*initialNbPossibleCodes*100000000)/100000000 + ")");
+          console.log("**** PERF OF " + codeHandler.compressCodeToString(cur_code) + ": " + listOfGlobalPerformances[idx1] + " (" + Math.round(listOfGlobalPerformances[idx1]*initialNbPossibleCodes*100000000)/100000000 + ")");
 
         }
         else if ((depth == 0) || (depth == 1)) { // first and second levels of recursivity

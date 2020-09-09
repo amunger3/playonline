@@ -3580,28 +3580,28 @@ function draw_graphic_bis() {
             let multiply_factor;
             switch (nbColumns) {
               case 3:
-                nb_attempts_for_max_score = 3; // (estimate: ~16% of scores, below 3 would not be relevant)
-                time_in_seconds_corresponding_to_one_attempt_in_score = 45.0; // (time corresponding to 2 attempts: 1 min 30)
+                nb_attempts_for_max_score = 3; // (estimate: <=3 attempts: 33% of the games, below 3 would not be relevant)
+                time_in_seconds_corresponding_to_one_attempt_in_score = 30.0; // (time corresponding to 2 attempts: 1 min)
                 multiply_factor = 0.50;
                 break;
               case 4:
-                nb_attempts_for_max_score = 3; // (estimate: ~5% of scores)
-                time_in_seconds_corresponding_to_one_attempt_in_score = 150.0; // (time corresponding to 2 attempts: 5 min)
+                nb_attempts_for_max_score = 3; // (estimate: <=3 attempts: 8% of the games, <=4 attempts: 28% of the games)
+                time_in_seconds_corresponding_to_one_attempt_in_score = 120.0; // (time corresponding to 2 attempts: 4 min)
                 multiply_factor = 0.75;
                 break;
               case 5:
-                nb_attempts_for_max_score = 4; // (estimate: ~5% of scores)
-                time_in_seconds_corresponding_to_one_attempt_in_score = 360.0; // (time corresponding to 2 attempts: 12 min) // See (*)
+                nb_attempts_for_max_score = 5; // (estimate: <=4 attempts: 5% of the games, <=5 attempts: 13% of the games)
+                time_in_seconds_corresponding_to_one_attempt_in_score = 270.0; // (time corresponding to 2 attempts: 9 min) // See (*)
                 multiply_factor = 1.0;
                 break;
               case 6:
-                nb_attempts_for_max_score = 6; // (estimate: ~15% of scores)
-                time_in_seconds_corresponding_to_one_attempt_in_score = 480.0; // (time corresponding to 2 attempts: 16 min) // See (*)
+                nb_attempts_for_max_score = 6; // (estimate: <=6 attempts: 17% of the games, <=7 attempts: 34% of the games)
+                time_in_seconds_corresponding_to_one_attempt_in_score = 360.0; // (time corresponding to 2 attempts: 12 min) // See (*)
                 multiply_factor = 1.5;
                 break;
               case 7:
-                nb_attempts_for_max_score = 7; // (estimate: ~7% of scores)
-                time_in_seconds_corresponding_to_one_attempt_in_score = 750.0; // (time corresponding to 2 attempts: 25 min) // See (*)
+                nb_attempts_for_max_score = 7; // (estimate: <=7 attempts: 11% of the games, <=8 attempts: 30% of the games)
+                time_in_seconds_corresponding_to_one_attempt_in_score = 450.0; // (time corresponding to 2 attempts: 15 min) // See (*)
                 multiply_factor = 2.0;
                 break;
               default:
@@ -4055,7 +4055,7 @@ function draw_graphic_bis() {
       if ( gameOnGoing() && (currentAttemptNumber > 1) // (Note: full condition duplicated at several places in this file)
            && !(document.getElementById("revealSecretColorButton").disabled)
            && (sCodeRevealed == 0)
-           && ( (((new Date()).getTime() - startTime)/1000 > ((nbColumns <= 5) ? 720 /* 12 min */ : 1200 /* 20 min */))  // See also (*)
+           && ( (((new Date()).getTime() - startTime)/1000 > ((nbColumns <= 5) ? 540 /* 9 min */ : 900 /* 15 min */))  // See also (*)
                 || (currentAttemptNumber == nbMaxAttempts-1) /* (last but one attempt) */
                 || at_least_one_useless_code_played ) ) { /* (number of useless attempts) */
         document.getElementById("revealSecretColorButton").className = (androidMode ? "button fast_blinking" : "button blinking");
@@ -4128,7 +4128,7 @@ function draw_graphic_bis() {
       if ( gameOnGoing() && (currentAttemptNumber > 1) // (Note: full condition duplicated at several places in this file)
            && !(document.getElementById("revealSecretColorButton").disabled)
            && (sCodeRevealed == 0)
-           && ( (((new Date()).getTime() - startTime)/1000 > ((nbColumns <= 5) ? 720 /* 12 min */ : 1200 /* 20 min */))  // See also (*)
+           && ( (((new Date()).getTime() - startTime)/1000 > ((nbColumns <= 5) ? 540 /* 9 min */ : 900 /* 15 min */))  // See also (*)
                 || (currentAttemptNumber == nbMaxAttempts-1) /* (last but one attempt) */ ) ) {
           if (document.getElementById("revealSecretColorButton").className.indexOf('blinking') == -1) {
             document.getElementById("revealSecretColorButton").className = document.getElementById("revealSecretColorButton").className + (androidMode ? " fast_blinking" : " blinking");

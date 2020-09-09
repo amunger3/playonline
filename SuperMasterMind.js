@@ -428,7 +428,7 @@ if( ((""+GUIErrorStr).indexOf("TypeError: null is not an object (evaluating 'rea
 &&((""+errStack).indexOf("game.html")!=-1) ){
 skip_useless_errors=true;
 }
-else if(("" + GUIErrorStr).indexOf("ResizeObserver loop limit exceeded") != -1){
+else if((""+GUIErrorStr).indexOf("ResizeObserver loop limit exceeded")!=-1){
 skip_useless_errors=true;
 }
 }
@@ -3059,27 +3059,27 @@ let multiply_factor;
 switch (nbColumns){
 case 3:
 nb_attempts_for_max_score=3;
-time_in_seconds_corresponding_to_one_attempt_in_score=45.0;
+time_in_seconds_corresponding_to_one_attempt_in_score=30.0;
 multiply_factor=0.50;
 break;
 case 4:
 nb_attempts_for_max_score=3;
-time_in_seconds_corresponding_to_one_attempt_in_score=150.0;
+time_in_seconds_corresponding_to_one_attempt_in_score=120.0;
 multiply_factor=0.75;
 break;
 case 5:
-nb_attempts_for_max_score=4;
-time_in_seconds_corresponding_to_one_attempt_in_score=360.0;
+nb_attempts_for_max_score=5;
+time_in_seconds_corresponding_to_one_attempt_in_score=270.0;
 multiply_factor=1.0;
 break;
 case 6:
 nb_attempts_for_max_score=6;
-time_in_seconds_corresponding_to_one_attempt_in_score=480.0;
+time_in_seconds_corresponding_to_one_attempt_in_score=360.0;
 multiply_factor=1.5;
 break;
 case 7:
 nb_attempts_for_max_score=7;
-time_in_seconds_corresponding_to_one_attempt_in_score=750.0;
+time_in_seconds_corresponding_to_one_attempt_in_score=450.0;
 multiply_factor=2.0;
 break;
 default:
@@ -3483,7 +3483,7 @@ document.getElementById("revealSecretColorButton").disabled=!(gameOnGoing()&&(nb
 if( gameOnGoing()&&(currentAttemptNumber > 1)
 &&!(document.getElementById("revealSecretColorButton").disabled)
 &&(sCodeRevealed==0)
-&&( (((new Date()).getTime() - startTime)/1000 > ((nbColumns <=5) ? 720 /* 12 min */ : 1200 /* 20 min */))
+&&( (((new Date()).getTime() - startTime)/1000 > ((nbColumns <=5) ? 540 /* 9 min */ : 900 /* 15 min */))
 ||(currentAttemptNumber==nbMaxAttempts-1) /* (last but one attempt) */
 ||at_least_one_useless_code_played ) ){ /* (number of useless attempts) */
 document.getElementById("revealSecretColorButton").className=(androidMode ? "button fast_blinking" : "button blinking");
@@ -3544,7 +3544,7 @@ currentCodeColorMode=-1;
 if( gameOnGoing()&&(currentAttemptNumber > 1)
 &&!(document.getElementById("revealSecretColorButton").disabled)
 &&(sCodeRevealed==0)
-&&( (((new Date()).getTime() - startTime)/1000 > ((nbColumns <=5) ? 720 /* 12 min */ : 1200 /* 20 min */))
+&&( (((new Date()).getTime() - startTime)/1000 > ((nbColumns <=5) ? 540 /* 9 min */ : 900 /* 15 min */))
 ||(currentAttemptNumber==nbMaxAttempts-1) /* (last but one attempt) */ ) ){
 if(document.getElementById("revealSecretColorButton").className.indexOf('blinking')==-1){
 document.getElementById("revealSecretColorButton").className=document.getElementById("revealSecretColorButton").className+(androidMode ? " fast_blinking" : " blinking");

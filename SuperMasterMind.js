@@ -10,11 +10,11 @@ console.log("Running SuperMasterMind.js...");
 // *************************************************************************
 // Main game variables
 // *******************
-let version ="v3.5";
-let emptyColor =0;
-let nbMinColors =5;
-let nbMaxColors =10;
-let nbMinColumns =3;
+let version="v3.5";
+let emptyColor=0;
+let nbMinColors=5;
+let nbMaxColors=10;
+let nbMinColumns=3;
 let nbMaxColumns=7;
 let overallNbMinAttempts=4;
 let overallNbMaxAttempts=15;
@@ -3420,7 +3420,7 @@ ctx.strokeStyle=currentColor;
 }
 if(gameWon &&!allPerformancesFilled()){
 document.getElementById("newGameButton").disabled=true;
-document.getElementById("newGameButton").className ="button disabled";
+document.getElementById("newGameButton").className="button disabled";
 if(CompressedDisplayMode){
 document.getElementById("newGameButton").value="\u231b";/* hourglass */
 }
@@ -3430,7 +3430,7 @@ document.getElementById("newGameButton").value="PLEASE WAIT \u231b";/* hourglass
 }
 else{
 document.getElementById("newGameButton").disabled=false;
-document.getElementById("newGameButton").className ="button";
+document.getElementById("newGameButton").className="button";
 if(CompressedDisplayMode){
 document.getElementById("newGameButton").value="N";
 }
@@ -3551,7 +3551,7 @@ document.getElementById("revealSecretColorButton").className=document.getElement
 }
 }
 }
-document.getElementById("resetCurrentCodeButton").disabled =!(gameOnGoing()&&(currentCode!=sCodeRevealed));
+document.getElementById("resetCurrentCodeButton").disabled=!(gameOnGoing()&&(currentCode!=sCodeRevealed));
 if(document.getElementById("resetCurrentCodeButton").disabled){
 document.getElementById("resetCurrentCodeButton").className="button disabled";
 }

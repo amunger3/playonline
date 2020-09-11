@@ -1524,7 +1524,7 @@ else if( localStorage.firstname&&localStorage.gamesok&&(Number(localStorage.game
 let paypalStr=
 "If you enjoy this "+(! android_appli? "Super Master Mind game" : "Android app")+",<br>you&nbsp;can&nbsp;make&nbsp;a&nbsp;&#x1F381; of&nbsp;your choice to its authors.<br>\
 Even if it is a small gift... it will be much appreciated! &#x1F642;&#x1F44D;<br><br>\
-&#x1F381;<a href='contact_info.html'>GO TO CONTACT PAGE</a> &#x1F381;<br><br>\
+&#x1F381;&nbsp;<a href='contact_info.html'>GO TO CONTACT PAGE</a>&nbsp;&#x1F381;<br><br>\
 Thanks in advance for your support!<br>";
 show_play_store_app("", false, "<font color=#C900A1>Hello "+localStorage.firstname+"</font><hr style='height:1.0vh;padding:0;margin:0;visibility:hidden;'>"+paypalStr);
 localStorage.lastDonationTimeT=(new Date()).getTime();

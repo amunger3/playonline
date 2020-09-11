@@ -1593,8 +1593,8 @@
           let deltagames = -1;
           if (typeof(Storage) !== 'undefined') {
 
-            if (!localStorage.lastDonationTimeZ) {
-              localStorage.lastDonationTimeZ = 0;
+            if (!localStorage.lastDonationTimeT) {
+              localStorage.lastDonationTimeT = 0;
             }
             if (!localStorage.gamesok) {
               localStorage.gamesok = 0;
@@ -1993,7 +1993,7 @@
                   firstAccessIdStr = localStorage.firstaccessid;
                 }
               }
-              document.getElementById('form_debuginfo_id').value = guessUserId() + "/" + getLocation() + (modernDisplay ? '/ThM' : '/ThL' + legacyDisplayVariant) + '/Screen:' + screen.width + '*' + screen.height + ',' + screen.colorDepth + '/Inner:' + window.innerWidth + "*" + window.innerHeight + '/' + html_compatibility_game_version + '/FirstNameAsked:' + firstNameAskedStr + '/androidAppNotifShown:' + androidAppNotifShownStr + '/FirstAccessId:' + firstAccessIdStr + '/NbGamesWon: ' + nbGamesPlayedAndWon + '/NbLocationURLAccesses:' + nb_locationURL_accesses + ((gameInv != 0) ? '/GameInv: ' +  gameInv : "") + '/NbDonationRequests: ' + (localStorage.nbDonationRequests ? localStorage.nbDonationRequests : 'NA') + extra_debug_info;
+              document.getElementById('form_debuginfo_id').value = guessUserId() + "/" + getLocation() + (modernDisplay ? '/ThM' : '/ThL' + legacyDisplayVariant) + '/Screen:' + screen.width + '*' + screen.height + ',' + screen.colorDepth + '/Inner:' + window.innerWidth + "*" + window.innerHeight + '/' + html_compatibility_game_version + '/FirstNameAsked:' + firstNameAskedStr + '/androidAppNotifShown:' + androidAppNotifShownStr + '/FirstAccessId:' + firstAccessIdStr + '/NbGamesWon: ' + nbGamesPlayedAndWon + '/NbLocationURLAccesses:' + nb_locationURL_accesses + ((gameInv != 0) ? '/GameInv: ' +  gameInv : "") + '/nbDonationRequests: ' + (localStorage.nbDonationRequestsT ? localStorage.nbDonationRequestsT : 'NA') + extra_debug_info;
 
               document.getElementById('form_rankings_id').value = '-';
               document.getElementById('form_list_id').value = '-';

@@ -1044,14 +1044,25 @@ else{
 nbPossibleCodesShown=Math.max(nbMinPossibleCodesShown, Math.min(nbMaxPossibleCodesShown/2 /* (half display) */, 20+(nbMaxAttempts+1 - currentAttemptNumber)));
 if(newPossibleCodeShown==-1){
 let interesting_attempt_idx=0;
+let interesting_attempt_idx_bis=0;
+let lowest_significant_relative_performance=PerformanceMaxValidValue;
 for (let i=currentAttemptNumber-2;i >=0;i--){
-if( (nbOfPossibleCodes[i] >=2)
-&&(relative_performances_of_codes_played[i]!=-1.00) /* not a useless code (simplified test) */
-&&((nbOfPossibleCodes[i] >=10)||(relative_performances_of_codes_played[i] <=PerformanceLOW/2))
-){
+if( (nbOfPossibleCodes[i] >=3)
+&&(relative_performances_of_codes_played[i]!=-1.00)
+&&(relative_performances_of_codes_played[i]!=PerformanceUNKNOWN)
+&&(relative_performances_of_codes_played[i]!=PerformanceNA)
+&&(relative_performances_of_codes_played[i] <=3*PerformanceLOW/5) ){
+if(relative_performances_of_codes_played[i] < lowest_significant_relative_performance){
+lowest_significant_relative_performance=relative_performances_of_codes_played[i];
 interesting_attempt_idx=i;
-break;
 }
+}
+if((nbOfPossibleCodes[i] >=5)&&(interesting_attempt_idx_bis==0)){
+interesting_attempt_idx_bis=i;
+}
+}
+if(interesting_attempt_idx==0){
+interesting_attempt_idx=interesting_attempt_idx_bis;
 }
 currentPossibleCodeShown=interesting_attempt_idx+1;
 }
@@ -1513,7 +1524,7 @@ else if( localStorage.firstname&&localStorage.gamesok&&(Number(localStorage.game
 let paypalStr=
 "If you enjoy this "+(! android_appli? "Super Master Mind game" : "Android app")+",<br>you&nbsp;can&nbsp;make&nbsp;a&nbsp;&#x1F381; of&nbsp;your choice to its authors.<br>\
 Even if it is a small gift... it will be much appreciated! &#x1F642;&#x1F44D;<br><br>\
-&#x1F381; <a href='contact_info.html'>GO TO CONTACT PAGE</a> &#x1F381;<br><br>\
+&#x1F381;<a href='contact_info.html'>GO TO CONTACT PAGE</a> &#x1F381;<br><br>\
 Thanks in advance for your support!<br>";
 show_play_store_app("", false, "<font color=#C900A1>Hello "+localStorage.firstname+"</font><hr style='height:1.0vh;padding:0;margin:0;visibility:hidden;'>"+paypalStr);
 localStorage.lastDonationTimeT=(new Date()).getTime();
@@ -1791,7 +1802,7 @@ if(game_id!=game_cnt){
 console.log("writePerformanceOfCodePlayed() call ignored: "+game_id+", "+game_cnt);
 return false;
 }
-if( ((relative_perf_p < PerformanceMinValidValue)&&(relative_perf_p!=PerformanceUNKNOWN))||(relative_perf_p > PerformanceMaxValidValue) /* possible range of relative performances */
+if( ((relative_perf_p <=PerformanceMinValidValue)&&(relative_perf_p!=PerformanceUNKNOWN))||(relative_perf_p >=PerformanceMaxValidValue) /* possible range of relative performances */
 ||(relative_perf_p==PerformanceNA)
 ||(relative_perf_evaluation_done_p&&(relative_perf_p==PerformanceUNKNOWN))
 ||(((relative_perf_p <=-1.00)&&(relative_perf_p!=PerformanceUNKNOWN)) /* useless code */&&(!relative_perf_evaluation_done_p))

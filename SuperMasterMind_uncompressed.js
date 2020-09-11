@@ -1252,14 +1252,25 @@ function showPossibleCodesButtonClick(invertMode = true, newPossibleCodeShown = 
       nbPossibleCodesShown = Math.max(nbMinPossibleCodesShown, Math.min(nbMaxPossibleCodesShown/2 /* (half display) */, 20 + (nbMaxAttempts+1 - currentAttemptNumber)));
       if (newPossibleCodeShown == -1) {
         let interesting_attempt_idx = 0;
+        let interesting_attempt_idx_bis = 0;
+        let lowest_significant_relative_performance = PerformanceMaxValidValue;
         for (let i = currentAttemptNumber-2; i >= 0; i--) {
-          if ( (nbOfPossibleCodes[i] >= 2)
-               && (relative_performances_of_codes_played[i] != -1.00) /* not a useless code (simplified test) */
-               && ((nbOfPossibleCodes[i] >= 10) || (relative_performances_of_codes_played[i] <= PerformanceLOW/2))
-             ) {
-            interesting_attempt_idx = i;
-            break;
+          if ( (nbOfPossibleCodes[i] >= 3) // performances may vary
+               && (relative_performances_of_codes_played[i] != -1.00) // not an useless code
+               && (relative_performances_of_codes_played[i] != PerformanceUNKNOWN)
+               && (relative_performances_of_codes_played[i] != PerformanceNA)
+               && (relative_performances_of_codes_played[i] <= 3*PerformanceLOW/5) ) { // code played was not so good
+            if (relative_performances_of_codes_played[i] < lowest_significant_relative_performance) {
+              lowest_significant_relative_performance = relative_performances_of_codes_played[i];
+              interesting_attempt_idx = i;
+            }
           }
+          if ((nbOfPossibleCodes[i] >= 5) && (interesting_attempt_idx_bis == 0)) {
+            interesting_attempt_idx_bis = i;
+          }
+        }
+        if (interesting_attempt_idx == 0) {
+          interesting_attempt_idx = interesting_attempt_idx_bis;
         }
         currentPossibleCodeShown = interesting_attempt_idx+1;
       }
@@ -2113,7 +2124,7 @@ function writePerformanceOfCodePlayed(relative_perf_p, relative_perf_evaluation_
     console.log("writePerformanceOfCodePlayed() call ignored: " + game_id + ", " + game_cnt);
     return false;
   }
-  if ( ((relative_perf_p < PerformanceMinValidValue) && (relative_perf_p != PerformanceUNKNOWN)) || (relative_perf_p > PerformanceMaxValidValue) /* possible range of relative performances */
+  if ( ((relative_perf_p <= PerformanceMinValidValue) && (relative_perf_p != PerformanceUNKNOWN)) || (relative_perf_p >= PerformanceMaxValidValue) /* possible range of relative performances */
        || (relative_perf_p == PerformanceNA)
        || (relative_perf_evaluation_done_p && (relative_perf_p == PerformanceUNKNOWN))
        || (((relative_perf_p <= -1.00) && (relative_perf_p != PerformanceUNKNOWN)) /* useless code */ && (!relative_perf_evaluation_done_p))
@@ -3341,7 +3352,7 @@ function draw_graphic_bis() {
 
           let isPossible = isAttemptPossible(i);
           if ( gameOnGoing() && (i > nbMaxHintsDisplayed)
-               && ((relative_performances_of_codes_played[i-1] > -0.9999) || (relative_performances_of_codes_played[i-1] == PerformanceUNKNOWN) || (relative_performances_of_codes_played[i-1] == PerformanceNA)) // not a useless code (simplified test)
+               && ((relative_performances_of_codes_played[i-1] > -0.9999) || (relative_performances_of_codes_played[i-1] == PerformanceUNKNOWN) || (relative_performances_of_codes_played[i-1] == PerformanceNA)) // not an useless code (simplified test)
                && (nbColumns >= nominalGameNbColumns) ) { // not easy games
             ctx.font = stats_font;
             displayString("\u2234" /* tick hidden */, attempt_nb_width+(70*(nbColumns+1))/100+nbColumns*2+nb_possible_codes_width+optimal_width, i-1, tick_width,

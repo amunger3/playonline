@@ -10,7 +10,7 @@ normal replace " || " by "||"
 normal replace " && " by "&&"
 normal replace "if (" by "if("
 normal replace "; " by ";"
-readd a space at this line "&#x1F381; of your choice"
+readd a space at this line "&#x1F381; of&nbsp;your choice"
   normal replace ", " by "," // PB: &nbsp; to be used in strings!
 normal replace " + " by "+"
 normal replace " {" by "{"

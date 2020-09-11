@@ -1794,20 +1794,14 @@ function resetGameAttributes(nbColumnsSelected) {
       show_play_store_app("<font color=#C900A1>Hello " + localStorage.firstname + "</font><hr style='height:1.0vh;padding:0;margin:0;visibility:hidden;'>If you want to merge your smartphone account & your computer account (to share the same scores on all devices), just send an email using the&nbsp;<a href='contact_info.html'>contact info</a> page", true);
     }
     else if ( localStorage.firstname && localStorage.gamesok && (Number(localStorage.gamesok) >= 153)
-              && localStorage.lastDonationTimeY && ((new Date()).getTime() - localStorage.lastDonationTimeY > 31*24*60*60*1000 /* (1 month) */) ) {
+              && localStorage.lastDonationTimeZ && ((new Date()).getTime() - localStorage.lastDonationTimeZ > 31*24*60*60*1000 /* (1 month) */) ) {
       let paypalStr =
-          "If you enjoy this " + (! android_appli? "Super Master Mind game" : "Android app") + ", you&nbsp;can&nbsp;make&nbsp;a&nbsp;&#x1F381; of your choice to the author.<br>\
-          Even if it is a small gift... it will be much appreciated!! &#x1F642;&#x1F44D;<br><br>\
-          <!--  duplicated in contact page html code -->\
-          <form action=\"https://www.paypal.com/cgi-bin/webscr\" method=\"post\" target=\"_top\">\
-          <input type=\"hidden\" name=\"cmd\" value=\"_s-xclick\" />\
-          <input type=\"hidden\" name=\"hosted_button_id\" value=\"F9EE2A483RT9J\" />\
-          <input type=\"image\" src=\"https://www.paypalobjects.com/en_US/FR/i/btn/btn_donateCC_LG.gif\" height=\"44vh\" border=\"0\" name=\"submit\" title=\"PayPal - The safer, easier way to pay online!\" alt=\"Donate with PayPal button\" />\
-          <img alt=\"\" border=\"0\" src=\"https://www.paypal.com/en_FR/i/scr/pixel.gif\" width=\"1\" height=\"1\" />\
-          </form><br>\
-          Thanks in advance for your support!<br>";
+        "If you enjoy this " + (! android_appli? "Super Master Mind game" : "Android app") + ", you&nbsp;can&nbsp;make&nbsp;a&nbsp;&#x1F381; of your choice to its author.<br>\
+        Even if it is a small gift... it will be much appreciated! &#x1F642;&#x1F44D;<br><br>\
+        &#x1F381; <a href='contact_info.html'>GO TO CONTACT PAGE</a> &#x1F381;<br><br>\
+        Thanks in advance for your support!<br>";
       show_play_store_app("", false, "<font color=#C900A1>Hello " + localStorage.firstname + "</font><hr style='height:1.0vh;padding:0;margin:0;visibility:hidden;'>" + paypalStr);
-      localStorage.lastDonationTimeY = (new Date()).getTime();
+      localStorage.lastDonationTimeZ = (new Date()).getTime();
       if (!localStorage.nbDonationRequests) {
         localStorage.nbDonationRequests = 0;
       }

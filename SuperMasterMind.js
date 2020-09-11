@@ -1512,7 +1512,7 @@ else if( localStorage.firstname&&localStorage.gamesok&&(Number(localStorage.game
 &&localStorage.lastDonationTime&&((new Date()).getTime() - localStorage.lastDonationTime > 31*24*60*60*1000 /* (1 month) */) ){
 let paypalStr=
 "If you enjoy this "+(! android_appli? "Super Master Mind game" : "Android app")+", you&nbsp;can&nbsp;make&nbsp;a&nbsp;&#x1F381; of your choice to the author.<br>\
-Even if it is a small gift... it will be much appreciated!&#x1F642;&#x1F44D;<br><br>\
+Even if it is a small gift... it will be much appreciated!<br>&#x1F642;&#x1F44D;<br><br>\
 <!--  duplicated in contact page html code -->\
 <form action=\"https://www.paypal.com/cgi-bin/webscr\" method=\"post\" target=\"_top\">\
 <input type=\"hidden\" name=\"cmd\" value=\"_s-xclick\" />\

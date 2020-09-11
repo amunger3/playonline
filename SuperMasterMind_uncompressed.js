@@ -1560,8 +1560,26 @@ function getNbColumnsSelected() {
   }
 }
 
-function show_play_store_app(specific_str = "", android_stars_mode = false) {
-  if ( ((!android_appli) || android_stars_mode) && (game_cnt != last_dialog_game_cnt + 1) ) {
+function show_play_store_app(specific_str = "", android_stars_mode = false, forceStr = "") {
+  if (forceStr != "") {
+    let str =
+      "<center><table style='width:" + rulesTableWidthStr + ";'><tr style='text-align:center;'><td><font style='font-size:1.75vh;color:black'>\
+      <br><b>" + forceStr + "</b><br>\
+      </font></td></tr></table></center>";
+    try {
+      modal_mode = 4;
+      // set modal content
+      modal.setContent("<div style='-webkit-touch-callout: none; /* iOS Safari */ -webkit-user-select: none; /* Safari */ -khtml-user-select: none; /* Konqueror HTML */ -moz-user-select: none; /* Firefox */ -ms-user-select: none; /* Internet Explorer/Edge */ user-select: none; /* Non-prefixed version, currently supported by Chrome and Opera */'>"
+                       + str
+                       + "</div>");
+      // open modal
+      modal.open();
+    }
+    catch (exc) {
+      throw new Error("modal error (" + modal_mode + "):" + exc + ": " + exc.stack);
+    }
+  }
+  else if ( ((!android_appli) || android_stars_mode) && (game_cnt != last_dialog_game_cnt + 1) ) {
     let str1 = "";
     let str2 = "";
     if (mobileMode) {
@@ -1774,6 +1792,26 @@ function resetGameAttributes(nbColumnsSelected) {
     }
     else if ( android_appli && localStorage.firstname && localStorage.gamesok && (Number(localStorage.gamesok) > 0) && (Number(localStorage.gamesok) < 3333) && (Number(localStorage.gamesok) % 314 == 0) && !localStorage.accountsAlreadyMerged ) {
       show_play_store_app("<font color=#C900A1>Hello " + localStorage.firstname + "</font><hr style='height:1.0vh;padding:0;margin:0;visibility:hidden;'>If you want to merge your smartphone account & your computer account (to share the same scores on all devices), just send an email using the&nbsp;<a href='contact_info.html'>contact info</a> page", true);
+    }
+    else if ( localStorage.firstname && localStorage.gamesok && (Number(localStorage.gamesok) >= 153)
+              && localStorage.lastDonationTime && ((new Date()).getTime() - localStorage.lastDonationTime > 31*24*60*60*1000 /* (1 month) */) ) {
+      let paypalStr =
+          "If you enjoy this " + (! android_appli? "Super Master Mind game" : "Android app") + ", you&nbsp;can&nbsp;make&nbsp;a&nbsp;&#x1F381; of your choice to the author.<br>\
+          Even if it is a small gift... it will be much appreciated!&#x1F642;&#x1F44D;<br><br>\
+          <!--  duplicated in contact page html code -->\
+          <form action=\"https://www.paypal.com/cgi-bin/webscr\" method=\"post\" target=\"_top\">\
+          <input type=\"hidden\" name=\"cmd\" value=\"_s-xclick\" />\
+          <input type=\"hidden\" name=\"hosted_button_id\" value=\"F9EE2A483RT9J\" />\
+          <input type=\"image\" src=\"https://www.paypalobjects.com/en_US/FR/i/btn/btn_donateCC_LG.gif\" border=\"0\" name=\"submit\" title=\"PayPal - The safer, easier way to pay online!\" alt=\"Donate with PayPal button\" />\
+          <img alt=\"\" border=\"0\" src=\"https://www.paypal.com/en_FR/i/scr/pixel.gif\" width=\"1\" height=\"1\" />\
+          </form><br>\
+          Thanks in advance for your support!<br>";
+      show_play_store_app("", false, "<font color=#C900A1>Hello " + localStorage.firstname + "</font><hr style='height:1.0vh;padding:0;margin:0;visibility:hidden;'>" + paypalStr);
+      localStorage.lastDonationTime = (new Date()).getTime();
+      if (!localStorage.nbDonationRequests) {
+        localStorage.nbDonationRequests = 0;
+      }
+      localStorage.nbDonationRequests = Number(localStorage.nbDonationRequests) + 1;
     }
   }
   catch (tmp_exc) {}

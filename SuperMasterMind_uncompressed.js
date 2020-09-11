@@ -1796,7 +1796,7 @@ function resetGameAttributes(nbColumnsSelected) {
     else if ( localStorage.firstname && localStorage.gamesok && (Number(localStorage.gamesok) >= 153)
               && localStorage.lastDonationTime && ((new Date()).getTime() - localStorage.lastDonationTime > 31*24*60*60*1000 /* (1 month) */) ) {
       let paypalStr =
-          "If you enjoy this " + (! android_appli? "Super Master Mind game" : "Android app") + ", you&nbsp;can&nbsp;make&nbsp;a&nbsp;&#x1F381;&nbsp;of&nbsp;your&nbsp;choice to the author.<br>\
+          "If you enjoy this " + (! android_appli? "Super Master Mind game" : "Android app") + ", you&nbsp;can&nbsp;make&nbsp;a&nbsp;&#x1F381; of your choice to the author.<br>\
           Even if it is a small gift... it will be much appreciated!&#x1F642;&#x1F44D;<br><br>\
           <!--  duplicated in contact page html code -->\
           <form action=\"https://www.paypal.com/cgi-bin/webscr\" method=\"post\" target=\"_top\">\

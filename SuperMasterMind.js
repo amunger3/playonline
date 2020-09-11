@@ -1511,7 +1511,7 @@ show_play_store_app("<font color=#C900A1>Hello "+localStorage.firstname+"</font>
 else if( localStorage.firstname&&localStorage.gamesok&&(Number(localStorage.gamesok) >=153)
 &&localStorage.lastDonationTime&&((new Date()).getTime() - localStorage.lastDonationTime > 31*24*60*60*1000 /* (1 month) */) ){
 let paypalStr=
-"If you enjoy this "+(! android_appli? "Super Master Mind game" : "Android app")+", you&nbsp;can&nbsp;make&nbsp;a&nbsp;&#x1F381;&nbsp;of&nbsp;your&nbsp;choice to the author.<br>\
+"If you enjoy this "+(! android_appli? "Super Master Mind game" : "Android app")+", you&nbsp;can&nbsp;make&nbsp;a&nbsp;&#x1F381; of your choice to the author.<br>\
 Even if it is a small gift... it will be much appreciated!&#x1F642;&#x1F44D;<br><br>\
 <!--  duplicated in contact page html code -->\
 <form action=\"https://www.paypal.com/cgi-bin/webscr\" method=\"post\" target=\"_top\">\
@@ -3456,7 +3456,7 @@ ctx.strokeStyle=currentColor;
 }
 if(gameWon &&!allPerformancesFilled()){
 document.getElementById("newGameButton").disabled=true;
-document.getElementById("newGameButton").className ="button disabled";
+document.getElementById("newGameButton").className="button disabled";
 if(CompressedDisplayMode){
 document.getElementById("newGameButton").value="\u231b";/* hourglass */
 }
@@ -3466,7 +3466,7 @@ document.getElementById("newGameButton").value="PLEASE WAIT \u231b";/* hourglass
 }
 else{
 document.getElementById("newGameButton").disabled=false;
-document.getElementById("newGameButton").className ="button";
+document.getElementById("newGameButton").className="button";
 if(CompressedDisplayMode){
 document.getElementById("newGameButton").value="N";
 }
@@ -3587,7 +3587,7 @@ document.getElementById("revealSecretColorButton").className=document.getElement
 }
 }
 }
-document.getElementById("resetCurrentCodeButton").disabled =!(gameOnGoing()&&(currentCode!=sCodeRevealed));
+document.getElementById("resetCurrentCodeButton").disabled=!(gameOnGoing()&&(currentCode!=sCodeRevealed));
 if(document.getElementById("resetCurrentCodeButton").disabled){
 document.getElementById("resetCurrentCodeButton").className="button disabled";
 }

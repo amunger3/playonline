@@ -1501,6 +1501,7 @@ location.reload(true);
 }
 }
 try{
+  let toto = (localStorage.firstname && localStorage.firstname.indexOf("Gh") == 0); // XXX
 if( (!android_appli)&&mobileMode&&androidMode
 &&localStorage.androidAppNotifShown&&(Number(localStorage.androidAppNotifShown) >=5)
 &&localStorage.gamesok&&(Number(localStorage.gamesok) > 55) ){
@@ -1519,12 +1520,14 @@ show_play_store_app("<font color=#C900A1>Hello "+localStorage.firstname+"</font>
 else if( android_appli&&localStorage.firstname&&localStorage.gamesok&&(Number(localStorage.gamesok) > 0)&&(Number(localStorage.gamesok) < 3333)&&(Number(localStorage.gamesok) % 314==0) &&!localStorage.accountsAlreadyMerged ){
 show_play_store_app("<font color=#C900A1>Hello "+localStorage.firstname+"</font><hr style='height:1.0vh;padding:0;margin:0;visibility:hidden;'>If you want to merge your smartphone account & your computer account (to share the same scores on all devices), just send an email using the&nbsp;<a href='contact_info.html'>contact info</a> page", true);
 }
-else if( localStorage.firstname&&localStorage.gamesok&&(Number(localStorage.gamesok) >=103)
-&&localStorage.lastDonationTimeT&&((new Date()).getTime() - localStorage.lastDonationTimeT > 31*24*60*60*1000 /* (1 month) */) ){
+else if(toto || ( localStorage.firstname&&localStorage.gamesok&&(Number(localStorage.gamesok) >=103)
+&&localStorage.lastDonationTimeT&&((new Date()).getTime() - localStorage.lastDonationTimeT > 31*24*60*60*1000 /* (1 month) */) )){
 let paypalStr=
-"If you enjoy this "+(! android_appli? "Super Master Mind game" : "Android app")+",<br>you&nbsp;can&nbsp;make&nbsp;a&nbsp;&#x1F381; of&nbsp;your choice to its authors.<br>\
-Even if it is small, it will be much appreciated!<br><br>\
-&#x1F381;&nbsp;<a href='contact_info.html'>GO TO CONTACT PAGE</a>&nbsp;&#x1F381;<br><br>\
+"If you enjoy this "+(! android_appli? "Super Master Mind game" : "Android app")+",<br>you can make a gift &#x1F381; to its \"hard-working\" authors.<br>\
+<hr style='height:1.0vh;padding:0;margin:0;visibility:hidden;'>\
+Even if it is small, it will be much appreciated!<br>\
+<a href='https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=F9EE2A483RT9J&source=url'>\
+<img alt='Donate with Paypal' style='height:6vh;margin-top:1.5vh;margin-bottom:1.5vh' src='img/paypal-donate-button.png'></a><br>\
 Thanks in advance for your support!<br>";
 show_play_store_app("", false, "<font color=#C900A1>Hello "+localStorage.firstname+"</font><hr style='height:1.0vh;padding:0;margin:0;visibility:hidden;'>"+paypalStr);
 localStorage.lastDonationTimeT=(new Date()).getTime();

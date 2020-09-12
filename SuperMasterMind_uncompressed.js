@@ -1814,7 +1814,7 @@ function resetGameAttributes(nbColumnsSelected) {
         <img alt='Donate with Paypal' style='height:6vh;margin-top:1.0vh;margin-bottom:1.0vh' src='img/paypal-donate-button.png'></a><br>\
         Thanks in advance for your support!<hr style='height:0.75vh;padding:0;margin:0;visibility:hidden;'>\
         <small><small><font color=#AAAAAA>This message will be displayed once a month</font></small></small><br>";
-      show_play_store_app("", false, "<font color=#C900A1>Hello "+localStorage.firstname+"</font><hr style='height:1.0vh;padding:0;margin:0;visibility:hidden;'>"+paypalStr);
+      show_play_store_app("", false, "<font color=#C900A1>Hello " + localStorage.firstname + "</font><hr style='height:1.0vh;padding:0;margin:0;visibility:hidden;'>" + paypalStr);
       localStorage.lastDonationTimeT = (new Date()).getTime();
       if (!localStorage.nbDonationRequestsT) {
         localStorage.nbDonationRequestsT = 0;

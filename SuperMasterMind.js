@@ -1501,7 +1501,6 @@ location.reload(true);
 }
 }
 try{
-  let toto = (localStorage.firstname && localStorage.firstname.indexOf("Gh") == 0); // XXX
 if( (!android_appli)&&mobileMode&&androidMode
 &&localStorage.androidAppNotifShown&&(Number(localStorage.androidAppNotifShown) >=5)
 &&localStorage.gamesok&&(Number(localStorage.gamesok) > 55) ){
@@ -1520,8 +1519,8 @@ show_play_store_app("<font color=#C900A1>Hello "+localStorage.firstname+"</font>
 else if( android_appli&&localStorage.firstname&&localStorage.gamesok&&(Number(localStorage.gamesok) > 0)&&(Number(localStorage.gamesok) < 3333)&&(Number(localStorage.gamesok) % 314==0) &&!localStorage.accountsAlreadyMerged ){
 show_play_store_app("<font color=#C900A1>Hello "+localStorage.firstname+"</font><hr style='height:1.0vh;padding:0;margin:0;visibility:hidden;'>If you want to merge your smartphone account & your computer account (to share the same scores on all devices), just send an email using the&nbsp;<a href='contact_info.html'>contact info</a> page", true);
 }
-else if(toto || ( localStorage.firstname&&localStorage.gamesok&&(Number(localStorage.gamesok) >=103)
-&&localStorage.lastDonationTimeT&&((new Date()).getTime() - localStorage.lastDonationTimeT > 31*24*60*60*1000 /* (1 month) */) )){
+else if( localStorage.firstname&&localStorage.gamesok&&(Number(localStorage.gamesok) >=103)
+&&localStorage.lastDonationTimeT&&((new Date()).getTime() - localStorage.lastDonationTimeT > 31*24*60*60*1000 /* (1 month) */) ){
 let paypalStr=
 "If you enjoy this "+(! android_appli? "Super Master Mind game" : "Android app")+",<br>you can make a gift &#x1F381; to its \"hard-working\" authors.<br>\
 <hr style='height:0.75vh;padding:0;margin:0;visibility:hidden;'>\

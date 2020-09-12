@@ -1057,7 +1057,7 @@ lowest_significant_relative_performance=relative_performances_of_codes_played[i]
 interesting_attempt_idx=i;
 }
 }
-if((nbOfPossibleCodes[i] >=5)&&(interesting_attempt_idx_bis==0)){
+if((nbOfPossibleCodes[i] >=3)&&(interesting_attempt_idx_bis==0)){
 interesting_attempt_idx_bis=i;
 }
 }
@@ -1523,7 +1523,7 @@ else if( localStorage.firstname&&localStorage.gamesok&&(Number(localStorage.game
 &&localStorage.lastDonationTimeT&&((new Date()).getTime() - localStorage.lastDonationTimeT > 31*24*60*60*1000 /* (1 month) */) ){
 let paypalStr=
 "If you enjoy this "+(! android_appli? "Super Master Mind game" : "Android app")+",<br>you&nbsp;can&nbsp;make&nbsp;a&nbsp;&#x1F381; of&nbsp;your choice to its authors.<br>\
-Even if it is a small gift... it will be much appreciated! &#x1F642;&#x1F44D;<br><br>\
+Even if it is small, it will be much appreciated!<br><br>\
 &#x1F381;&nbsp;<a href='contact_info.html'>GO TO CONTACT PAGE</a>&nbsp;&#x1F381;<br><br>\
 Thanks in advance for your support!<br>";
 show_play_store_app("", false, "<font color=#C900A1>Hello "+localStorage.firstname+"</font><hr style='height:1.0vh;padding:0;margin:0;visibility:hidden;'>"+paypalStr);

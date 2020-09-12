@@ -1044,6 +1044,7 @@ else{
 nbPossibleCodesShown=Math.max(nbMinPossibleCodesShown, Math.min(nbMaxPossibleCodesShown/2 /* (half display) */, 20+(nbMaxAttempts+1 - currentAttemptNumber)));
 if(newPossibleCodeShown==-1){
 let interesting_attempt_idx=0;
+let interesting_attempt_idx_was_updated=false;
 let interesting_attempt_idx_bis=0;
 let lowest_significant_relative_performance=PerformanceMaxValidValue;
 for (let i=currentAttemptNumber-2;i >=0;i--){
@@ -1055,13 +1056,14 @@ if( (nbOfPossibleCodes[i] >=3)
 if(relative_performances_of_codes_played[i] < lowest_significant_relative_performance){
 lowest_significant_relative_performance=relative_performances_of_codes_played[i];
 interesting_attempt_idx=i;
+interesting_attempt_idx_was_updated=true;
 }
 }
 if((nbOfPossibleCodes[i] >=3)&&(interesting_attempt_idx_bis==0)){
 interesting_attempt_idx_bis=i;
 }
 }
-if(interesting_attempt_idx==0){
+if(!interesting_attempt_idx_was_updated){
 interesting_attempt_idx=interesting_attempt_idx_bis;
 }
 currentPossibleCodeShown=interesting_attempt_idx+1;
@@ -1649,7 +1651,7 @@ toto=simpleCodeHandler.setColor(toto, 4, 2);
 toto=simpleCodeHandler.setColor(toto, 4, 3);
 toto=simpleCodeHandler.setColor(toto, 4, 4);
 toto=simpleCodeHandler.setColor(toto, 4, 5);
-sCode=~(toto);*/
+sCode=~(toto); */
 sCodeRevealed=0;
 newGameEvent=false;
 playerWasHelped=false;

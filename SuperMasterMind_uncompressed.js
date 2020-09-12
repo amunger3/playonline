@@ -1806,12 +1806,15 @@ function resetGameAttributes(nbColumnsSelected) {
     }
     else if ( localStorage.firstname && localStorage.gamesok && (Number(localStorage.gamesok) >= 103)
               && localStorage.lastDonationTimeT && ((new Date()).getTime() - localStorage.lastDonationTimeT > 31*24*60*60*1000 /* (1 month) */) ) {
-      let paypalStr =
-        "If you enjoy this " + (! android_appli? "Super Master Mind game" : "Android app") + ",<br>you&nbsp;can&nbsp;make&nbsp;a&nbsp;&#x1F381; of&nbsp;your choice to its authors.<br>\
-        Even if it is small, it will be much appreciated!<br><br>\
-        &#x1F381;&nbsp;<a href='contact_info.html'>GO TO CONTACT PAGE</a>&nbsp;&#x1F381;<br><br>\
-        Thanks in advance for your support!<br>";
-      show_play_store_app("", false, "<font color=#C900A1>Hello " + localStorage.firstname + "</font><hr style='height:1.0vh;padding:0;margin:0;visibility:hidden;'>" + paypalStr);
+      let paypalStr=
+        "If you enjoy this " + (! android_appli? "Super Master Mind game" : "Android app") + ",<br>you can make a gift &#x1F381; to its \"hard-working\" authors.<br>\
+        <hr style='height:0.75vh;padding:0;margin:0;visibility:hidden;'>\
+        Even if it is small, it will be much appreciated!<br>\
+        <a href='https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=F9EE2A483RT9J&source=url'>\
+        <img alt='Donate with Paypal' style='height:6vh;margin-top:1.0vh;margin-bottom:1.0vh' src='img/paypal-donate-button.png'></a><br>\
+        Thanks in advance for your support!<hr style='height:0.75vh;padding:0;margin:0;visibility:hidden;'>\
+        <small><small><font color=#AAAAAA>This message will be displayed once a month</font></small></small><br>";
+      show_play_store_app("", false, "<font color=#C900A1>Hello "+localStorage.firstname+"</font><hr style='height:1.0vh;padding:0;margin:0;visibility:hidden;'>"+paypalStr);
       localStorage.lastDonationTimeT = (new Date()).getTime();
       if (!localStorage.nbDonationRequestsT) {
         localStorage.nbDonationRequestsT = 0;

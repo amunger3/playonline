@@ -936,7 +936,7 @@ return;
 }
 }
 nbOnGoingGamesAborted++;
-let reset_duration=4000;
+let reset_duration=5000;
 setTimeout("newGameButtonClick_delayed();", 2*reset_duration);
 try{
 $(".game_aborted").fadeIn(reset_duration);
@@ -1048,7 +1048,7 @@ let interesting_attempt_idx_was_updated=false;
 let interesting_attempt_idx_bis=0;
 let lowest_significant_relative_performance=PerformanceMaxValidValue;
 for (let i=currentAttemptNumber-2;i >=0;i--){
-if( (nbOfPossibleCodes[i] >=3)
+if( (nbOfPossibleCodes[i] >=2)
 &&(relative_performances_of_codes_played[i]!=-1.00)
 &&(relative_performances_of_codes_played[i]!=PerformanceUNKNOWN)
 &&(relative_performances_of_codes_played[i]!=PerformanceNA)

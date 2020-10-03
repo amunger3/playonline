@@ -1126,7 +1126,7 @@ newGameButtonClick = function(nbColumns_p) { // (override temporary definition)
         }
         nbOnGoingGamesAborted++;
 
-        let reset_duration = 4000;
+        let reset_duration = 5000;
         setTimeout("newGameButtonClick_delayed();", 2*reset_duration);
 
         // Transition effect 1/2
@@ -1256,11 +1256,11 @@ function showPossibleCodesButtonClick(invertMode = true, newPossibleCodeShown = 
         let interesting_attempt_idx_bis = 0;
         let lowest_significant_relative_performance = PerformanceMaxValidValue;
         for (let i = currentAttemptNumber-2; i >= 0; i--) {
-          if ( (nbOfPossibleCodes[i] >= 3) // performances may vary
+          if ( (nbOfPossibleCodes[i] >= 2) // several possible codes left
                && (relative_performances_of_codes_played[i] != -1.00) // not an useless code
                && (relative_performances_of_codes_played[i] != PerformanceUNKNOWN)
                && (relative_performances_of_codes_played[i] != PerformanceNA)
-               && (relative_performances_of_codes_played[i] <= -0.145) ) { // code played was not so good (~3*PerformanceLOW/5)
+               && (relative_performances_of_codes_played[i] <= -0.145) ) { // code played was not so good (~3*PerformanceLOW/5) / -0.15 with rounding
             if (relative_performances_of_codes_played[i] < lowest_significant_relative_performance) {
               lowest_significant_relative_performance = relative_performances_of_codes_played[i];
               interesting_attempt_idx = i;

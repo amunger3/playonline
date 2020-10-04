@@ -1267,7 +1267,7 @@ function showPossibleCodesButtonClick(invertMode = true, newPossibleCodeShown = 
               interesting_attempt_idx_was_updated = true;
             }
           }
-          if ((nbOfPossibleCodes[i] >= 3) && (interesting_attempt_idx_bis == 0)) {
+          if ((nbOfPossibleCodes[i] >= 2) && (interesting_attempt_idx_bis == 0)) {
             interesting_attempt_idx_bis = i;
           }
         }

@@ -2446,7 +2446,7 @@ try {
     let precalculation_mode = ( (nbCodes >= minNbCodesForPrecalculation) // (**) only games for which there may not be enough CPU capacity / time to calculate performances online
                                 && (next_cur_game_idx <= maxDepthForGamePrecalculation) // (-1 or 3)
                                 && ( (next_cur_game_idx <= 1)
-                                     || ((next_cur_game_idx == 2) && ((possibleGame && (codeHandler.nbDifferentColors(curGame[0]) <= 2)) || (codeHandler.isVerySimple(curGame[0]) && codeHandler.isVerySimple(curGame[1])) || (nbCodes <= nbCodesForPrecalculationThreshold))) // (***)
+                                     || ((next_cur_game_idx == 2) && ((possibleGame && (codeHandler.nbDifferentColors(curGame[0]) <= 2)) || ((codeHandler.nbDifferentColors(curGame[0]) <= 2) && codeHandler.isVerySimple(curGame[1])) || (nbCodes <= nbCodesForPrecalculationThreshold))) // (***)
                                      || ((next_cur_game_idx == 3) && possibleGame && (codeHandler.nbDifferentColors(curGame[0]) <= 2) && (codeHandler.nbDifferentColors(curGame[1]) <= 2) && (codeHandler.nbDifferentColors(curGame[2]) <= 2))
                                      || ((next_cur_game_idx == 3) && (codeHandler.nbDifferentColors(curGame[0]) == 1) && codeHandler.isVerySimple(curGame[1]) && codeHandler.isVerySimple(curGame[2])) // (this condition could be made totally symmetrical with isVerySimple() called 3 times, with little/no? gains - condition introduced initially to cover frequent "11111|22222|33333-like games" whose evaluation may be a bit too long")
                                    )

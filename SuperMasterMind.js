@@ -3453,7 +3453,7 @@ relative_perf=best_global_perf - global_perf;
 }
 ctx.font=stats_font;
 let backgroundColor=backgroundColor_2;
-displayPerf(relative_perf, y_cell, backgroundColor, 0, true, valid_best_global_perf&&(currentPossibleCodeShown <=1), best_global_perf, ctx, (code==codesPlayed[currentPossibleCodeShown-1]));
+displayPerf(relative_perf, y_cell, backgroundColor, 0, true, false /* valid_best_global_perf&&(currentPossibleCodeShown <=1) */, PerformanceNA /* best_global_perf */, ctx, (code==codesPlayed[currentPossibleCodeShown-1]));
 if( (possibleCodesListsSubdivisions[currentPossibleCodeShown-1]!=-1)
 &&(possibleCodesListsSubdivisions[currentPossibleCodeShown-1]==codeidx+code_list_offset+1) ){
 x_0=get_x_pixel(x_min+x_step*(attempt_nb_width+(70*(nbColumns+1))/100+nbColumns*2+nb_possible_codes_width));

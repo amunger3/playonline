@@ -4016,7 +4016,7 @@ function draw_graphic_bis() {
           }
           ctx.font = stats_font;
           let backgroundColor = backgroundColor_2;
-          displayPerf(relative_perf, y_cell, backgroundColor, 0, true, valid_best_global_perf && (currentPossibleCodeShown <= 1), best_global_perf, ctx, (code == codesPlayed[currentPossibleCodeShown-1]));
+          displayPerf(relative_perf, y_cell, backgroundColor, 0, true, false /* valid_best_global_perf && (currentPossibleCodeShown <= 1) */, PerformanceNA /* best_global_perf */, ctx, (code == codesPlayed[currentPossibleCodeShown-1]));
 
           // Display subdivision
           if ( (possibleCodesListsSubdivisions[currentPossibleCodeShown-1] != -1)

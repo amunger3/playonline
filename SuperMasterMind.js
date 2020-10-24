@@ -3106,7 +3106,7 @@ let multiply_factor;
 switch (nbColumns){
 case 3:
 nb_attempts_for_max_score=3;
-time_in_seconds_for_max_score=3+1;
+time_in_seconds_for_max_score=3+2;
 time_in_seconds_corresponding_to_one_attempt_in_score=22;
 multiply_factor=0.20;
 break;

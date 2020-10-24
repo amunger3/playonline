@@ -3694,7 +3694,7 @@ function draw_graphic_bis() {
             score = score_from_nb_attempts - time_delta_score;
             let min_score = 1;
             if (score < min_score + 0.01) {
-              score = min_score + 0.01 - totalTimeInSeconds/1000000;
+              score = min_score + 0.01 - totalTimeInSeconds/100000000;
               if (score < min_score) {
                 score = min_score;
               }

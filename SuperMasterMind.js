@@ -1651,7 +1651,7 @@ toto=simpleCodeHandler.setColor(toto, 4, 2);
 toto=simpleCodeHandler.setColor(toto, 4, 3);
 toto=simpleCodeHandler.setColor(toto, 4, 4);
 toto=simpleCodeHandler.setColor(toto, 4, 5);
-sCode=~(toto); */
+sCode=~(toto);*/
 sCodeRevealed=0;
 newGameEvent=false;
 playerWasHelped=false;
@@ -3055,8 +3055,8 @@ displayCode(simpleCodeHandler.convert(sCode), nbMaxAttemptsToDisplay+transition_
 }
 }
 if(!gameOnGoing()){
-let totalTimeInSeconds=Math.floor((stopTime - startTime)/1000);
-let timeInMilliSeconds=(stopTime - startTime) % 1000;
+let totalTimeInMilliSeconds=stopTime - startTime;
+let totalTimeInSeconds=Math.floor(totalTimeInMilliSeconds/1000);
 let timeInHours=Math.floor(totalTimeInSeconds/3600);
 let timeInSecondsWithinHour=(totalTimeInSeconds - timeInHours*3600);
 let timeInMinutes=Math.floor(timeInSecondsWithinHour/60);
@@ -3100,65 +3100,71 @@ let victoryStr;
 let victoryStr2;
 let victoryStr3;
 let nb_attempts_for_max_score;
+let time_in_seconds_for_max_score=-1;
 let time_in_seconds_corresponding_to_one_attempt_in_score;
 let multiply_factor;
 switch (nbColumns){
 case 3:
 nb_attempts_for_max_score=3;
-time_in_seconds_corresponding_to_one_attempt_in_score=30.0;
-multiply_factor=0.50;
+time_in_seconds_for_max_score=3;
+time_in_seconds_corresponding_to_one_attempt_in_score=22;
+multiply_factor=0.20;
 break;
 case 4:
 nb_attempts_for_max_score=4;
-time_in_seconds_corresponding_to_one_attempt_in_score=120.0;
-multiply_factor=0.75;
+time_in_seconds_for_max_score=15;
+time_in_seconds_corresponding_to_one_attempt_in_score= 75;
+multiply_factor=0.50;
 break;
 case 5:
 nb_attempts_for_max_score=5;
-time_in_seconds_corresponding_to_one_attempt_in_score=270.0;
+time_in_seconds_for_max_score=40;
+time_in_seconds_corresponding_to_one_attempt_in_score= 140;
 multiply_factor=1.0;
 break;
 case 6:
 nb_attempts_for_max_score=6;
-time_in_seconds_corresponding_to_one_attempt_in_score=360.0;
+time_in_seconds_for_max_score=60;
+time_in_seconds_corresponding_to_one_attempt_in_score= 240;
 multiply_factor=1.5;
 break;
 case 7:
 nb_attempts_for_max_score=7;
-time_in_seconds_corresponding_to_one_attempt_in_score=450.0;
+time_in_seconds_for_max_score=90;
+time_in_seconds_corresponding_to_one_attempt_in_score= 330;
 multiply_factor=2.0;
 break;
 default:
 throw new Error("invalid number of columns in score calculation: "+nbColumns);
 }
-let max_score=100.0;
-let min_score=1.4 - Math.min(totalTimeInSeconds/1000000, 0.4);
+let max_score=100.0 * multiply_factor;
 let score_from_nb_attempts;
 if(currentAttemptNumber-1 /* number of attempts */ <=nb_attempts_for_max_score){
 score_from_nb_attempts=max_score;
 }
 else{
-score_from_nb_attempts=max_score - ((currentAttemptNumber-1) /* number of attempts */ - nb_attempts_for_max_score)*10.0;
+score_from_nb_attempts=max_score - ((currentAttemptNumber-1) /* number of attempts */ - nb_attempts_for_max_score)*10.0*multiply_factor;
 }
-let time_in_seconds_short_games=(2.0*time_in_seconds_corresponding_to_one_attempt_in_score)/3.0;
 let time_delta_score;
-if(totalTimeInSeconds <=time_in_seconds_short_games){
-time_delta_score=(totalTimeInSeconds*10.0)/time_in_seconds_short_games;
+let max_time_in_seconds_for_nominal_slope=time_in_seconds_for_max_score+2*time_in_seconds_corresponding_to_one_attempt_in_score;
+if(totalTimeInMilliSeconds < time_in_seconds_for_max_score*1000+1000){
+time_delta_score=0.5000001 * totalTimeInMilliSeconds / (time_in_seconds_for_max_score*1000+1000);
+}
+else if(totalTimeInMilliSeconds <=max_time_in_seconds_for_nominal_slope*1000+1000){
+let slope=10*multiply_factor / (time_in_seconds_corresponding_to_one_attempt_in_score*1000);
+time_delta_score=slope * (totalTimeInMilliSeconds - (time_in_seconds_for_max_score*1000+1000))+0.5000001;
 }
 else{
-time_delta_score=10.0+(10.0 * (totalTimeInSeconds - time_in_seconds_short_games)) / (2*time_in_seconds_corresponding_to_one_attempt_in_score - time_in_seconds_short_games);
+let slope=10*multiply_factor / (2*time_in_seconds_corresponding_to_one_attempt_in_score*1000);
+time_delta_score=slope * (totalTimeInMilliSeconds - (max_time_in_seconds_for_nominal_slope*1000+1000))+0.5000001+2*10*multiply_factor;
 }
-let max_time_delta_score=2*10.0;
-if( (time_delta_score <=max_time_delta_score)
-||(currentAttemptNumber-1 /* number of attempts */ >=nbMaxAttempts) /* at last attempt, score will tend towards zero "more quickly" as time goes on */ ){
-score=multiply_factor * (score_from_nb_attempts - time_delta_score)+0.499 - timeInMilliSeconds/10000000;
-}
-else{
-score=multiply_factor * (score_from_nb_attempts - max_time_delta_score
-- (time_delta_score - max_time_delta_score)/1.5)+0.499 - timeInMilliSeconds/10000000;
-}
+score=score_from_nb_attempts - time_delta_score;
+let min_score=1;
+if(score < min_score+0.01){
+score=min_score+0.01 - totalTimeInSeconds/1000000;
 if(score < min_score){
-score=min_score;/* (score will never be zero in case the game was won) */
+score=min_score;
+}
 }
 if(playerWasHelped){
 victoryStr="\u2009You won with help!\u2009";
@@ -3379,7 +3385,7 @@ darkGray, backgroundColor_2, ctx, false, true, 0, true, 0)){
 if(!displayString("\u2009"+(nbOfCodes-nbOfCodesListed)+"\u2009"+offset_str+"\u2009", 0, nbMaxAttemptsToDisplay+transition_height, attempt_nb_width+(70*(nbColumns+1))/100,
 darkGray, backgroundColor_2, ctx, false, true, 0, true, 0)){
 displayString(offset_str, 0, nbMaxAttemptsToDisplay+transition_height, attempt_nb_width+(70*(nbColumns+1))/100,
-darkGray, backgroundColor_2, ctx, false, true, 0, true, 0);  
+darkGray, backgroundColor_2, ctx, false, true, 0, true, 0);
 }
 }
 }
@@ -3469,7 +3475,7 @@ ctx.strokeStyle=currentColor;
 }
 if(gameWon &&!allPerformancesFilled()){
 document.getElementById("newGameButton").disabled=true;
-document.getElementById("newGameButton").className="button disabled";
+document.getElementById("newGameButton").className ="button disabled";
 if(CompressedDisplayMode){
 document.getElementById("newGameButton").value="\u231b";/* hourglass */
 }
@@ -3479,7 +3485,7 @@ document.getElementById("newGameButton").value="PLEASE WAIT \u231b";/* hourglass
 }
 else{
 document.getElementById("newGameButton").disabled=false;
-document.getElementById("newGameButton").className="button";
+document.getElementById("newGameButton").className ="button";
 if(CompressedDisplayMode){
 document.getElementById("newGameButton").value="N";
 }
@@ -3600,7 +3606,7 @@ document.getElementById("revealSecretColorButton").className=document.getElement
 }
 }
 }
-document.getElementById("resetCurrentCodeButton").disabled=!(gameOnGoing()&&(currentCode!=sCodeRevealed));
+document.getElementById("resetCurrentCodeButton").disabled =!(gameOnGoing()&&(currentCode!=sCodeRevealed));
 if(document.getElementById("resetCurrentCodeButton").disabled){
 document.getElementById("resetCurrentCodeButton").className="button disabled";
 }

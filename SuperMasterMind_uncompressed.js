@@ -3576,8 +3576,8 @@ function draw_graphic_bis() {
 
         if (!gameOnGoing()) {
 
-          let totalTimeInSeconds = Math.floor((stopTime - startTime)/1000);
-          let timeInMilliSeconds = (stopTime - startTime) % 1000;
+          let totalTimeInMilliSeconds = stopTime - startTime;
+          let totalTimeInSeconds = Math.floor(totalTimeInMilliSeconds/1000);
 
           let timeInHours = Math.floor(totalTimeInSeconds/3600);
           let timeInSecondsWithinHour = (totalTimeInSeconds - timeInHours*3600); // (range: [0;3599]
@@ -3624,66 +3624,80 @@ function draw_graphic_bis() {
             let victoryStr2;
             let victoryStr3;
             let nb_attempts_for_max_score;
+            let time_in_seconds_for_max_score = -1;
             let time_in_seconds_corresponding_to_one_attempt_in_score;
             let multiply_factor;
             switch (nbColumns) {
               case 3:
                 nb_attempts_for_max_score = 3; // (estimate: <=3 attempts: 33% of the games, below 3 would not be relevant)
-                time_in_seconds_corresponding_to_one_attempt_in_score = 30.0; // (1 attempt <=> 20 sec, 2 attempts <=> 1 min)
-                multiply_factor = 0.50;
+                time_in_seconds_for_max_score = 3;
+                time_in_seconds_corresponding_to_one_attempt_in_score = 22; // (1 attempt <=> 22 sec)
+                multiply_factor = 0.20;
                 break;
               case 4:
                 nb_attempts_for_max_score = 4; // (estimate: <=3 attempts: 8% of the games, <=4 attempts: 28% of the games)
-                time_in_seconds_corresponding_to_one_attempt_in_score = 120.0; // (1 attempt <=> 1 min 20 sec, 2 attempts <=> 4 min)
-                multiply_factor = 0.75;
+                time_in_seconds_for_max_score = 15;
+                time_in_seconds_corresponding_to_one_attempt_in_score =  75; // (1 attempt <=> 1 min 15 sec)
+                multiply_factor = 0.50;
                 break;
               case 5:
                 nb_attempts_for_max_score = 5; // (estimate: <=4 attempts: 5% of the games, <=5 attempts: 13% of the games)
-                time_in_seconds_corresponding_to_one_attempt_in_score = 270.0; // (1 attempt <=> 3 minutes, 2 attempts <=> 9 min) // See (*)
+                time_in_seconds_for_max_score = 40;
+                time_in_seconds_corresponding_to_one_attempt_in_score =  140; // (1 attempt <=> 2 min 20 sec)
                 multiply_factor = 1.0;
                 break;
               case 6:
                 nb_attempts_for_max_score = 6; // (estimate: <=6 attempts: 17% of the games, <=7 attempts: 34% of the games)
-                time_in_seconds_corresponding_to_one_attempt_in_score = 360.0; // (1 attempt <=> 4 min, 2 attempts <=> 12 min) // See (*)
+                time_in_seconds_for_max_score = 60;
+                time_in_seconds_corresponding_to_one_attempt_in_score =  240; // (1 attempt <=> 4 min)
                 multiply_factor = 1.5;
                 break;
               case 7:
                 nb_attempts_for_max_score = 7; // (estimate: <=7 attempts: 11% of the games, <=8 attempts: 30% of the games)
-                time_in_seconds_corresponding_to_one_attempt_in_score = 450.0; // (1 attempt <=> 5 min, 2 attempts <=> 15 min) // See (*)
+                time_in_seconds_for_max_score = 90;
+                time_in_seconds_corresponding_to_one_attempt_in_score =  330; // (1 attempt <=> 5 min 30 sec)
                 multiply_factor = 2.0;
                 break;
               default:
                 throw new Error("invalid number of columns in score calculation: " + nbColumns);
             }
-            let max_score = 100.0;
-            let min_score = 1.4 - Math.min(totalTimeInSeconds/1000000, 0.4);
+
+            // Score from number of attempts
+            let max_score = 100.0 * multiply_factor;
             let score_from_nb_attempts;
             if (currentAttemptNumber-1 /* number of attempts */ <= nb_attempts_for_max_score) { // (all the very low numbers of attempts ("lucky games") are handled the same way)
               score_from_nb_attempts = max_score;
             }
             else {
-              score_from_nb_attempts = max_score - ((currentAttemptNumber-1) /* number of attempts */ - nb_attempts_for_max_score)*10.0;
+              score_from_nb_attempts = max_score - ((currentAttemptNumber-1) /* number of attempts */ - nb_attempts_for_max_score)*10.0*multiply_factor;
             }
-            let time_in_seconds_short_games = (2.0*time_in_seconds_corresponding_to_one_attempt_in_score)/3.0;
+
+            // Score from game duration
             let time_delta_score;
-            if (totalTimeInSeconds <= time_in_seconds_short_games) { // scoring rule useful to distinguish good players
-              time_delta_score = (totalTimeInSeconds*10.0)/time_in_seconds_short_games;
+            let max_time_in_seconds_for_nominal_slope = time_in_seconds_for_max_score + 2*time_in_seconds_corresponding_to_one_attempt_in_score;
+            if (totalTimeInMilliSeconds < time_in_seconds_for_max_score*1000+1000) { // <=> totalTimeInSeconds <= time_in_seconds_for_max_score
+              // 0 -> 0, time_in_seconds_for_max_score*1000+1000 -> 0.5000001
+              time_delta_score = 0.5000001 * totalTimeInMilliSeconds / (time_in_seconds_for_max_score*1000+1000);
             }
-            else { // scoring rule for other players
-              // "good player's slope / 2"
-              time_delta_score = 10.0 + (10.0 * (totalTimeInSeconds - time_in_seconds_short_games)) / (2*time_in_seconds_corresponding_to_one_attempt_in_score - time_in_seconds_short_games);
-            }
-            let max_time_delta_score = 2*10.0; // the time spent will tend not to cost more than 2 attempts in the score
-            if ( (time_delta_score <= max_time_delta_score)
-                 || (currentAttemptNumber-1 /* number of attempts */ >= nbMaxAttempts) /* at last attempt, score will tend towards zero "more quickly" as time goes on */ ) {
-              score = multiply_factor * (score_from_nb_attempts - time_delta_score) + 0.499 - timeInMilliSeconds/10000000;
+            else if (totalTimeInMilliSeconds <= max_time_in_seconds_for_nominal_slope*1000+1000) {
+              // slope: time_in_seconds_corresponding_to_one_attempt_in_score -> 10*multiply_factor
+              let slope = 10*multiply_factor / (time_in_seconds_corresponding_to_one_attempt_in_score*1000);
+              time_delta_score = slope * (totalTimeInMilliSeconds - (time_in_seconds_for_max_score*1000+1000)) + 0.5000001;
             }
             else {
-              score = multiply_factor * (score_from_nb_attempts - max_time_delta_score
-                                         - (time_delta_score - max_time_delta_score)/1.5) + 0.499 - timeInMilliSeconds/10000000; // "good player's slope / 3"
+              // half slope is applied
+              let slope = 10*multiply_factor / (2*time_in_seconds_corresponding_to_one_attempt_in_score*1000);
+              time_delta_score = slope * (totalTimeInMilliSeconds - (max_time_in_seconds_for_nominal_slope*1000+1000)) + 0.5000001 + 2*10*multiply_factor;
             }
-            if (score < min_score) {
-              score = min_score; /* (score will never be zero in case the game was won) */
+
+            // Final score
+            score = score_from_nb_attempts - time_delta_score;
+            let min_score = 1;
+            if (score < min_score + 0.01) {
+              score = min_score + 0.01 - totalTimeInSeconds/1000000;
+              if (score < min_score) {
+                score = min_score;
+              }
             }
 
             // Check if the player was helped

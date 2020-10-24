@@ -3630,7 +3630,7 @@ function draw_graphic_bis() {
             switch (nbColumns) {
               case 3:
                 nb_attempts_for_max_score = 3; // (estimate: <=3 attempts: 33% of the games, below 3 would not be relevant)
-                time_in_seconds_for_max_score = 3+1; // +1 due to time to enter combinations when extra attempts
+                time_in_seconds_for_max_score = 3+1; // +1 due to time for extra attempts
                 time_in_seconds_corresponding_to_one_attempt_in_score = 22; // (1 attempt <=> 22 sec)
                 multiply_factor = 0.20;
                 break;

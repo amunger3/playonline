@@ -3112,8 +3112,8 @@ multiply_factor=0.20;
 break;
 case 4:
 nb_attempts_for_max_score=4;
-time_in_seconds_for_max_score=15+4;
-time_in_seconds_corresponding_to_one_attempt_in_score= 70;
+time_in_seconds_for_max_score=15+9;
+time_in_seconds_corresponding_to_one_attempt_in_score= 65;
 multiply_factor=0.50;
 break;
 case 5:

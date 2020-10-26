@@ -7,7 +7,7 @@ Method:
 3 colonnes: échelle: 20 pts
 0 = -0pt
 3s = -0.5pts (5%) + delta due to time to make attempts + very low granularity
-+20sec <=> -10 (temps rond avec delta)
++20sec <=> -10 (temps rond avec delta si possible)
 +40sec <=> -20
 ... puis pente de moitié (60sec = -25)
 

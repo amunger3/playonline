@@ -3655,7 +3655,7 @@ function draw_graphic_bis() {
               case 7:
                 nb_attempts_for_max_score = 7; // (estimate: <=7 attempts: 11% of the games, <=8 attempts: 30% of the games)
                 time_in_seconds_for_max_score = 90;
-                time_in_seconds_corresponding_to_one_attempt_in_score =  330; // (1 attempt <=> 5 min 30 sec)
+                time_in_seconds_corresponding_to_one_attempt_in_score = 330; // (1 attempt <=> 5 min 30 sec)
                 multiply_factor = 2.0;
                 break;
               default:

@@ -3636,20 +3636,20 @@ function draw_graphic_bis() {
                 break;
               case 4:
                 nb_attempts_for_max_score = 4; // (estimate: <=3 attempts: 8% of the games, <=4 attempts: 28% of the games)
-                time_in_seconds_for_max_score = 15+9;
-                time_in_seconds_corresponding_to_one_attempt_in_score =  65; // (1 attempt <=> 1 min 5 sec)
+                time_in_seconds_for_max_score = 15+10; // +10 due to time to make attempts
+                time_in_seconds_corresponding_to_one_attempt_in_score = 65; // (1 attempt <=> 1 min 5 sec)
                 multiply_factor = 0.50;
                 break;
               case 5:
                 nb_attempts_for_max_score = 5; // (estimate: <=4 attempts: 5% of the games, <=5 attempts: 13% of the games)
                 time_in_seconds_for_max_score = 40;
-                time_in_seconds_corresponding_to_one_attempt_in_score =  140; // (1 attempt <=> 2 min 20 sec)
+                time_in_seconds_corresponding_to_one_attempt_in_score = 140; // (1 attempt <=> 2 min 20 sec)
                 multiply_factor = 1.0;
                 break;
               case 6:
                 nb_attempts_for_max_score = 6; // (estimate: <=6 attempts: 17% of the games, <=7 attempts: 34% of the games)
                 time_in_seconds_for_max_score = 60;
-                time_in_seconds_corresponding_to_one_attempt_in_score =  240; // (1 attempt <=> 4 min)
+                time_in_seconds_corresponding_to_one_attempt_in_score = 240; // (1 attempt <=> 4 min)
                 multiply_factor = 1.5;
                 break;
               case 7:

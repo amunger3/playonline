@@ -3631,7 +3631,7 @@ function draw_graphic_bis() {
               case 3:
                 nb_attempts_for_max_score = 3; // (estimate: <=3 attempts: 33% of the games, below 3 would not be relevant)
                 if (currentAttemptNumber-1 /* number of attempts */ <= nb_attempts_for_max_score) {
-                  time_in_seconds_for_max_score = 3+4; // +4 due to time to make attempts + very low multiply_factor granularity
+                  time_in_seconds_for_max_score = 3+5; // +5 due to time to make attempts + very low multiply_factor granularity
                 }
                 else {
                   time_in_seconds_for_max_score = 3+7; // +7 due to time to make attempts + very low multiply_factor granularity

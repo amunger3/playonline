@@ -3107,7 +3107,7 @@ switch (nbColumns){
 case 3:
 nb_attempts_for_max_score=3;
 if(currentAttemptNumber-1 /* number of attempts */ <=nb_attempts_for_max_score){
-time_in_seconds_for_max_score=3+4;
+time_in_seconds_for_max_score=3+5;
 }
 else{
 time_in_seconds_for_max_score=3+7;

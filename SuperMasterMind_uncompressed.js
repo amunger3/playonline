@@ -3630,13 +3630,23 @@ function draw_graphic_bis() {
             switch (nbColumns) {
               case 3:
                 nb_attempts_for_max_score = 3; // (estimate: <=3 attempts: 33% of the games, below 3 would not be relevant)
-                time_in_seconds_for_max_score = 3+7; // +7 due to time to make attempts + very low multiply_factor granularity
+                if (currentAttemptNumber-1 /* number of attempts */ <= nb_attempts_for_max_score) {
+                  time_in_seconds_for_max_score = 3+4; // +4 due to time to make attempts + very low multiply_factor granularity
+                }
+                else {
+                  time_in_seconds_for_max_score = 3+7; // +7 due to time to make attempts + very low multiply_factor granularity
+                }
                 time_in_seconds_corresponding_to_one_attempt_in_score = 20; // (1 attempt <=> 20 sec)
                 multiply_factor = 0.20;
                 break;
               case 4:
                 nb_attempts_for_max_score = 4; // (estimate: <=3 attempts: 8% of the games, <=4 attempts: 28% of the games)
-                time_in_seconds_for_max_score = 15+10; // +10 due to time to make attempts
+                if (currentAttemptNumber-1 /* number of attempts */ <= nb_attempts_for_max_score) {
+                  time_in_seconds_for_max_score = 15+0; // +0 due to time to make attempts
+                }
+                else {
+                  time_in_seconds_for_max_score = 15+10; // +10 due to time to make attempts
+                }
                 time_in_seconds_corresponding_to_one_attempt_in_score = 65; // (1 attempt <=> 1 min 5 sec)
                 multiply_factor = 0.50;
                 break;
@@ -3665,7 +3675,7 @@ function draw_graphic_bis() {
             // Score from number of attempts
             let max_score = 100.0 * multiply_factor;
             let score_from_nb_attempts;
-            if (currentAttemptNumber-1 /* number of attempts */ <= nb_attempts_for_max_score) { // (all the very low numbers of attempts ("lucky games") are handled the same way)
+            if (currentAttemptNumber-1 /* number of attempts */ <= nb_attempts_for_max_score) { // (all the very low numbers of attempts ("lucky games") are scored the same way)
               score_from_nb_attempts = max_score;
             }
             else {

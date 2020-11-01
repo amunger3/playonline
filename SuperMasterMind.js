@@ -1055,7 +1055,7 @@ else if (nbColumns==4){
 not_so_good_perf=-0.145;
 }
 else{
-not_so_good_perf=-0.155;
+not_so_good_perf=-0.165;
 }
 if(not_so_good_perf <=0.8*PerformanceLOW){
 throw new Error("inconsistent not_so_good_perf: "+not_so_good_perf);

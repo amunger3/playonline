@@ -1263,7 +1263,7 @@ function showPossibleCodesButtonClick(invertMode = true, newPossibleCodeShown = 
           not_so_good_perf = -0.145; // -0.15 with rounding
         }
         else {
-          not_so_good_perf = -0.155; // -0.16 with rounding
+          not_so_good_perf = -0.165; // -0.17 with rounding
         }
         if (not_so_good_perf <= 0.8*PerformanceLOW) {
           throw new Error("inconsistent not_so_good_perf: " + not_so_good_perf);

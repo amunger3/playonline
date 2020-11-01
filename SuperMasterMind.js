@@ -1047,12 +1047,25 @@ let interesting_attempt_idx=0;
 let interesting_attempt_idx_was_updated=false;
 let interesting_attempt_idx_bis=0;
 let lowest_significant_relative_performance=PerformanceMaxValidValue;
+let not_so_good_perf=PerformanceNA;
+if (nbColumns <=3){
+not_so_good_perf=-0.095;
+}
+else if (nbColumns==4){
+not_so_good_perf=-0.145;
+}
+else{
+not_so_good_perf=-0.155;
+}
+if(not_so_good_perf <=0.8*PerformanceLOW){
+throw new Error("inconsistent not_so_good_perf: "+not_so_good_perf);
+}
 for (let i=currentAttemptNumber-2;i >=0;i--){
 if( (nbOfPossibleCodes[i] >=2)
 &&(relative_performances_of_codes_played[i]!=-1.00)
 &&(relative_performances_of_codes_played[i]!=PerformanceUNKNOWN)
 &&(relative_performances_of_codes_played[i]!=PerformanceNA)
-&&(relative_performances_of_codes_played[i] <=((nbColumns <=4) ? -0.095 : -0.165)) ) {
+&&(relative_performances_of_codes_played[i] <=not_so_good_perf) ) {
 if(relative_performances_of_codes_played[i] < lowest_significant_relative_performance){
 lowest_significant_relative_performance=relative_performances_of_codes_played[i];
 interesting_attempt_idx=i;

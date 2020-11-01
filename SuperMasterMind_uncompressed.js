@@ -1255,12 +1255,25 @@ function showPossibleCodesButtonClick(invertMode = true, newPossibleCodeShown = 
         let interesting_attempt_idx_was_updated = false;
         let interesting_attempt_idx_bis = 0;
         let lowest_significant_relative_performance = PerformanceMaxValidValue;
+        let not_so_good_perf = PerformanceNA;
+        if (nbColumns <= 3) {
+          not_so_good_perf = -0.095; // -0.10 with rounding
+        }
+        else if (nbColumns == 4) {
+          not_so_good_perf = -0.145; // -0.15 with rounding
+        }
+        else {
+          not_so_good_perf = -0.155; // -0.16 with rounding
+        }
+        if (not_so_good_perf <= 0.8*PerformanceLOW) {
+          throw new Error("inconsistent not_so_good_perf: " + not_so_good_perf);
+        }
         for (let i = currentAttemptNumber-2; i >= 0; i--) {
           if ( (nbOfPossibleCodes[i] >= 2) // several possible codes left
                && (relative_performances_of_codes_played[i] != -1.00) // not an useless code
                && (relative_performances_of_codes_played[i] != PerformanceUNKNOWN)
                && (relative_performances_of_codes_played[i] != PerformanceNA)
-               && (relative_performances_of_codes_played[i] <= ((nbColumns <= 4) ? -0.095 : -0.165)) ) { // code played was not so good (~3*PerformanceLOW/5) / -0.10 or -0.17 with rounding
+               && (relative_performances_of_codes_played[i] <= not_so_good_perf) ) { // code played was not so good
             if (relative_performances_of_codes_played[i] < lowest_significant_relative_performance) {
               lowest_significant_relative_performance = relative_performances_of_codes_played[i];
               interesting_attempt_idx = i;

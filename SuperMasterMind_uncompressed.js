@@ -1809,7 +1809,7 @@ function resetGameAttributes(nbColumnsSelected) {
     else if ( localStorage.firstname && localStorage.gamesok && (Number(localStorage.gamesok) >= 103)
               && localStorage.lastDonationTimeT && ((new Date()).getTime() - localStorage.lastDonationTimeT > 1.6*31*24*60*60*1000 /* (~2 months) */) ) {
       let paypalStr=
-        "If you enjoy this " + (! android_appli? "Super Master Mind game" : "Android app") + ",<br>you can make a gift &#x1F381; to its \"hard-working\" authors.<br>\
+        "If you enjoy this " + (! android_appli? "Super Master Mind game" : "Android app") + ",<br>you can make a gift &#x1F381; to its author.<br>\
         <hr style='height:0.75vh;padding:0;margin:0;visibility:hidden;'>\
         Even if it is small, it will be much appreciated! &#x1F609;<br>\
         <a href='https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=F9EE2A483RT9J&source=url'>\
@@ -2000,7 +2000,7 @@ function resetGameAttributes(nbColumnsSelected) {
   setTimeout("postInitMessageToGameSolver(" + game_id_for_gameSolverConfig + ");", ((mobileMode && (game_cnt == 1)) ? 2222 : 1111)); // delay number of possible codes display (better than a "blocking while loop" till time has elapsed)
 
   if (randomCodesHintToBeDisplayed) {
-    setTimeout("displayRandomCodesHintIfNeeded();", 888);
+    setTimeout("displayRandomCodesHintIfNeeded();", 444);
   }
   gameSolverDbg = 8;
 

@@ -1512,17 +1512,17 @@ else if( (!android_appli)&&mobileMode&&androidMode
 &&localStorage.gamesok&&(Number(localStorage.gamesok) > 0)&&(Number(localStorage.gamesok) % 11==0) ){
 show_play_store_app();
 }
-else if( (!android_appli)&&(!mobileMode)&&localStorage.gamesok&&(Number(localStorage.gamesok) > 0)&&((Number(localStorage.gamesok)==13)||(Number(localStorage.gamesok)==27)||(Number(localStorage.gamesok)==51)||(Number(localStorage.gamesok) % 71==0)||(Number(localStorage.gamesok) % 444==0)||(Number(localStorage.gamesok) % 1004==0)||(Number(localStorage.gamesok) % 1444==0)) ){
+else if( (!android_appli)&&(!mobileMode)&&localStorage.gamesok&&(Number(localStorage.gamesok) > 0)&&((Number(localStorage.gamesok)==51)||(Number(localStorage.gamesok) % 71==0)||(Number(localStorage.gamesok) % 444==0)||(Number(localStorage.gamesok) % 1004==0)||(Number(localStorage.gamesok) % 1444==0)) ){
 show_play_store_app();
 }
-else if( android_appli&&localStorage.firstname&&localStorage.gamesok&&((Number(localStorage.gamesok)==67)||(Number(localStorage.gamesok)==101)||(Number(localStorage.gamesok)==156)||(Number(localStorage.gamesok)==202)||(Number(localStorage.gamesok)==303)||(Number(localStorage.gamesok)==404)||(Number(localStorage.gamesok)==707)||(Number(localStorage.gamesok)==1061)||(Number(localStorage.gamesok)==1333)||(Number(localStorage.gamesok)==1644)||(Number(localStorage.gamesok)==1999)) ){
+else if( android_appli&&localStorage.firstname&&localStorage.gamesok&&((Number(localStorage.gamesok)==77)||(Number(localStorage.gamesok)==104)||(Number(localStorage.gamesok)==156)||(Number(localStorage.gamesok)==204)||(Number(localStorage.gamesok)==304)||(Number(localStorage.gamesok)==404)||(Number(localStorage.gamesok)==707)||(Number(localStorage.gamesok)==1061)||(Number(localStorage.gamesok)==1333)||(Number(localStorage.gamesok)==1644)||(Number(localStorage.gamesok)==2004)) ){
 show_play_store_app("<font color=#C900A1>Hello "+localStorage.firstname+"</font><hr style='height:1.0vh;padding:0;margin:0;visibility:hidden;'>If you like this game, put some stars&nbsp;<big>&#x2b50;&#x2b50;&#x2b50;&#x2b50;&#x2b50;</big> in&nbsp;Google&nbsp;Play. It&nbsp;will help to make it better known. Thanks&nbsp;in&nbsp;advance for&nbsp;your&nbsp;support!<hr style='height:1.0vh;padding:0;margin:0;visibility:hidden;'>Just follow this link:", true);
 }
-else if( android_appli&&localStorage.firstname&&localStorage.gamesok&&(Number(localStorage.gamesok) > 0)&&(Number(localStorage.gamesok) < 3333)&&(Number(localStorage.gamesok) % 314==0) &&!localStorage.accountsAlreadyMerged ){
+/* else if( android_appli&&localStorage.firstname&&localStorage.gamesok&&(Number(localStorage.gamesok) > 0)&&(Number(localStorage.gamesok) < 3333)&&(Number(localStorage.gamesok) % 314==0) &&!localStorage.accountsAlreadyMerged ){
 show_play_store_app("<font color=#C900A1>Hello "+localStorage.firstname+"</font><hr style='height:1.0vh;padding:0;margin:0;visibility:hidden;'>If you want to merge your smartphone account & your computer account (to share the same scores on all devices), just send an email using the&nbsp;<a href='contact_info.html'>contact info</a> page", true);
-}
+} */
 else if( localStorage.firstname&&localStorage.gamesok&&(Number(localStorage.gamesok) >=103)
-&&localStorage.lastDonationTimeT&&((new Date()).getTime() - localStorage.lastDonationTimeT > 2*31*24*60*60*1000 /* (2 months) */) ){
+&&localStorage.lastDonationTimeT&&((new Date()).getTime() - localStorage.lastDonationTimeT > 1.7*31*24*60*60*1000 /* (~2 months) */) ){
 let paypalStr=
 "If you enjoy this "+(! android_appli? "Super Master Mind game" : "Android app")+",<br>you can make a gift &#x1F381; to its \"hard-working\" authors.<br>\
 <hr style='height:0.75vh;padding:0;margin:0;visibility:hidden;'>\

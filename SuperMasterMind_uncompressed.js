@@ -1260,7 +1260,7 @@ function showPossibleCodesButtonClick(invertMode = true, newPossibleCodeShown = 
                && (relative_performances_of_codes_played[i] != -1.00) // not an useless code
                && (relative_performances_of_codes_played[i] != PerformanceUNKNOWN)
                && (relative_performances_of_codes_played[i] != PerformanceNA)
-               && (relative_performances_of_codes_played[i] <= -0.145) ) { // code played was not so good (~3*PerformanceLOW/5) / -0.15 with rounding
+               && (relative_performances_of_codes_played[i] <= ((nbColumns <= 4) ? -0.095 : -0.165)) ) { // code played was not so good (~3*PerformanceLOW/5) / -0.10 or -0.17 with rounding
             if (relative_performances_of_codes_played[i] < lowest_significant_relative_performance) {
               lowest_significant_relative_performance = relative_performances_of_codes_played[i];
               interesting_attempt_idx = i;

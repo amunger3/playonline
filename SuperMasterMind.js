@@ -1052,7 +1052,7 @@ if( (nbOfPossibleCodes[i] >=2)
 &&(relative_performances_of_codes_played[i]!=-1.00)
 &&(relative_performances_of_codes_played[i]!=PerformanceUNKNOWN)
 &&(relative_performances_of_codes_played[i]!=PerformanceNA)
-&&(relative_performances_of_codes_played[i] <=-0.145) ){
+&&(relative_performances_of_codes_played[i] <=((nbColumns <=4) ? -0.095 : -0.165)) ) {
 if(relative_performances_of_codes_played[i] < lowest_significant_relative_performance){
 lowest_significant_relative_performance=relative_performances_of_codes_played[i];
 interesting_attempt_idx=i;

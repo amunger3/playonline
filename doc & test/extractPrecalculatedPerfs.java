@@ -30,6 +30,8 @@ public class extractPrecalculatedPerfs {
       "STAGE2 - RESULTS_270_to_1700_2.7sec_12345 (OK).txt"
     };
 
+  private static boolean dim_inversion_mode = false;
+
   private static int table_tmp[][] = new int[2][9]; // (9 as the highest number standing on one char)
   private static boolean are_there_5_identical_colors[] = new boolean[2];
   private static boolean are_there_4_identical_colors[] = new boolean[2];
@@ -178,6 +180,10 @@ public class extractPrecalculatedPerfs {
   public static void main(String[] args) {
     try {
 
+      if ((args.length > 0) && args[0].equals("dim_inversion_mode")) {
+        dim_inversion_mode = true;
+      }
+
       Pattern line_pattern_depth_2_and_3 = Pattern.compile("^\"[2-3]\\|([0-9]+):(\\w+)\\|([0-9]+):(\\w+)\\|"); // "2or3|11111:2B0W|12234:0B2W|...
 
       int cnt = 0;
@@ -187,36 +193,67 @@ public class extractPrecalculatedPerfs {
         File file = new File(file_table[i]);
         BufferedReader br = new BufferedReader(new FileReader(file));
         String line;
-        while ((line = br.readLine()) != null) {
 
-          cnt_total++;
-          Matcher matcher = line_pattern_depth_2_and_3.matcher(line);
-          if (matcher.find()) {
-            int group_cnt = matcher.groupCount();
-            if (group_cnt != 4) {
-              throw new Error("unexpected group_cnt value: " + group_cnt);
+        if (!dim_inversion_mode) { // nominal mode
+          while ((line = br.readLine()) != null) {
+            cnt_total++;
+            Matcher matcher = line_pattern_depth_2_and_3.matcher(line);
+            if (matcher.find()) {
+              int group_cnt = matcher.groupCount();
+              if (group_cnt != 4) {
+                throw new Error("unexpected group_cnt value: " + group_cnt);
+              }
+              cnt++;
+              String output_filename = "out/" + determine_smm_jscriptname(matcher.group(1), matcher.group(2), matcher.group(3), matcher.group(4));
+              File output_file = new File(output_filename);
+              boolean write_prefix = false;
+              if(!output_file.exists()){
+                output_file.createNewFile();
+                write_prefix = true;
+              }
+              FileWriter fw = new FileWriter(output_file, true /* (append) */);
+              BufferedWriter bw = new BufferedWriter(fw);
+              if (write_prefix) {
+                bw.write("extra_precalculated_str = " + line.replace(" +","") + "\n");
+              }
+              else {
+                bw.write("+" + line.replace(" +","") + "\n");
+              }
+              bw.close();
             }
-            cnt++;
-
-            String output_filename = "out/" + determine_smm_jscriptname(matcher.group(1), matcher.group(2), matcher.group(3), matcher.group(4));
-            File output_file = new File(output_filename);
-            boolean write_prefix = false;
-            if(!output_file.exists()){
-              output_file.createNewFile();
-              write_prefix = true;
-            }
-            FileWriter fw = new FileWriter(output_file, true /* (append) */);
-            BufferedWriter bw = new BufferedWriter(fw);
-            if (write_prefix) {
-              bw.write("extra_precalculated_str = " + line.replace(" +","") + "\n");
+          } // end while
+        }
+        else { // dim_inversion_mode
+          String output_filename = "out/diminv_" + file_table[i];
+          File output_file = new File(output_filename);
+          if(!output_file.exists()){
+            output_file.createNewFile();
+          }
+          FileWriter fw = new FileWriter(output_file, false /* (do not append) */);
+          BufferedWriter bw = new BufferedWriter(fw);
+          while ((line = br.readLine()) != null) {
+            cnt_total++;
+            Matcher matcher = line_pattern_depth_2_and_3.matcher(line);
+            if (matcher.find()) {
+              int group_cnt = matcher.groupCount();
+              if (group_cnt != 4) {
+                throw new Error("unexpected group_cnt value: " + group_cnt);
+              }
+              cnt++;
+              String diminv_line = line.substring(0, matcher.start(1))
+                                   + line.substring(matcher.start(3), matcher.end(4)) // invert first 2 dimensions
+                                   + "|" + line.substring(matcher.start(1), matcher.end(2))
+                                   + line.substring(matcher.end(4))
+                                   + "\n";
+              bw.write(diminv_line);
             }
             else {
-              bw.write("+" + line.replace(" +","") + "\n");
+              bw.write(line + "\n");
             }
-            bw.close();
-          }
+          } // end while
+          bw.close();
+        }
 
-        } // end while
       } // end for
       System.out.println("SUCCESS! (" + cnt + " out of " + cnt_total + " lines)");
 

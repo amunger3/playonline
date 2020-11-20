@@ -1,21 +1,732 @@
+// *************************************************************************
+// *************************************************************************
+// Global Super Master Mind variables
+// *************************************************************************
+// *************************************************************************
+
 "use strict";
+
+let emptyColor = 0; // (0 is also the Java default table init value)
+let nbMinColors = 5;
+let nbMaxColors = 10;
+let nbMinColumns = 3;
+let nbMaxColumns = 7;
+let overallNbMinAttempts = 4;
+let overallNbMaxAttempts = 15;
+let overallMaxDepth = 15;
+
+let PerformanceNA = -3.00;
+let PerformanceUNKNOWN = -2.00;
+let PerformanceMinValidValue = -1.50; // (a valid relative performance can be < -1.00 in some extremely rare cases / Value observed: -1.35 for 5-colmuns game {1B4W 12345; 1B4W 51234; 45123} (SCODE: 25314))
+let PerformanceMaxValidValue = +1.30; // (a valid relative performance can be > 0.00 in some rare (impossible code) cases / Some values observed: +0.94 for 5-colmuns game {4B0W 11223; 11456}, +1.04 for 6-colmuns game {5B0W 112234; 112567}
+let PerformanceLOW = -0.25;
+let PerformanceVERYLOW = -0.50;
+
+let marks_already_computed_table = null;
+
+// *************************************************************************
+// Global code handler class
+// *************************************************************************
+
+class CodeHandler {
+
+  constructor(nbColumns_p, nbColors_p, nbMinColumns_p, nbMaxColumns_p, emptyColor_p, marks_optimization_mask_p, game_solver_call_p) {
+    if ( (nbColumns_p < Math.max(nbMinColumns_p,3)) || (nbColumns_p > Math.min(nbMaxColumns_p,7)) /* 3 and 7 is hardcoded in some methods of this class for better performances */ ) {
+      throw new Error("CodeHandler: invalid nb of columns (" + nbColumns_p + ", " + nbMinColumns_p + "," + nbMaxColumns_p + ")");
+    }
+    if (nbColors_p < 0) {
+      throw new Error("CodeHandler: invalid nb of colors: (" + nbColors_p + ")");
+    }
+    this.nbColumns = nbColumns_p;
+    this.nbColors = nbColors_p;
+    this.nbMaxColumns = nbMaxColumns_p;
+    this.emptyColor = emptyColor_p;
+    this.marks_optimization_mask = marks_optimization_mask_p;
+    this.game_solver_call = game_solver_call_p;
+
+    if (this.game_solver_call && (this.marks_optimization_mask < 7500)) {
+      throw new Error("CodeHandler: invalid marks_optimization_mask: (" + this.marks_optimization_mask + ")");
+    }
+
+    this.code1_colors = new Array(this.nbMaxColumns);
+    this.code2_colors = new Array(this.nbMaxColumns);
+    this.colors_int = new Array(this.nbMaxColumns);
+
+    this.different_colors = new Array(this.nbColors+1);
+
+    // Attributes useful for getSMMCodeClassId() method:
+    this.complete_game = new Array(overallNbMaxAttempts+1);
+    this.different_game_colors_per_row = new Array(overallNbMaxAttempts+1);
+    for (let i = 0; i < overallNbMaxAttempts+1; i++) {
+      this.different_game_colors_per_row[i] = new Array(this.nbColors+1);
+    }
+    this.different_game_colors_per_column = new Array(this.nbColumns);
+    for (let i = 0; i < this.nbColumns; i++) {
+      this.different_game_colors_per_column[i] = new Array(this.nbColors+1);
+    }
+    this.color_correlation_matrix = new Array(this.nbColors+1);
+    for (let i = 0; i < this.nbColors+1; i++) {
+      this.color_correlation_matrix[i] = new Array(this.nbColors+1);
+    }
+  }
+
+  getNbColumns() {
+    return this.nbColumns;
+  }
+
+  getColor(code, column) {
+    switch (column) {
+      case 1:
+        return (code & 0x0000000F);
+      case 2:
+        return ((code >> 4) & 0x0000000F);
+      case 3:
+        return ((code >> 8) & 0x0000000F);
+      case 4:
+        return ((code >> 12) & 0x0000000F);
+      case 5:
+        return ((code >> 16) & 0x0000000F);
+      case 6:
+        return ((code >> 20) & 0x0000000F);
+      case 7:
+        return ((code >> 24) & 0x0000000F);
+      default:
+        throw new Error("CodeHandler: getColor (" + column + ")");
+    }
+  }
+
+  setColor(code, color, column)  {
+    switch (column) {
+      case 1:
+        return ((code & 0xFFFFFFF0) | color);
+      case 2:
+        return ((code & 0xFFFFFF0F) | (color << 4));
+      case 3:
+        return ((code & 0xFFFFF0FF) | (color << 8));
+      case 4:
+        return ((code & 0xFFFF0FFF) | (color << 12));
+      case 5:
+        return ((code & 0xFFF0FFFF) | (color << 16));
+      case 6:
+        return ((code & 0xFF0FFFFF) | (color << 20));
+      case 7:
+        return ((code & 0xF0FFFFFF) | (color << 24));
+      default:
+        throw new Error("CodeHandler: setColor (" + column + ")");
+    }
+  }
+
+  setAllColors(color1, color2, color3, color4, color5, color6, color7) {
+    return color1
+           | (color2 << 4)
+           | (color3 << 8)
+           | (color4 << 12)
+           | (color5 << 16)
+           | (color6 << 20)
+           | (color7 << 24);
+  }
+
+  setAllColorsIdentical(color) {
+    let res_code = 0;
+    for (let col = 0; col < this.nbColumns; col++) {
+      res_code = this.setColor(res_code, color, col+1);
+    }
+    return res_code;
+  }
+
+  nbDifferentColors(code) {
+    let sum = 0;
+    this.different_colors.fill(0);
+    for (let col = 0; col < this.nbColumns; col++) {
+      let color = this.getColor(code, col+1);
+      if (this.different_colors[color] == 0) {
+        this.different_colors[color] = 1;
+        sum = sum + 1;
+      }
+    }
+    return sum;
+  }
+
+  getSMMCodeClassId(code, game = null, game_size = 0) {
+
+    if (this.nbColumns != 5) { // function only for Super Master Mind games
+      throw new Error("CodeHandler: getSMMCodeClassId (" + this.nbColumns + ")");
+    }
+
+    this.different_colors.fill(0);
+    for (let col = 0; col < this.nbColumns; col++) {
+      let color = this.getColor(code, col+1);
+      this.different_colors[color]++;
+    }
+
+    let extra_game_id = 0;
+    if ((game != null) && (game_size >= 1)) {
+
+      // Initializations
+      // ***************
+
+      let complete_game_size = game_size+1;
+      if (complete_game_size > overallNbMaxAttempts+1) {
+        throw new Error("CodeHandler: getSMMCodeClassId - internal error #1");
+      }
+      this.complete_game.fill(0);
+      for (let i = 0; i < game_size; i++) {
+        this.complete_game[i] = game[i]
+      }
+      this.complete_game[game_size] = code;
+
+      for (let row = 0; row < complete_game_size; row++) {
+        this.different_game_colors_per_row[row].fill(0);
+        for (let col = 0; col < this.nbColumns; col++) {
+          let color = this.getColor(this.complete_game[row], col+1);
+          this.different_game_colors_per_row[row][color]++;
+        }
+      }
+
+      for (let col = 0; col < this.nbColumns; col++) {
+        this.different_game_colors_per_column[col].fill(0);
+        for (let row = 0; row < complete_game_size; row++) {
+          let color = this.getColor(this.complete_game[row], col+1);
+          this.different_game_colors_per_column[col][color]++;
+        }
+      }
+
+      for (let i = 0; i < this.nbColors+1; i++) {
+        this.color_correlation_matrix[i].fill(0);
+      }
+
+      // Column-based color correlations
+      // *******************************
+
+      for (let col = 0; col < this.nbColumns; col++) {
+        for (let row1 = 0; row1 < complete_game_size; row1++) {
+          for (let row2 = 0; row2 < complete_game_size; row2++) {
+            if (row1 < row2) { // Go through all pairs of colors in current column
+              let color1 = this.getColor(this.complete_game[row1], col+1);
+              let color2 = this.getColor(this.complete_game[row2], col+1);
+              let color_min;
+              let color_max;
+              if (color1 <= color2) {
+                color_min = color1;
+                color_max = color2;
+              }
+              else {
+                color_min = color2;
+                color_max = color1;
+              }
+              let coef = ((row1+1) * 0xA26970) ^ ((row2+1) * 0xF14457) // (Rq: no permutations on rows)
+                         ^ (this.different_game_colors_per_row[row1][color1] * 0x749841) ^ (this.different_game_colors_per_row[row2][color2] * 0x369874)
+                         ^ (this.different_game_colors_per_row[row1][color2] * 0xB54796) ^ (this.different_game_colors_per_row[row2][color1] * 0x252241);
+              if (color_min == color_max) {
+                coef = coef ^ 0x5C1148;
+              }
+              this.color_correlation_matrix[color_min][color_max] = this.color_correlation_matrix[color_min][color_max] ^ coef;
+            }
+          }
+        }
+      }
+
+      // Row-based color correlations
+      // ****************************
+
+      for (let row = 0; row < complete_game_size; row++) {
+        for (let col1 = 0; col1 < this.nbColumns; col1++) {
+          for (let col2 = 0; col2 < this.nbColumns; col2++) {
+            if (col1 < col2) { // Go through all pairs of colors in current row
+              let color1 = this.getColor(this.complete_game[row], col1+1);
+              let color2 = this.getColor(this.complete_game[row], col2+1);
+              let color_min;
+              let color_max;
+              if (color1 <= color2) {
+                color_min = color1;
+                color_max = color2;
+              }
+              else {
+                color_min = color2;
+                color_max = color1;
+              }
+              let common_mask_1 = 0xA49875;
+              let common_mask_2 = 0xCE84F4;
+              let coef = ((row+1) * 0x2A3698) // (Rq: no permutations on rows)
+                         ^ (this.different_game_colors_per_column[col1][color1] * common_mask_1) ^ (this.different_game_colors_per_column[col2][color2] * common_mask_1)
+                         ^ (this.different_game_colors_per_column[col2][color1] * common_mask_2) ^ (this.different_game_colors_per_column[col1][color2] * common_mask_2);
+              if (color_min == color_max) {
+                coef = coef ^ 0x533E16;
+              }
+              this.color_correlation_matrix[color_min][color_max] = this.color_correlation_matrix[color_min][color_max] ^ coef;
+            }
+          }
+        }
+      }
+
+      // Color decorrelations
+      // ********************
+
+      for (let col1 = 0; col1 < this.nbColumns; col1++) {
+        for (let row1 = 0; row1 < complete_game_size; row1++) {
+          let color1 = this.getColor(this.complete_game[row1], col1+1);
+          for (let col2 = 0; col2 < this.nbColumns; col2++) {
+            if (col1 != col2) {
+              for (let row2 = 0; row2 < complete_game_size; row2++) {
+                if (row1 < row2) {
+                  let color2 = this.getColor(this.complete_game[row2], col2+1);
+                  if (color1 != color2) { // Go through all pairs of different colors not in current column and row
+                    if ( (this.different_game_colors_per_row[row1][color2] == 0) && (this.different_game_colors_per_row[row2][color1] == 0)
+                         && (this.different_game_colors_per_column[col1][color2] == 0) && (this.different_game_colors_per_column[col2][color1] == 0) ) {
+                      let color_min;
+                      let color_max;
+                      if (color1 <= color2) {
+                        color_min = color1;
+                        color_max = color2;
+                      }
+                      else {
+                        color_min = color2;
+                        color_max = color1;
+                      }
+                      let coef = ((row1+1) * 0xB48725) ^ ((row2+1) * 0x67F428); // (Rq: no permutations on rows)
+                      this.color_correlation_matrix[color_min][color_max] = this.color_correlation_matrix[color_min][color_max] ^ coef;
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+
+      // Unused colors
+      // *************
+
+      let nbUnusedColors = 0;
+      for (let color = 1; color <= this.nbColors; color++) {
+        let isColorUsedInCurrentGame = false;
+        for (let row = 0; row < complete_game_size; row++) {
+          for (let col = 0; col < this.nbColumns; col++) {
+            if (color == this.getColor(this.complete_game[row], col+1)) {
+              isColorUsedInCurrentGame = true;
+              break
+            }
+          }
+          if (isColorUsedInCurrentGame) {
+            break;
+          }
+        }
+        if (!isColorUsedInCurrentGame) {
+          nbUnusedColors = nbUnusedColors + 1;
+        }
+      }
+
+      // Infer number from color correlation matrix
+      // ******************************************
+
+      for (let i = 0; i < this.nbColors+1; i++) {
+        for (let j = 0; j < this.nbColors+1; j++) {
+          extra_game_id = extra_game_id + this.color_correlation_matrix[i][j];
+        }
+      }
+      if (extra_game_id <= 0) {
+        throw new Error("CodeHandler: getSMMCodeClassId - internal error #2: " + extra_game_id);
+      }
+      extra_game_id = extra_game_id + nbUnusedColors * 444;
+      if (extra_game_id != Math.floor(extra_game_id)) {
+        throw new Error("CodeHandler: getSMMCodeClassId - internal error #3: " + extra_game_id);
+      }
+
+    }
+
+    // Basic SMM code class ids: {100: 11111, 200: 11112, 300: 11122, 400: 11123, 500: 11223, 600: 11234, 700: 12345}
+    let is_there_triple = false;
+    let nb_doubles = 0;
+    for (let color = 1; color <= this.nbColors; color++) {
+      let nb_different_colors = this.different_colors[color];
+      if (nb_different_colors == 2) {
+        nb_doubles++;
+      }
+      else if (nb_different_colors == 3) {
+        is_there_triple = true;
+      }
+      else if (nb_different_colors == 4) {
+        return 200 + extra_game_id;
+      }
+      else if (nb_different_colors == 5) {
+        return 100 + extra_game_id;
+      }
+    }
+    if (is_there_triple) {
+      if (nb_doubles == 0) {
+        return 400 + extra_game_id;
+      }
+      else if (nb_doubles == 1) {
+        return 300 + extra_game_id;
+      }
+      else {
+        throw new Error("CodeHandler: getSMMCodeClassId - internal error #4");
+      }
+    }
+    else {
+      if (nb_doubles == 0) {
+        return 700 + extra_game_id;
+      }
+      else if (nb_doubles == 1) {
+        return 600 + extra_game_id;
+      }
+      else if (nb_doubles == 2) {
+        return 500 + extra_game_id;
+      }
+      else {
+        throw new Error("CodeHandler: getSMMCodeClassId - internal error #5");
+      }
+    }
+
+  }
+
+  isVerySimple(code) {
+    this.different_colors.fill(0);
+    for (let col = 0; col < this.nbColumns; col++) {
+      let color = this.getColor(code, col+1);
+      this.different_colors[color]++;
+    }
+    for (let color = 0; color <= this.nbColors; color++) {
+      if (this.different_colors[color] == this.nbColumns) {
+        return true; // "111...1" like codes
+      }
+      else if (this.different_colors[color] == this.nbColumns - 1) {
+        return true; // "122...2" like codes
+      }
+    }
+    return false;
+  }
+
+  codeToString(code) {
+    let res = "[ ";
+    for (let col = 0; col < this.nbColumns; col++) {
+      let color = this.getColor(code, col+1);
+      res = res + color + " ";
+    }
+    res = res + "]";
+    return res;
+  }
+
+  compressCodeToString(code) {
+    let res = "";
+    for (let col = 0; col < this.nbColumns; col++) {
+      let color = this.getColor(code, col+1);
+      res = res + color.toString(16).toUpperCase(); // (hexa number used if >= 10)
+    }
+    return res;
+  }
+
+  uncompressStringToCode(str) {
+    let code = 0; // empty code
+    if (str.length != this.nbColumns) {
+      throw new Error("CodeHandler: uncompressStringToCode (1) (" + str + ")");
+    }
+    for (let col = 0; col < this.nbColumns; col++) {
+      let color = Number("0x" + str.substring(col, col+1)); // (hexa number parsing)
+      code = this.setColor(code, color, col+1);
+    }
+    if (!this.isFullAndValid(code)) {
+      throw new Error("CodeHandler: uncompressStringToCode (2) (" + str + ")");
+    }
+    return code;
+  }
+
+  isValid(code) {
+    for (let col = 0; col < this.nbColumns; col++) {
+      let color = this.getColor(code, col+1);
+      if ( ((color < 1) || (color > this.nbColors))
+           && (color != this.emptyColor) ) {
+        return false;
+      }
+    }
+    for (let col = this.nbColumns+1; col <= this.nbMaxColumns; col++) {
+      let color = this.getColor(code, col);
+      if (color != this.emptyColor) {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  isFullAndValid(code) {
+    for (let col = 0; col < this.nbColumns; col++) {
+      let color = this.getColor(code, col+1);
+      if ( (color < 1) || (color > this.nbColors)
+           || (color == this.emptyColor) ) {
+        return false;
+      }
+    }
+    for (let col = this.nbColumns+1; col <= this.nbMaxColumns; col++) {
+      let color = this.getColor(code, col);
+      if (color != this.emptyColor) {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  nbEmptyColors(code) {
+    let cnt = 0;
+    for (let col = 0; col < this.nbColumns; col++) {
+      if (this.getColor(code, col+1) == this.emptyColor) {
+        cnt++;
+      }
+    }
+    return cnt;
+  }
+
+  isEmpty(code) {
+    return (code == 0); // only emptyColor in the code
+  }
+
+  replaceEmptyColor(code, emptyColorIdx, code2) {
+    let cnt = 0;
+    for (let col = 0; col < this.nbColumns; col++) {
+      if (this.getColor(code, col+1) == this.emptyColor) {
+        if (cnt == emptyColorIdx) {
+          return this.setColor(code, this.getColor(code2, col+1), col+1);
+        }
+        cnt++;
+      }
+    }
+    return code;
+  }
+
+  // Get a mark between 2 codes
+  getMark(code1, code2) {
+    let mark = {nbBlacks:0, nbWhites:0};
+    this.fillMark(code1, code2, mark);
+    return mark;
+  }
+
+  // Fill a mark between 2 codes in a fast way
+  fillMark(code1, code2, mark) { // (duplicated code)
+
+    if (this.game_solver_call) {
+
+      let marks_already_computed_table_cell;
+      let codeX;
+      let codeY;
+
+      // Marks optimization (1/2) - begin
+      // Notes: - Hash key computing shall be very fast
+      //        - Bit operations are done on 32 bits in javascript (so for example 'x >> y', with x > 0 on 64 bits, may be negative)
+      //        - The final hash key will anyway always be in the range [0, marks_optimization_mask] after bit mask application with the '&' operator
+
+      let min_code, max_code;
+      if (code1 < code2) {
+        min_code = code1;
+        max_code = code2;
+      }
+      else {
+        min_code = code2;
+        max_code = code1;
+      }
+      let sum_max_code = max_code + (max_code >> 2);
+      // Potential optimizations (not done to simplify):
+      // - a potential optimization would consist in using possible code indexes to then access marks_already_computed_table[index_min][index_max],
+      //   that would save the hask key calculation time + avoid any redundancy in mark computing (locally to this function)
+      // - handling possible code indexes instead of codes would also be useful to access listOfClassIds whichever the number of columns + to consume
+      //   a bit less memory
+      let key = ( (min_code + sum_max_code /* (use LSBs) */
+                  + ((min_code ^ (sum_max_code >> 3)) >> 9) /* (use MSBs) */ ) & this.marks_optimization_mask );
+
+      marks_already_computed_table_cell = marks_already_computed_table[key];
+      codeX = marks_already_computed_table_cell.code1a;
+      codeY = marks_already_computed_table_cell.code2a;
+      if ((codeX == min_code) && (codeY == max_code)) {
+        mark.nbBlacks = marks_already_computed_table_cell.nbBlacksa;
+        mark.nbWhites = marks_already_computed_table_cell.nbWhitesa;
+      }
+      else {
+        codeX = marks_already_computed_table_cell.code1b;
+        codeY = marks_already_computed_table_cell.code2b;
+        if ((codeX == min_code) && (codeY == max_code)) {
+          mark.nbBlacks = marks_already_computed_table_cell.nbBlacksb;
+          mark.nbWhites = marks_already_computed_table_cell.nbWhitesb;
+        }
+        else {
+          codeX = marks_already_computed_table_cell.code1c;
+          codeY = marks_already_computed_table_cell.code2c;
+          if ((codeX == min_code) && (codeY == max_code)) {
+            mark.nbBlacks = marks_already_computed_table_cell.nbBlacksc;
+            mark.nbWhites = marks_already_computed_table_cell.nbWhitesc;
+          }
+          // Marks optimization (1/2) - end
+          else {
+            let nbBlacks = 0;
+            let nbWhites = 0;
+            let col1, col2;
+
+            // The below operations are unrolled for better performances
+            this.colors_int[0] = true;
+            this.colors_int[1] = true;
+            this.colors_int[2] = true;
+            this.colors_int[3] = true;
+            this.colors_int[4] = true;
+            this.colors_int[5] = true;
+            this.colors_int[6] = true;
+            this.code1_colors[0] = (code1 & 0x0000000F);
+            this.code1_colors[1] = ((code1 >> 4) & 0x0000000F);
+            this.code1_colors[2] = ((code1 >> 8) & 0x0000000F);
+            this.code1_colors[3] = ((code1 >> 12) & 0x0000000F);
+            this.code1_colors[4] = ((code1 >> 16) & 0x0000000F);
+            this.code1_colors[5] = ((code1 >> 20) & 0x0000000F);
+            this.code1_colors[6] = ((code1 >> 24) & 0x0000000F);
+            this.code2_colors[0] = (code2 & 0x0000000F);
+            this.code2_colors[1] = ((code2 >> 4) & 0x0000000F);
+            this.code2_colors[2] = ((code2 >> 8) & 0x0000000F);
+            this.code2_colors[3] = ((code2 >> 12) & 0x0000000F);
+            this.code2_colors[4] = ((code2 >> 16) & 0x0000000F);
+            this.code2_colors[5] = ((code2 >> 20) & 0x0000000F);
+            this.code2_colors[6] = ((code2 >> 24) & 0x0000000F);
+
+            for (col1 = 0; col1 < this.nbColumns; col1++) {
+              if (this.code1_colors[col1] == this.code2_colors[col1]) {
+                nbBlacks++;
+              }
+              else {
+                for (col2 = 0; col2 < this.nbColumns; col2++) {
+                  if ((this.code1_colors[col1] == this.code2_colors[col2]) && (this.code1_colors[col2] != this.code2_colors[col2]) && this.colors_int[col2]) {
+                    this.colors_int[col2] = false;
+                    nbWhites++;
+                    break;
+                  }
+                }
+              }
+            }
+
+            mark.nbBlacks = nbBlacks;
+            mark.nbWhites = nbWhites;
+
+            // Marks optimization (2/2) - begin
+            if (marks_already_computed_table_cell.write_index == 0) {
+              marks_already_computed_table_cell.code1a = min_code;
+              marks_already_computed_table_cell.code2a = max_code;
+              marks_already_computed_table_cell.nbBlacksa = nbBlacks;
+              marks_already_computed_table_cell.nbWhitesa = nbWhites;
+              marks_already_computed_table_cell.write_index = 1;
+            }
+            else if (marks_already_computed_table_cell.write_index == 1) {
+              marks_already_computed_table_cell.code1b = min_code;
+              marks_already_computed_table_cell.code2b = max_code;
+              marks_already_computed_table_cell.nbBlacksb = nbBlacks;
+              marks_already_computed_table_cell.nbWhitesb = nbWhites;
+              marks_already_computed_table_cell.write_index = 2;
+            }
+            else if (marks_already_computed_table_cell.write_index == 2) {
+              marks_already_computed_table_cell.code1c = min_code;
+              marks_already_computed_table_cell.code2c = max_code;
+              marks_already_computed_table_cell.nbBlacksc = nbBlacks;
+              marks_already_computed_table_cell.nbWhitesc = nbWhites;
+              marks_already_computed_table_cell.write_index = 0;
+            }
+            else {
+              throw new Error("CodeHandler: fillMark (wrong write_index: " + marks_already_computed_table_cell.write_index + ")");
+            }
+            // Marks optimization (2/2) - end
+          }
+        }
+      }
+
+    }
+    else {
+      let nbBlacks = 0;
+      let nbWhites = 0;
+      let col1, col2;
+
+      // The below operations are unrolled for better performances
+      this.colors_int[0] = true;
+      this.colors_int[1] = true;
+      this.colors_int[2] = true;
+      this.colors_int[3] = true;
+      this.colors_int[4] = true;
+      this.colors_int[5] = true;
+      this.colors_int[6] = true;
+      this.code1_colors[0] = (code1 & 0x0000000F);
+      this.code1_colors[1] = ((code1 >> 4) & 0x0000000F);
+      this.code1_colors[2] = ((code1 >> 8) & 0x0000000F);
+      this.code1_colors[3] = ((code1 >> 12) & 0x0000000F);
+      this.code1_colors[4] = ((code1 >> 16) & 0x0000000F);
+      this.code1_colors[5] = ((code1 >> 20) & 0x0000000F);
+      this.code1_colors[6] = ((code1 >> 24) & 0x0000000F);
+      this.code2_colors[0] = (code2 & 0x0000000F);
+      this.code2_colors[1] = ((code2 >> 4) & 0x0000000F);
+      this.code2_colors[2] = ((code2 >> 8) & 0x0000000F);
+      this.code2_colors[3] = ((code2 >> 12) & 0x0000000F);
+      this.code2_colors[4] = ((code2 >> 16) & 0x0000000F);
+      this.code2_colors[5] = ((code2 >> 20) & 0x0000000F);
+      this.code2_colors[6] = ((code2 >> 24) & 0x0000000F);
+
+      for (col1 = 0; col1 < this.nbColumns; col1++) {
+        if (this.code1_colors[col1] == this.code2_colors[col1]) {
+          nbBlacks++;
+        }
+        else {
+          for (col2 = 0; col2 < this.nbColumns; col2++) {
+            if ((this.code1_colors[col1] == this.code2_colors[col2]) && (this.code1_colors[col2] != this.code2_colors[col2]) && this.colors_int[col2]) {
+              this.colors_int[col2] = false;
+              nbWhites++;
+              break;
+            }
+          }
+        }
+      }
+
+      mark.nbBlacks = nbBlacks;
+      mark.nbWhites = nbWhites;
+    }
+
+  }
+
+  marksEqual(mark1, mark2) {
+    return ( (mark1.nbBlacks == mark2.nbBlacks) && (mark1.nbWhites == mark2.nbWhites) );
+  }
+
+  isMarkValid(mark) {
+    if ( (mark.nbBlacks >= 0) && (mark.nbWhites >= 0) && (mark.nbBlacks + mark.nbWhites <= this.nbColumns)
+         && !((mark.nbBlacks == this.nbColumns - 1) && (mark.nbWhites == 1)) ) {
+      return true;
+    }
+    return false;
+  }
+
+  markToString(mark) {
+    return mark.nbBlacks + "B" + mark.nbWhites + "W";
+  }
+
+  stringToMark(str, mark) {
+    if (str.length != 4) {
+      throw new Error("CodeHandler: stringToMark (1) (" + str + ")");
+    }
+    let index_blacks = str.indexOf("B");
+    if (index_blacks != 1) {
+      throw new Error("CodeHandler: stringToMark (2) (" + str + ")");
+    }
+    let index_whites = str.indexOf("W", index_blacks);
+    if (index_whites != 3) {
+      throw new Error("CodeHandler: stringToMark (3) (" + str + ")");
+    }
+    mark.nbBlacks = Number(str.substring(0,1));
+    mark.nbWhites = Number(str.substring(2,3));
+    if (!this.isMarkValid(mark)) {
+      throw new Error("CodeHandler: stringToMark (4) (" + str + ")");
+    }
+  }
+
+  convert(code) {
+    return ~code;
+  }
+
+}
 
 try {
 
   // *************************************************************************
   // *************************************************************************
-  // Global variables
+  // GameSolver variables
   // *************************************************************************
   // *************************************************************************
-
-  let emptyColor = 0; // (0 is also the Java default table init value)
-  let nbMinColors = 5;
-  let nbMaxColors = 10;
-  let nbMinColumns = 3;
-  let nbMaxColumns = 7;
-  let overallNbMinAttempts = 4;
-  let overallNbMaxAttempts = 15;
-  let overallMaxDepth = 15;
 
   let init_done = false;
   let nbColumns = -1;
@@ -88,13 +799,7 @@ try {
   let listsOfPossibleCodes;
   let nbOfPossibleCodes;
   let listOfEquivalentCodesAndPerformances;
-  let marks_already_computed_table = null;
   let nbCodesLimitForEquivalentCodesCheck = 40; // (value determined empirically)
-
-  let PerformanceNA = -3.00; // (duplicated in SuperMasterMind.js)
-  let PerformanceUNKNOWN = -2.00; // (duplicated in SuperMasterMind.js)
-  let PerformanceMinValidValue = -1.50; // (a valid relative performance can be < -1.00 in some extremely rare cases - duplicated in SuperMasterMind.js / Value observed: -1.35 for 5-colmuns game {1B4W 12345; 1B4W 51234; 45123} (SCODE: 25314))
-  let PerformanceMaxValidValue = +1.30; // (a valid relative performance can be > 0.00 in some rare (impossible code) cases - duplicated in SuperMasterMind.js) / Some values observed: +0.94 for 5-colmuns game {4B0W 11223; 11456}, +1.04 for 6-colmuns game {5B0W 112234; 112567}
 
   let initialInitDone = false;
   let curGame;
@@ -548,650 +1253,6 @@ try {
         throw new Error("OptimizedArrayList: replaceNextElement inconsistency");
       }
 
-    }
-
-  }
-
-  // *************************************************************************
-  // Code handler class
-  // *************************************************************************
-
-  class CodeHandler { // NOTE: the code of this class is partially duplicated in SuperMasterMind.js script
-
-    constructor(nbColumns_p, nbColors_p, nbMinColumns_p, nbMaxColumns_p, emptyColor_p) {
-      if ( (nbColumns_p < Math.max(nbMinColumns_p,3)) || (nbColumns_p > Math.min(nbMaxColumns_p,7)) /* 3 and 7 is hardcoded in some methods of this class for better performances */ ) {
-        throw new Error("CodeHandler: invalid nb of columns (" + nbColumns_p + ", " + nbMinColumns_p + "," + nbMaxColumns_p + ")");
-      }
-      if (nbColors_p < 0) {
-        throw new Error("CodeHandler: invalid nb of colors: (" + nbColors_p + ")");
-      }
-      this.nbColumns = nbColumns_p;
-      this.nbColors = nbColors_p;
-      this.nbMaxColumns = nbMaxColumns_p;
-      this.emptyColor = emptyColor_p;
-
-      this.code1_colors = new Array(this.nbMaxColumns);
-      this.code2_colors = new Array(this.nbMaxColumns);
-      this.colors_int = new Array(this.nbMaxColumns);
-
-      this.different_colors = new Array(this.nbColors+1);
-
-      // Attributes useful for getSMMCodeClassId() method:
-      this.complete_game = new Array(overallNbMaxAttempts+1);
-      this.different_game_colors_per_row = new Array(overallNbMaxAttempts+1);
-      for (let i = 0; i < overallNbMaxAttempts+1; i++) {
-        this.different_game_colors_per_row[i] = new Array(this.nbColors+1);
-      }
-      this.different_game_colors_per_column = new Array(this.nbColumns);
-      for (let i = 0; i < this.nbColumns; i++) {
-        this.different_game_colors_per_column[i] = new Array(this.nbColors+1);
-      }
-      this.color_correlation_matrix = new Array(this.nbColors+1);
-      for (let i = 0; i < this.nbColors+1; i++) {
-        this.color_correlation_matrix[i] = new Array(this.nbColors+1);
-      }
-    }
-
-    getNbColumns() {
-      return this.nbColumns;
-    }
-
-    getColor(code, column) {
-      switch (column) {
-        case 1:
-          return (code & 0x0000000F);
-        case 2:
-          return ((code >> 4) & 0x0000000F);
-        case 3:
-          return ((code >> 8) & 0x0000000F);
-        case 4:
-          return ((code >> 12) & 0x0000000F);
-        case 5:
-          return ((code >> 16) & 0x0000000F);
-        case 6:
-          return ((code >> 20) & 0x0000000F);
-        case 7:
-          return ((code >> 24) & 0x0000000F);
-        default:
-          throw new Error("CodeHandler: getColor (" + column + ")");
-      }
-    }
-
-    setColor(code, color, column)  {
-      switch (column) {
-        case 1:
-          return ((code & 0xFFFFFFF0) | color);
-        case 2:
-          return ((code & 0xFFFFFF0F) | (color << 4));
-        case 3:
-          return ((code & 0xFFFFF0FF) | (color << 8));
-        case 4:
-          return ((code & 0xFFFF0FFF) | (color << 12));
-        case 5:
-          return ((code & 0xFFF0FFFF) | (color << 16));
-        case 6:
-          return ((code & 0xFF0FFFFF) | (color << 20));
-        case 7:
-          return ((code & 0xF0FFFFFF) | (color << 24));
-        default:
-          throw new Error("CodeHandler: setColor (" + column + ")");
-      }
-    }
-
-    setAllColors(color1, color2, color3, color4, color5, color6, color7) {
-      return color1
-             | (color2 << 4)
-             | (color3 << 8)
-             | (color4 << 12)
-             | (color5 << 16)
-             | (color6 << 20)
-             | (color7 << 24);
-    }
-
-    setAllColorsIdentical(color) {
-      let res_code = 0;
-      for (let col = 0; col < this.nbColumns; col++) {
-        res_code = this.setColor(res_code, color, col+1);
-      }
-      return res_code;
-    }
-
-    nbDifferentColors(code) {
-      let sum = 0;
-      this.different_colors.fill(0);
-      for (let col = 0; col < this.nbColumns; col++) {
-        let color = this.getColor(code, col+1);
-        if (this.different_colors[color] == 0) {
-          this.different_colors[color] = 1;
-          sum = sum + 1;
-        }
-      }
-      return sum;
-    }
-
-    getSMMCodeClassId(code, game = null, game_size = 0) {
-
-      if (this.nbColumns != 5) { // function only for Super Master Mind games
-        throw new Error("CodeHandler: getSMMCodeClassId (" + this.nbColumns + ")");
-      }
-
-      this.different_colors.fill(0);
-      for (let col = 0; col < this.nbColumns; col++) {
-        let color = this.getColor(code, col+1);
-        this.different_colors[color]++;
-      }
-
-      let extra_game_id = 0;
-      if ((game != null) && (game_size >= 1)) {
-
-        // Initializations
-        // ***************
-
-        let complete_game_size = game_size+1;
-        if (complete_game_size > overallNbMaxAttempts+1) {
-          throw new Error("CodeHandler: getSMMCodeClassId - internal error #1");
-        }
-        this.complete_game.fill(0);
-        for (let i = 0; i < game_size; i++) {
-          this.complete_game[i] = game[i]
-        }
-        this.complete_game[game_size] = code;
-
-        for (let row = 0; row < complete_game_size; row++) {
-          this.different_game_colors_per_row[row].fill(0);
-          for (let col = 0; col < this.nbColumns; col++) {
-            let color = this.getColor(this.complete_game[row], col+1);
-            this.different_game_colors_per_row[row][color]++;
-          }
-        }
-
-        for (let col = 0; col < this.nbColumns; col++) {
-          this.different_game_colors_per_column[col].fill(0);
-          for (let row = 0; row < complete_game_size; row++) {
-            let color = this.getColor(this.complete_game[row], col+1);
-            this.different_game_colors_per_column[col][color]++;
-          }
-        }
-
-        for (let i = 0; i < this.nbColors+1; i++) {
-          this.color_correlation_matrix[i].fill(0);
-        }
-
-        // Column-based color correlations
-        // *******************************
-
-        for (let col = 0; col < this.nbColumns; col++) {
-          for (let row1 = 0; row1 < complete_game_size; row1++) {
-            for (let row2 = 0; row2 < complete_game_size; row2++) {
-              if (row1 < row2) { // Go through all pairs of colors in current column
-                let color1 = this.getColor(this.complete_game[row1], col+1);
-                let color2 = this.getColor(this.complete_game[row2], col+1);
-                let color_min;
-                let color_max;
-                if (color1 <= color2) {
-                  color_min = color1;
-                  color_max = color2;
-                }
-                else {
-                  color_min = color2;
-                  color_max = color1;
-                }
-                let coef = ((row1+1) * 0xA26970) ^ ((row2+1) * 0xF14457) // (Rq: no permutations on rows)
-                           ^ (this.different_game_colors_per_row[row1][color1] * 0x749841) ^ (this.different_game_colors_per_row[row2][color2] * 0x369874)
-                           ^ (this.different_game_colors_per_row[row1][color2] * 0xB54796) ^ (this.different_game_colors_per_row[row2][color1] * 0x252241);
-                if (color_min == color_max) {
-                  coef = coef ^ 0x5C1148;
-                }
-                this.color_correlation_matrix[color_min][color_max] = this.color_correlation_matrix[color_min][color_max] ^ coef;
-              }
-            }
-          }
-        }
-
-        // Row-based color correlations
-        // ****************************
-
-        for (let row = 0; row < complete_game_size; row++) {
-          for (let col1 = 0; col1 < this.nbColumns; col1++) {
-            for (let col2 = 0; col2 < this.nbColumns; col2++) {
-              if (col1 < col2) { // Go through all pairs of colors in current row
-                let color1 = this.getColor(this.complete_game[row], col1+1);
-                let color2 = this.getColor(this.complete_game[row], col2+1);
-                let color_min;
-                let color_max;
-                if (color1 <= color2) {
-                  color_min = color1;
-                  color_max = color2;
-                }
-                else {
-                  color_min = color2;
-                  color_max = color1;
-                }
-                let common_mask_1 = 0xA49875;
-                let common_mask_2 = 0xCE84F4;
-                let coef = ((row+1) * 0x2A3698) // (Rq: no permutations on rows)
-                           ^ (this.different_game_colors_per_column[col1][color1] * common_mask_1) ^ (this.different_game_colors_per_column[col2][color2] * common_mask_1)
-                           ^ (this.different_game_colors_per_column[col2][color1] * common_mask_2) ^ (this.different_game_colors_per_column[col1][color2] * common_mask_2);
-                if (color_min == color_max) {
-                  coef = coef ^ 0x533E16;
-                }
-                this.color_correlation_matrix[color_min][color_max] = this.color_correlation_matrix[color_min][color_max] ^ coef;
-              }
-            }
-          }
-        }
-
-        // Color decorrelations
-        // ********************
-
-        for (let col1 = 0; col1 < this.nbColumns; col1++) {
-          for (let row1 = 0; row1 < complete_game_size; row1++) {
-            let color1 = this.getColor(this.complete_game[row1], col1+1);
-            for (let col2 = 0; col2 < this.nbColumns; col2++) {
-              if (col1 != col2) {
-                for (let row2 = 0; row2 < complete_game_size; row2++) {
-                  if (row1 < row2) {
-                    let color2 = this.getColor(this.complete_game[row2], col2+1);
-                    if (color1 != color2) { // Go through all pairs of different colors not in current column and row
-                      if ( (this.different_game_colors_per_row[row1][color2] == 0) && (this.different_game_colors_per_row[row2][color1] == 0)
-                           && (this.different_game_colors_per_column[col1][color2] == 0) && (this.different_game_colors_per_column[col2][color1] == 0) ) {
-                        let color_min;
-                        let color_max;
-                        if (color1 <= color2) {
-                          color_min = color1;
-                          color_max = color2;
-                        }
-                        else {
-                          color_min = color2;
-                          color_max = color1;
-                        }
-                        let coef = ((row1+1) * 0xB48725) ^ ((row2+1) * 0x67F428); // (Rq: no permutations on rows)
-                        this.color_correlation_matrix[color_min][color_max] = this.color_correlation_matrix[color_min][color_max] ^ coef;
-                      }
-                    }
-                  }
-                }
-              }
-            }
-          }
-        }
-
-        // Unused colors
-        // *************
-
-        let nbUnusedColors = 0;
-        for (let color = 1; color <= this.nbColors; color++) {
-          let isColorUsedInCurrentGame = false;
-          for (let row = 0; row < complete_game_size; row++) {
-            for (let col = 0; col < this.nbColumns; col++) {
-              if (color == this.getColor(this.complete_game[row], col+1)) {
-                isColorUsedInCurrentGame = true;
-                break
-              }
-            }
-            if (isColorUsedInCurrentGame) {
-              break;
-            }
-          }
-          if (!isColorUsedInCurrentGame) {
-            nbUnusedColors = nbUnusedColors + 1;
-          }
-        }
-
-        // Infer number from color correlation matrix
-        // ******************************************
-
-        for (let i = 0; i < this.nbColors+1; i++) {
-          for (let j = 0; j < this.nbColors+1; j++) {
-            extra_game_id = extra_game_id + this.color_correlation_matrix[i][j];
-          }
-        }
-        if (extra_game_id <= 0) {
-          throw new Error("CodeHandler: getSMMCodeClassId - internal error #2: " + extra_game_id);
-        }
-        extra_game_id = extra_game_id + nbUnusedColors * 444;
-        if (extra_game_id != Math.floor(extra_game_id)) {
-          throw new Error("CodeHandler: getSMMCodeClassId - internal error #3: " + extra_game_id);
-        }
-
-      }
-
-      // Basic SMM code class ids: {100: 11111, 200: 11112, 300: 11122, 400: 11123, 500: 11223, 600: 11234, 700: 12345}
-      let is_there_triple = false;
-      let nb_doubles = 0;
-      for (let color = 1; color <= this.nbColors; color++) {
-        let nb_different_colors = this.different_colors[color];
-        if (nb_different_colors == 2) {
-          nb_doubles++;
-        }
-        else if (nb_different_colors == 3) {
-          is_there_triple = true;
-        }
-        else if (nb_different_colors == 4) {
-          return 200 + extra_game_id;
-        }
-        else if (nb_different_colors == 5) {
-          return 100 + extra_game_id;
-        }
-      }
-      if (is_there_triple) {
-        if (nb_doubles == 0) {
-          return 400 + extra_game_id;
-        }
-        else if (nb_doubles == 1) {
-          return 300 + extra_game_id;
-        }
-        else {
-          throw new Error("CodeHandler: getSMMCodeClassId - internal error #4");
-        }
-      }
-      else {
-        if (nb_doubles == 0) {
-          return 700 + extra_game_id;
-        }
-        else if (nb_doubles == 1) {
-          return 600 + extra_game_id;
-        }
-        else if (nb_doubles == 2) {
-          return 500 + extra_game_id;
-        }
-        else {
-          throw new Error("CodeHandler: getSMMCodeClassId - internal error #5");
-        }
-      }
-
-    }
-
-    isVerySimple(code) {
-      this.different_colors.fill(0);
-      for (let col = 0; col < this.nbColumns; col++) {
-        let color = this.getColor(code, col+1);
-        this.different_colors[color]++;
-      }
-      for (let color = 0; color <= this.nbColors; color++) {
-        if (this.different_colors[color] == this.nbColumns) {
-          return true; // "111...1" like codes
-        }
-        else if (this.different_colors[color] == this.nbColumns - 1) {
-          return true; // "122...2" like codes
-        }
-      }
-      return false;
-    }
-
-    codeToString(code) {
-      let res = "[ ";
-      for (let col = 0; col < this.nbColumns; col++) {
-        let color = this.getColor(code, col+1);
-        res = res + color + " ";
-      }
-      res = res + "]";
-      return res;
-    }
-
-    compressCodeToString(code) {
-      let res = "";
-      for (let col = 0; col < this.nbColumns; col++) {
-        let color = this.getColor(code, col+1);
-        res = res + color.toString(16).toUpperCase(); // (hexa number used if >= 10)
-      }
-      return res;
-    }
-
-    uncompressStringToCode(str) {
-      let code = 0; // empty code
-      if (str.length != this.nbColumns) {
-        throw new Error("CodeHandler: uncompressStringToCode (1) (" + str + ")");
-      }
-      for (let col = 0; col < this.nbColumns; col++) {
-        let color = Number("0x" + str.substring(col, col+1)); // (hexa number parsing)
-        code = this.setColor(code, color, col+1);
-      }
-      if (!this.isFullAndValid(code)) {
-        throw new Error("CodeHandler: uncompressStringToCode (2) (" + str + ")");
-      }
-      return code;
-    }
-
-    createRandomCode() {
-      let code = 0;
-      for (let col = 0; col < this.nbColumns; col++) {
-        code = this.setColor(code, Math.floor((Math.random() * this.nbColors) + 1), col+1);
-      }
-      return code;
-    }
-
-    isValid(code) {
-      for (let col = 0; col < this.nbColumns; col++) {
-        let color = this.getColor(code, col+1);
-        if ( ((color < 1) || (color > this.nbColors))
-             && (color != this.emptyColor) ) {
-          return false;
-        }
-      }
-      for (let col = this.nbColumns+1; col <= this.nbMaxColumns; col++) {
-        let color = this.getColor(code, col);
-        if (color != this.emptyColor) {
-          return false;
-        }
-      }
-      return true;
-    }
-
-    isFullAndValid(code) {
-      for (let col = 0; col < this.nbColumns; col++) {
-        let color = this.getColor(code, col+1);
-        if ( (color < 1) || (color > this.nbColors)
-             || (color == this.emptyColor) ) {
-          return false;
-        }
-      }
-      for (let col = this.nbColumns+1; col <= this.nbMaxColumns; col++) {
-        let color = this.getColor(code, col);
-        if (color != this.emptyColor) {
-          return false;
-        }
-      }
-      return true;
-    }
-
-    nbEmptyColors(code) {
-      let cnt = 0;
-      for (let col = 0; col < this.nbColumns; col++) {
-        if (this.getColor(code, col+1) == this.emptyColor) {
-          cnt++;
-        }
-      }
-      return cnt;
-    }
-
-    isEmpty(code) {
-      return (code == 0); // only emptyColor in the code
-    }
-
-    replaceEmptyColor(code, emptyColorIdx, code2) {
-      let cnt = 0;
-      for (let col = 0; col < this.nbColumns; col++) {
-        if (this.getColor(code, col+1) == this.emptyColor) {
-          if (cnt == emptyColorIdx) {
-            return this.setColor(code, this.getColor(code2, col+1), col+1);
-          }
-          cnt++;
-        }
-      }
-      return code;
-    }
-
-    // Get a mark between 2 codes
-    getMark(code1, code2) {
-      let mark = {nbBlacks:0, nbWhites:0};
-      this.fillMark(code1, code2, mark);
-      return mark;
-    }
-
-    // Fill a mark between 2 codes in a fast way
-    fillMark(code1, code2, mark) { // (duplicated code)
-
-      let marks_already_computed_table_cell;
-      let codeX;
-      let codeY;
-
-      // Marks optimization (1/2) - begin
-      // Notes: - Hash key computing shall be very fast
-      //        - Bit operations are done on 32 bits in javascript (so for example 'x >> y', with x > 0 on 64 bits, may be negative)
-      //        - The final hash key will anyway always be in the range [0, marks_optimization_mask] after bit mask application with the '&' operator
-
-      let min_code, max_code;
-      if (code1 < code2) {
-        min_code = code1;
-        max_code = code2;
-      }
-      else {
-        min_code = code2;
-        max_code = code1;
-      }
-      let sum_max_code = max_code + (max_code >> 2);
-      // Potential optimizations (not done to simplify):
-      // - a potential optimization would consist in using possible code indexes to then access marks_already_computed_table[index_min][index_max],
-      //   that would save the hask key calculation time + avoid any redundancy in mark computing (locally to this function)
-      // - handling possible code indexes instead of codes would also be useful to access listOfClassIds whichever the number of columns + to consume
-      //   a bit less memory
-      let key = ( (min_code + sum_max_code /* (use LSBs) */
-                  + ((min_code ^ (sum_max_code >> 3)) >> 9) /* (use MSBs) */ ) & marks_optimization_mask );
-
-      marks_already_computed_table_cell = marks_already_computed_table[key];
-      codeX = marks_already_computed_table_cell.code1a;
-      codeY = marks_already_computed_table_cell.code2a;
-      if ((codeX == min_code) && (codeY == max_code)) {
-        mark.nbBlacks = marks_already_computed_table_cell.nbBlacksa;
-        mark.nbWhites = marks_already_computed_table_cell.nbWhitesa;
-      }
-      else {
-        codeX = marks_already_computed_table_cell.code1b;
-        codeY = marks_already_computed_table_cell.code2b;
-        if ((codeX == min_code) && (codeY == max_code)) {
-          mark.nbBlacks = marks_already_computed_table_cell.nbBlacksb;
-          mark.nbWhites = marks_already_computed_table_cell.nbWhitesb;
-        }
-        else {
-          codeX = marks_already_computed_table_cell.code1c;
-          codeY = marks_already_computed_table_cell.code2c;
-          if ((codeX == min_code) && (codeY == max_code)) {
-            mark.nbBlacks = marks_already_computed_table_cell.nbBlacksc;
-            mark.nbWhites = marks_already_computed_table_cell.nbWhitesc;
-          }
-          // Marks optimization (1/2) - end
-          else {
-            let nbBlacks = 0;
-            let nbWhites = 0;
-            let col1, col2;
-
-            // The below operations are unrolled for better performances
-            this.colors_int[0] = true;
-            this.colors_int[1] = true;
-            this.colors_int[2] = true;
-            this.colors_int[3] = true;
-            this.colors_int[4] = true;
-            this.colors_int[5] = true;
-            this.colors_int[6] = true;
-            this.code1_colors[0] = (code1 & 0x0000000F);
-            this.code1_colors[1] = ((code1 >> 4) & 0x0000000F);
-            this.code1_colors[2] = ((code1 >> 8) & 0x0000000F);
-            this.code1_colors[3] = ((code1 >> 12) & 0x0000000F);
-            this.code1_colors[4] = ((code1 >> 16) & 0x0000000F);
-            this.code1_colors[5] = ((code1 >> 20) & 0x0000000F);
-            this.code1_colors[6] = ((code1 >> 24) & 0x0000000F);
-            this.code2_colors[0] = (code2 & 0x0000000F);
-            this.code2_colors[1] = ((code2 >> 4) & 0x0000000F);
-            this.code2_colors[2] = ((code2 >> 8) & 0x0000000F);
-            this.code2_colors[3] = ((code2 >> 12) & 0x0000000F);
-            this.code2_colors[4] = ((code2 >> 16) & 0x0000000F);
-            this.code2_colors[5] = ((code2 >> 20) & 0x0000000F);
-            this.code2_colors[6] = ((code2 >> 24) & 0x0000000F);
-
-            for (col1 = 0; col1 < this.nbColumns; col1++) {
-              if (this.code1_colors[col1] == this.code2_colors[col1]) {
-                nbBlacks++;
-              }
-              else {
-                for (col2 = 0; col2 < this.nbColumns; col2++) {
-                  if ((this.code1_colors[col1] == this.code2_colors[col2]) && (this.code1_colors[col2] != this.code2_colors[col2]) && this.colors_int[col2]) {
-                    this.colors_int[col2] = false;
-                    nbWhites++;
-                    break;
-                  }
-                }
-              }
-            }
-
-            mark.nbBlacks = nbBlacks;
-            mark.nbWhites = nbWhites;
-
-            // Marks optimization (2/2) - begin
-            if (marks_already_computed_table_cell.write_index == 0) {
-              marks_already_computed_table_cell.code1a = min_code;
-              marks_already_computed_table_cell.code2a = max_code;
-              marks_already_computed_table_cell.nbBlacksa = nbBlacks;
-              marks_already_computed_table_cell.nbWhitesa = nbWhites;
-              marks_already_computed_table_cell.write_index = 1;
-            }
-            else if (marks_already_computed_table_cell.write_index == 1) {
-              marks_already_computed_table_cell.code1b = min_code;
-              marks_already_computed_table_cell.code2b = max_code;
-              marks_already_computed_table_cell.nbBlacksb = nbBlacks;
-              marks_already_computed_table_cell.nbWhitesb = nbWhites;
-              marks_already_computed_table_cell.write_index = 2;
-            }
-            else if (marks_already_computed_table_cell.write_index == 2) {
-              marks_already_computed_table_cell.code1c = min_code;
-              marks_already_computed_table_cell.code2c = max_code;
-              marks_already_computed_table_cell.nbBlacksc = nbBlacks;
-              marks_already_computed_table_cell.nbWhitesc = nbWhites;
-              marks_already_computed_table_cell.write_index = 0;
-            }
-            else {
-              throw new Error("CodeHandler: fillMark (wrong write_index: " + marks_already_computed_table_cell.write_index + ")");
-            }
-            // Marks optimization (2/2) - end
-          }
-        }
-      }
-
-    }
-
-    marksEqual(mark1, mark2) {
-      return ( (mark1.nbBlacks == mark2.nbBlacks) && (mark1.nbWhites == mark2.nbWhites) );
-    }
-
-    isMarkValid(mark) {
-      if ( (mark.nbBlacks >= 0) && (mark.nbWhites >= 0) && (mark.nbBlacks + mark.nbWhites <= this.nbColumns)
-           && !((mark.nbBlacks == this.nbColumns - 1) && (mark.nbWhites == 1)) ) {
-        return true;
-      }
-      return false;
-    }
-
-    markToString(mark) {
-      return mark.nbBlacks + "B" + mark.nbWhites + "W";
-    }
-
-    stringToMark(str, mark) {
-      if (str.length != 4) {
-        throw new Error("CodeHandler: stringToMark (1) (" + str + ")");
-      }
-      let index_blacks = str.indexOf("B");
-      if (index_blacks != 1) {
-        throw new Error("CodeHandler: stringToMark (2) (" + str + ")");
-      }
-      let index_whites = str.indexOf("W", index_blacks);
-      if (index_whites != 3) {
-        throw new Error("CodeHandler: stringToMark (3) (" + str + ")");
-      }
-      mark.nbBlacks = Number(str.substring(0,1));
-      mark.nbWhites = Number(str.substring(2,3));
-      if (!codeHandler.isMarkValid(mark)) {
-        throw new Error("CodeHandler: stringToMark (4) (" + str + ")");
-      }
     }
 
   }
@@ -3173,8 +3234,6 @@ try {
         marks[i] = {nbBlacks:0, nbWhites:0};
       }
 
-      codeHandler = new CodeHandler(nbColumns, nbColors, nbMinColumns, nbMaxColumns, emptyColor);
-
       initialNbPossibleCodes = Math.round(Math.pow(nbColors,nbColumns));
       previousNbOfPossibleCodes = initialNbPossibleCodes;
       nextNbOfPossibleCodes = initialNbPossibleCodes;
@@ -3271,6 +3330,8 @@ try {
         default:
           throw new Error("INIT phase / invalid nbColumns: " + nbColumns);
       }
+
+      codeHandler = new CodeHandler(nbColumns, nbColors, nbMinColumns, nbMaxColumns, emptyColor, marks_optimization_mask, true);
 
       if ((nbOfCodesForSystematicEvaluation <= 0) || (nbOfCodesForSystematicEvaluation_AllCodesEvaluated <= 0) || (nbOfCodesForSystematicEvaluation_ForMemAlloc <= 0) || (refNbOfCodesForSystematicEvaluation_AllCodesEvaluated > refNbOfCodesForSystematicEvaluation)) {
         throw new Error("INIT phase / internal error: [ref]nbOfCodesForSystematicEvaluation series");

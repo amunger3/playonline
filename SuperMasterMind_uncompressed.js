@@ -1,4 +1,3 @@
-
 // ***************************************************
 // ********** Main Super Master Mind script **********
 // ***************************************************
@@ -18,14 +17,6 @@ console.log("Running SuperMasterMind.js...");
 
 let version = "v3.5";
 
-let emptyColor = 0; // (0 is also the Java default table init value)
-let nbMinColors = 5;
-let nbMaxColors = 10;
-let nbMinColumns = 3;
-let nbMaxColumns = 7;
-let overallNbMinAttempts = 4;
-let overallNbMaxAttempts = 15;
-
 let nominalGameNbColumns = 5; // classical Super Master Mind game
 let nominalGameNbColors = 8; // classical Super Master Mind game
 let nominalGameNbMaxAttempts = 12; // classical Super Master Mind game
@@ -36,7 +27,7 @@ let nbColumns = -1; // N.A.
 let nbColors = -1; // N.A.
 let nbMaxAttempts = -1; // N.A.
 
-let simpleCodeHandler = null;
+let smmCodeHandler = null;
 
 let showPossibleCodesMode = false;
 let showPossibleCodesOffsetMode = false;
@@ -65,12 +56,6 @@ let possibleCodesLists;
 let possibleCodesListsSizes;
 let possibleCodesListsSubdivisions;
 let globalPerformancesList; // (same size as possibleCodesLists)
-let PerformanceLOW = -0.25;
-let PerformanceVERYLOW = -0.50;
-let PerformanceNA = -3.00; // (duplicated in GameSolver script)
-let PerformanceUNKNOWN = -2.00; // (duplicated in GameSolver script)
-let PerformanceMinValidValue = -1.50; // (a valid relative performance can be < -1.00 in some extremely rare (impossible code) cases - duplicated in GameSolver script)
-let PerformanceMaxValidValue = +1.30; // (a valid relative performance can be > 0.00 in some rare (impossible code) cases - duplicated in GameSolver script)
 let nbOfStatsFilled_NbPossibleCodes = 0;
 let nbOfStatsFilled_ListsOfPossibleCodes = 0;
 let nbOfStatsFilled_Perfs = 0;
@@ -458,10 +443,10 @@ function displayGUIError(GUIErrorStr, errStack) {
       try {
         errorStr = errorStr + " on " + navigator.platform + " / " + navigator.userAgent + " / " + decodeURI(location.href);
         for (let i = 1; i < currentAttemptNumber; i++) {
-          strGame = strGame + simpleCodeHandler.markToString(marks[i-1]) + " " + simpleCodeHandler.codeToString(codesPlayed[i-1]) + " (" + nbOfPossibleCodes[i-1]
+          strGame = strGame + smmCodeHandler.markToString(marks[i-1]) + " " + smmCodeHandler.codeToString(codesPlayed[i-1]) + " (" + nbOfPossibleCodes[i-1]
                             + "|" + (Math.round(relative_performances_of_codes_played[i-1] * 100.0) / 100.0).toFixed(2) /* 0.01 precision */ + ") ";
         }
-        strGame = strGame + "SCODE " + simpleCodeHandler.codeToString(simpleCodeHandler.convert(sCode));
+        strGame = strGame + "SCODE " + smmCodeHandler.codeToString(smmCodeHandler.convert(sCode));
         strGame = strGame.trim();
       }
       catch (game_exc) {
@@ -531,125 +516,10 @@ function onGameSolverMessageError(e) {
 // *************************************************************************
 // *************************************************************************
 
-// *************************************************************************
-// "Simple" Code handler class
-// *************************************************************************
-
-class SimpleCodeHandler { // NOTE: the code of this class is partially duplicated in GameSolver script
+class SmmCodeHandler extends CodeHandler {
 
   constructor(nbColumns_p, nbColors_p, nbMinColumns_p, nbMaxColumns_p, emptyColor_p) {
-    if ( (nbColumns_p < Math.max(nbMinColumns_p,3)) || (nbColumns_p > Math.min(nbMaxColumns_p,7)) /* 3 and 7 is hardcoded in some methods of this class for better performances */ ) {
-      throw new Error("SimpleCodeHandler: invalid nb of columns (" + nbColumns_p + ", " + nbMinColumns_p + "," + nbMaxColumns_p + ")");
-    }
-    if (nbColors_p < 0) {
-      throw new Error("SimpleCodeHandler: invalid nb of colors: (" + nbColors_p + ")");
-    }
-    this.nbColumns = nbColumns_p;
-    this.nbColors = nbColors_p;
-    this.nbMaxColumns = nbMaxColumns_p;
-    this.emptyColor = emptyColor_p;
-
-    this.code1_colors = new Array(this.nbMaxColumns);
-    this.code2_colors = new Array(this.nbMaxColumns);
-    this.colors_int = new Array(this.nbMaxColumns);
-
-    this.different_colors = new Array(this.nbColors+1);
-  }
-
-  getNbColumns() {
-    return this.nbColumns;
-  }
-
-  getColor(code, column) {
-    switch (column) {
-      case 1:
-        return (code & 0x0000000F);
-      case 2:
-        return ((code >> 4) & 0x0000000F);
-      case 3:
-        return ((code >> 8) & 0x0000000F);
-      case 4:
-        return ((code >> 12) & 0x0000000F);
-      case 5:
-        return ((code >> 16) & 0x0000000F);
-      case 6:
-        return ((code >> 20) & 0x0000000F);
-      case 7:
-        return ((code >> 24) & 0x0000000F);
-      default:
-        throw new Error("SimpleCodeHandler: getColor (" + column + ")");
-    }
-  }
-
-  setColor(code, color, column)  {
-    switch (column) {
-      case 1:
-        return ((code & 0xFFFFFFF0) | color);
-      case 2:
-        return ((code & 0xFFFFFF0F) | (color << 4));
-      case 3:
-        return ((code & 0xFFFFF0FF) | (color << 8));
-      case 4:
-        return ((code & 0xFFFF0FFF) | (color << 12));
-      case 5:
-        return ((code & 0xFFF0FFFF) | (color << 16));
-      case 6:
-        return ((code & 0xFF0FFFFF) | (color << 20));
-      case 7:
-        return ((code & 0xF0FFFFFF) | (color << 24));
-      default:
-        throw new Error("SimpleCodeHandler: setColor (" + column + ")");
-    }
-  }
-
-  setAllColors(color1, color2, color3, color4, color5, color6, color7) {
-    return color1
-           | (color2 << 4)
-           | (color3 << 8)
-           | (color4 << 12)
-           | (color5 << 16)
-           | (color6 << 20)
-           | (color7 << 24);
-  }
-
-  setAllColorsIdentical(color) {
-    let res_code = 0;
-    for (let col = 0; col < this.nbColumns; col++) {
-      res_code = this.setColor(res_code, color, col+1);
-    }
-    return res_code;
-  }
-
-  nbDifferentColors(code) {
-    let sum = 0;
-    this.different_colors.fill(0);
-    for (let col = 0; col < this.nbColumns; col++) {
-      let color = this.getColor(code, col+1);
-      if (this.different_colors[color] == 0) {
-        this.different_colors[color] = 1;
-        sum = sum + 1;
-      }
-    }
-    return sum;
-  }
-
-  codeToString(code) {
-    let res = "[ ";
-    for (let col = 0; col < this.nbColumns; col++) {
-      let color = this.getColor(code, col+1);
-      res = res + color + " ";
-    }
-    res = res + "]";
-    return res;
-  }
-
-  compressCodeToString(code) {
-    let res = "";
-    for (let col = 0; col < this.nbColumns; col++) {
-      let color = this.getColor(code, col+1);
-      res = res + color.toString(16).toUpperCase(); // (hexa number used if >= 10)
-    }
-    return res;
+    super(nbColumns_p, nbColors_p, nbMinColumns_p, nbMaxColumns_p, emptyColor_p, -1 /* N.A */, false);
   }
 
   createRandomCode(codeRevealed = 0 /* (empty code) */) {
@@ -681,14 +551,14 @@ class SimpleCodeHandler { // NOTE: the code of this class is partially duplicate
           }
           color_cnt++;
           if (color_cnt > this.nbColors) {
-            throw new Error("SimpleCodeHandler: createRandomCode (1) (" + codeRevealed + ")");
+            throw new Error("SmmCodeHandler: createRandomCode (1) (" + codeRevealed + ")");
           }
         }
         if (selected_color == -1) {
-          throw new Error("SimpleCodeHandler: createRandomCode (2) (" + codeRevealed + ")");
+          throw new Error("SmmCodeHandler: createRandomCode (2) (" + codeRevealed + ")");
         }
         if ((nbObviouslyImpossibleColors == 0) && (selected_color != color_idx)) {
-          throw new Error("SimpleCodeHandler: createRandomCode (3) (" + codeRevealed + ")");
+          throw new Error("SmmCodeHandler: createRandomCode (3) (" + codeRevealed + ")");
         }
         code = this.setColor(code, selected_color, col+1);
       }
@@ -697,136 +567,6 @@ class SimpleCodeHandler { // NOTE: the code of this class is partially duplicate
       code = this.setColor(code, this.emptyColor, col);
     }
     return code;
-  }
-
-  isValid(code) {
-    for (let col = 0; col < this.nbColumns; col++) {
-      let color = this.getColor(code, col+1);
-      if ( ((color < 1) || (color > this.nbColors))
-           && (color != this.emptyColor) ) {
-        return false;
-      }
-    }
-    for (let col = this.nbColumns+1; col <= this.nbMaxColumns; col++) {
-      let color = this.getColor(code, col);
-      if (color != this.emptyColor) {
-        return false;
-      }
-    }
-    return true;
-  }
-
-  isFullAndValid(code) {
-    for (let col = 0; col < this.nbColumns; col++) {
-      let color = this.getColor(code, col+1);
-      if ( (color < 1) || (color > this.nbColors)
-           || (color == this.emptyColor) ) {
-        return false;
-      }
-    }
-    for (let col = this.nbColumns+1; col <= this.nbMaxColumns; col++) {
-      let color = this.getColor(code, col);
-      if (color != this.emptyColor) {
-        return false;
-      }
-    }
-    return true;
-  }
-
-  nbEmptyColors(code) {
-    let cnt = 0;
-    for (let col = 0; col < this.nbColumns; col++) {
-      if (this.getColor(code, col+1) == this.emptyColor) {
-        cnt++;
-      }
-    }
-    return cnt;
-  }
-
-  isEmpty(code) {
-    return (code == 0); // only emptyColor in the code
-  }
-
-  replaceEmptyColor(code, emptyColorIdx, code2) {
-    let cnt = 0;
-    for (let col = 0; col < this.nbColumns; col++) {
-      if (this.getColor(code, col+1) == this.emptyColor) {
-        if (cnt == emptyColorIdx) {
-          return this.setColor(code, this.getColor(code2, col+1), col+1);
-        }
-        cnt++;
-      }
-    }
-    return code;
-  }
-
-  // Get a mark between 2 codes
-  getMark(code1, code2) {
-    let mark = {nbBlacks:0, nbWhites:0};
-    this.fillMark(code1, code2, mark);
-    return mark;
-  }
-
-  // Fill a mark between 2 codes in a fast way
-  fillMark(code1, code2, mark) {
-
-    let nbBlacks = 0;
-    let nbWhites = 0;
-    let col1, col2;
-
-    // The below operations are unrolled for better performances
-    this.colors_int[0] = true;
-    this.colors_int[1] = true;
-    this.colors_int[2] = true;
-    this.colors_int[3] = true;
-    this.colors_int[4] = true;
-    this.colors_int[5] = true;
-    this.colors_int[6] = true;
-    this.code1_colors[0] = (code1 & 0x0000000F);
-    this.code1_colors[1] = ((code1 >> 4) & 0x0000000F);
-    this.code1_colors[2] = ((code1 >> 8) & 0x0000000F);
-    this.code1_colors[3] = ((code1 >> 12) & 0x0000000F);
-    this.code1_colors[4] = ((code1 >> 16) & 0x0000000F);
-    this.code1_colors[5] = ((code1 >> 20) & 0x0000000F);
-    this.code1_colors[6] = ((code1 >> 24) & 0x0000000F);
-    this.code2_colors[0] = (code2 & 0x0000000F);
-    this.code2_colors[1] = ((code2 >> 4) & 0x0000000F);
-    this.code2_colors[2] = ((code2 >> 8) & 0x0000000F);
-    this.code2_colors[3] = ((code2 >> 12) & 0x0000000F);
-    this.code2_colors[4] = ((code2 >> 16) & 0x0000000F);
-    this.code2_colors[5] = ((code2 >> 20) & 0x0000000F);
-    this.code2_colors[6] = ((code2 >> 24) & 0x0000000F);
-
-    for (col1 = 0; col1 < this.nbColumns; col1++) {
-      if (this.code1_colors[col1] == this.code2_colors[col1]) {
-        nbBlacks++;
-      }
-      else {
-        for (col2 = 0; col2 < this.nbColumns; col2++) {
-          if ((this.code1_colors[col1] == this.code2_colors[col2]) && (this.code1_colors[col2] != this.code2_colors[col2]) && this.colors_int[col2]) {
-            this.colors_int[col2] = false;
-            nbWhites++;
-            break;
-          }
-        }
-      }
-    }
-
-    mark.nbBlacks = nbBlacks;
-    mark.nbWhites = nbWhites;
-
-  }
-
-  marksEqual(mark1, mark2) {
-    return ( (mark1.nbBlacks == mark2.nbBlacks) && (mark1.nbWhites == mark2.nbWhites) );
-  }
-
-  markToString(mark) {
-    return mark.nbBlacks + "B" + mark.nbWhites + "W";
-  }
-
-  convert(code) {
-    return ~code;
   }
 
 }
@@ -1175,7 +915,7 @@ function playRandomCodeButtonClick() {
   if (!document.getElementById("playRandomCodeButton").disabled) {
     randomCodesHintToBeDisplayed = false;
     nb_random_codes_played++;
-    currentCode = simpleCodeHandler.createRandomCode(sCodeRevealed);
+    currentCode = smmCodeHandler.createRandomCode(sCodeRevealed);
     draw_graphic(false);
   }
 }
@@ -1206,14 +946,14 @@ function revealSecretColorButtonClick() {
   if ( (!document.getElementById("revealSecretColorButton").disabled)
        && gameOnGoing()
        && (sCode != -1) && (sCodeRevealed != -1) ) {
-    let nbEmptyColors = simpleCodeHandler.nbEmptyColors(sCodeRevealed);
+    let nbEmptyColors = smmCodeHandler.nbEmptyColors(sCodeRevealed);
     if (nbEmptyColors <= 1) {
       displayGUIError("too many revealed colors", new Error().stack);
     }
     else if ((nbColumns > 3) && (currentAttemptNumber >= 2) && (nbEmptyColors == nbColumns)) {
       playerWasHelped = true;
       let revealedColorIdx = Math.floor(Math.random() * nbEmptyColors);
-      sCodeRevealed = simpleCodeHandler.replaceEmptyColor(sCodeRevealed, revealedColorIdx, simpleCodeHandler.convert(sCode));
+      sCodeRevealed = smmCodeHandler.replaceEmptyColor(sCodeRevealed, revealedColorIdx, smmCodeHandler.convert(sCode));
       currentCode = sCodeRevealed;
       main_graph_update_needed = true;
       draw_graphic(false);
@@ -1552,7 +1292,7 @@ function playAColor(color, column) {
         return;
       }
     }
-    let newCurrentCode = simpleCodeHandler.setColor(currentCode, color, column);
+    let newCurrentCode = smmCodeHandler.setColor(currentCode, color, column);
     for (let i = 1; i < currentAttemptNumber; i++) {
       if (newCurrentCode == codesPlayed[i-1]) {
         alert("This code was already played!");
@@ -1840,7 +1580,7 @@ function resetGameAttributes(nbColumnsSelected) {
   catch (tmp_exc) {}
 
   main_graph_update_needed = true;
-  simpleCodeHandler = null;
+  smmCodeHandler = null;
 
   nbColumns = nbColumnsSelected;
   switch (nbColumns) {
@@ -1876,7 +1616,7 @@ function resetGameAttributes(nbColumnsSelected) {
     throw new Error("invalid nbMaxAttempts: " + nbMaxAttempts);
   }
 
-  simpleCodeHandler = new SimpleCodeHandler(nbColumns, nbColors, nbMinColumns, nbMaxColumns, emptyColor);
+  smmCodeHandler = new SmmCodeHandler(nbColumns, nbColors, nbMinColumns, nbMaxColumns, emptyColor);
 
   showPossibleCodesMode = false;
   showPossibleCodesOffsetMode = false;
@@ -1950,17 +1690,16 @@ function resetGameAttributes(nbColumnsSelected) {
   sumPerfs = 0.00;
   nbUnknownPerfs = 0;
 
-  sCode = ~(simpleCodeHandler.createRandomCode());
+  sCode = ~(smmCodeHandler.createRandomCode());
   /* XXX
-  let toto = simpleCodeHandler.createRandomCode();
-  toto = simpleCodeHandler.setColor(toto, 4, 1);
-  toto = simpleCodeHandler.setColor(toto, 4, 2);
-  toto = simpleCodeHandler.setColor(toto, 4, 3);
-  toto = simpleCodeHandler.setColor(toto, 4, 4);
-  toto = simpleCodeHandler.setColor(toto, 4, 5);
-  // toto = simpleCodeHandler.setColor(toto, 7, 6);
-  // toto = simpleCodeHandler.setColor(toto, 4, 6);
-  // toto = simpleCodeHandler.setColor(toto, 4, 7);
+  let toto = smmCodeHandler.createRandomCode();
+  toto = smmCodeHandler.setColor(toto, 4, 1);
+  toto = smmCodeHandler.setColor(toto, 4, 2);
+  toto = smmCodeHandler.setColor(toto, 4, 3);
+  toto = smmCodeHandler.setColor(toto, 4, 4);
+  toto = smmCodeHandler.setColor(toto, 4, 5);
+  // toto = smmCodeHandler.setColor(toto, 4, 6);
+  // toto = smmCodeHandler.setColor(toto, 4, 7);
   sCode = ~(toto); */
 
   sCodeRevealed = 0;
@@ -2091,8 +1830,8 @@ function isAttemptPossible(attempt_nb) { // (returns 0 if the attempt_nb th code
   }
   let mark_tmp = {nbBlacks:0, nbWhites:0};
   for (let i = 1; i <= attempt_nb-1; i++) { // go through all codes previously played
-    simpleCodeHandler.fillMark(codesPlayed[attempt_nb-1], codesPlayed[i-1], mark_tmp);
-    if (!simpleCodeHandler.marksEqual(mark_tmp, marks[i-1])) {
+    smmCodeHandler.fillMark(codesPlayed[attempt_nb-1], codesPlayed[i-1], mark_tmp);
+    if (!smmCodeHandler.marksEqual(mark_tmp, marks[i-1])) {
       return i;
     }
   }
@@ -2113,7 +1852,7 @@ function writeNbOfPossibleCodes(nbOfPossibleCodes_p, colorsFoundCode_p, minNbCol
        || (attempt_nb != nbOfStatsFilled_NbPossibleCodes + 1) // stats shall be filled consecutively
        || (attempt_nb <= 0) || (attempt_nb > nbMaxAttempts)
        || (nbOfPossibleCodes[attempt_nb-1] != 0 /* initial value */)
-       || (!simpleCodeHandler.isValid(colorsFoundCode_p)) ) {
+       || (!smmCodeHandler.isValid(colorsFoundCode_p)) ) {
     displayGUIError("invalid stats (" + nbOfPossibleCodes_p + ", " + attempt_nb + ", " + nbOfStatsFilled_NbPossibleCodes + ", " + nbOfPossibleCodes[attempt_nb-1] + ") (1)", new Error().stack);
     return false;
   }
@@ -2164,12 +1903,12 @@ function writePerformanceOfCodePlayed(relative_perf_p, relative_perf_evaluation_
   if (relative_perf_p == PerformanceUNKNOWN) {
     nbUnknownPerfs++;
     if ( (nbColumns == 5) && (attempt_nb == 2) && (currentAttemptNumber == 3) && gameOnGoing() // Unknown performance at 2nd attempt of Super Master Mind game
-         && (simpleCodeHandler.nbDifferentColors(codesPlayed[0]) > 2)
-         && (simpleCodeHandler.nbDifferentColors(codesPlayed[1]) <= 2)
+         && (smmCodeHandler.nbDifferentColors(codesPlayed[0]) > 2)
+         && (smmCodeHandler.nbDifferentColors(codesPlayed[1]) <= 2)
        ) { // Game row inversion could allow to better evaluate performances asymmetrically
       let mark_tmp = {nbBlacks:0, nbWhites:0};
-      simpleCodeHandler.fillMark(codesPlayed[0], codesPlayed[1], mark_tmp);
-      if ( !simpleCodeHandler.marksEqual(mark_tmp, marks[0]) // Impossible 2nd code
+      smmCodeHandler.fillMark(codesPlayed[0], codesPlayed[1], mark_tmp);
+      if ( !smmCodeHandler.marksEqual(mark_tmp, marks[0]) // Impossible 2nd code
             && ( !((marks[1].nbBlacks == 0) && (marks[1].nbWhites == 0))
                  || ((mark_tmp.nbBlacks == 0) && (mark_tmp.nbWhites == 0)) ) // worst mark condition avoiding obviously impossible color replay
          ) {
@@ -2187,13 +1926,13 @@ function writePerformanceOfCodePlayed(relative_perf_p, relative_perf_evaluation_
       }
     }
     else if ( (nbColumns == 5) && (attempt_nb == 3) && (currentAttemptNumber == 4) && gameOnGoing() // Unknown performance at 3rd attempt of Super Master Mind game
-              && (simpleCodeHandler.nbDifferentColors(codesPlayed[0]) <= 2)
-              && (simpleCodeHandler.nbDifferentColors(codesPlayed[1]) <= 2) // (will not loop with above case)
+              && (smmCodeHandler.nbDifferentColors(codesPlayed[0]) <= 2)
+              && (smmCodeHandler.nbDifferentColors(codesPlayed[1]) <= 2) // (will not loop with above case)
             ) { // Game row inversion could allow to better evaluate performances asymmetrically
       let mark_tmp = {nbBlacks:0, nbWhites:0};
-      simpleCodeHandler.fillMark(codesPlayed[0], codesPlayed[1], mark_tmp);
-      if ( !simpleCodeHandler.marksEqual(mark_tmp, marks[0]) // Impossible 2nd code
-           && simpleCodeHandler.marksEqual(mark_tmp, marks[1]) ) { // Inverting codes would make game possible so its performances better evaluated (will not loop)
+      smmCodeHandler.fillMark(codesPlayed[0], codesPlayed[1], mark_tmp);
+      if ( !smmCodeHandler.marksEqual(mark_tmp, marks[0]) // Impossible 2nd code
+           && smmCodeHandler.marksEqual(mark_tmp, marks[1]) ) { // Inverting codes would make game possible so its performances better evaluated (will not loop)
           console.log("invert game rows (2)");
           next_code1 = codesPlayed[1];
           next_code2 = codesPlayed[0];
@@ -2229,14 +1968,14 @@ function writePerformanceOfCodePlayed(relative_perf_p, relative_perf_evaluation_
       displayGUIError("internal error at store_player_info call: " + timeStr.length + ", " + score, new Error().stack);
     }
     else { // (score > 0.0 because game won)
-      let nbColorsRevealed = (nbColumns-simpleCodeHandler.nbEmptyColors(sCodeRevealed));
+      let nbColorsRevealed = (nbColumns-smmCodeHandler.nbEmptyColors(sCodeRevealed));
 
       let strGame = "";
       for (let i = 1; i < currentAttemptNumber; i++) {
-        strGame = strGame + simpleCodeHandler.markToString(marks[i-1]) + " " + simpleCodeHandler.codeToString(codesPlayed[i-1]) + " (" + nbOfPossibleCodes[i-1]
+        strGame = strGame + smmCodeHandler.markToString(marks[i-1]) + " " + smmCodeHandler.codeToString(codesPlayed[i-1]) + " (" + nbOfPossibleCodes[i-1]
                           + "|" + (Math.round(relative_performances_of_codes_played[i-1] * 100.0) / 100.0).toFixed(2) /* 0.01 precision */ + ") ";
       }
-      strGame = strGame + "SCODE " + simpleCodeHandler.codeToString(simpleCodeHandler.convert(sCode));
+      strGame = strGame + "SCODE " + smmCodeHandler.codeToString(smmCodeHandler.convert(sCode));
       strGame = strGame.trim();
 
       store_player_info(game_cnt, nbColumns, score, currentAttemptNumber-1, timeStr, (Math.round(sumPerfs * 100.0) / 100.0).toFixed(2) /* 0.01 precision */, nbUnknownPerfs, (((nbColorsRevealed > 0) || (nb_random_codes_played == 0)) ? nbColorsRevealed + 'x' : Math.min(nb_random_codes_played,9) + 'ra'), strGame);
@@ -2266,7 +2005,7 @@ function writePossibleCodes(possibleCodesList_p, nb_possible_codes_listed, possi
   for (let i = 0; i < nb_possible_codes_listed; i++) {
     let code = possibleCodesList_p[i];
     let global_perf = globalPerformancesList_p[i];
-    if (!simpleCodeHandler.isFullAndValid(code)) {
+    if (!smmCodeHandler.isFullAndValid(code)) {
       displayGUIError("invalid stats (" + attempt_nb + ", " + nbOfStatsFilled_NbPossibleCodes + ", " + i + ", " + code + ") (4)", new Error().stack);
       return false;
     }
@@ -2919,7 +2658,7 @@ function draw_graphic_bis() {
          || (nbColumns != nbColumnsSelected) ) { // Check event "column number change"
       resetGameAttributes(nbColumnsSelected);
     }
-    if (simpleCodeHandler.getNbColumns() != nbColumns) {
+    if (smmCodeHandler.getNbColumns() != nbColumns) {
       throw new Error("invalid nbColumns handling");
     }
 
@@ -2928,7 +2667,7 @@ function draw_graphic_bis() {
     }
     else {
       if ( gameOnGoing() // playing phase
-           && simpleCodeHandler.isFullAndValid(currentCode) ) { // New code submitted
+           && smmCodeHandler.isFullAndValid(currentCode) ) { // New code submitted
 
         if (currentAttemptNumber == 2) {
           attempt_HTML_geolocation_if_needed();
@@ -2942,15 +2681,15 @@ function draw_graphic_bis() {
           updateAndStoreNbGamesStarted(+1);
         }
         codesPlayed[currentAttemptNumber-1] = currentCode;
-        let sCodeConv = simpleCodeHandler.convert(sCode);
-        if (!simpleCodeHandler.isFullAndValid(sCodeConv)) {
+        let sCodeConv = smmCodeHandler.convert(sCode);
+        if (!smmCodeHandler.isFullAndValid(sCodeConv)) {
           throw new Error("inconsistent code (" + sCodeConv + ")");
         }
-        simpleCodeHandler.fillMark(sCodeConv, currentCode, marks[currentAttemptNumber-1]);
+        smmCodeHandler.fillMark(sCodeConv, currentCode, marks[currentAttemptNumber-1]);
 
         if ((marks[currentAttemptNumber-1].nbBlacks == 0) && (marks[currentAttemptNumber-1].nbWhites == 0)) { // worst mark
           for (let col = 0; col < nbColumns; col++) {
-            obviouslyImpossibleColors[simpleCodeHandler.getColor(currentCode, col+1)] = true;
+            obviouslyImpossibleColors[smmCodeHandler.getColor(currentCode, col+1)] = true;
           }
         }
         if (marks[currentAttemptNumber-1].nbBlacks == nbColumns) { // game over (game won)
@@ -3011,8 +2750,9 @@ function draw_graphic_bis() {
 
               // Try to complete precalculated games "on the fly" from second attempt of 5 columns games
               if ((nbColumns == 5) && (currentAttemptNumber == 3)) {
-                completePrecalculatedGamesOnTheFly(simpleCodeHandler.compressCodeToString(codesPlayed[0]), simpleCodeHandler.markToString(marks[0]),
-                                                   simpleCodeHandler.compressCodeToString(codesPlayed[1]), simpleCodeHandler.markToString(marks[1]));
+                // Future improvement: smmCodeHandler.getSMMCodeClassId(currentCode, codesPlayed, 2) could be used here
+                completePrecalculatedGamesOnTheFly(smmCodeHandler.compressCodeToString(codesPlayed[0]), smmCodeHandler.markToString(marks[0]),
+                                                   smmCodeHandler.compressCodeToString(codesPlayed[1]), smmCodeHandler.markToString(marks[1]));
               }
             }
             else {
@@ -3576,11 +3316,11 @@ function draw_graphic_bis() {
               displayCode(sCodeRevealed, nbMaxAttemptsToDisplay+transition_height, ctx, true, false);
             }
             else {
-              displayCode(simpleCodeHandler.convert(sCode), nbMaxAttemptsToDisplay+transition_height, ctx);
+              displayCode(smmCodeHandler.convert(sCode), nbMaxAttemptsToDisplay+transition_height, ctx);
             }
           }
           else { // game over
-            displayCode(simpleCodeHandler.convert(sCode), nbMaxAttemptsToDisplay+transition_height, ctx);
+            displayCode(smmCodeHandler.convert(sCode), nbMaxAttemptsToDisplay+transition_height, ctx);
           }
         }
 
@@ -3728,7 +3468,7 @@ function draw_graphic_bis() {
               victoryStr = "\u2009You won with help!\u2009";
               victoryStr2 = "\u2009You won /?\u2009";
               victoryStr3 = "Yes!";
-              nbColorsRevealed = (nbColumns-simpleCodeHandler.nbEmptyColors(sCodeRevealed));
+              nbColorsRevealed = (nbColumns-smmCodeHandler.nbEmptyColors(sCodeRevealed));
               if (nbColorsRevealed == 1) { // 1 color revealed
                 score = Math.max(score / 4.44, min_score);
               }
@@ -3833,7 +3573,7 @@ function draw_graphic_bis() {
         ctx.font = basic_bold_font;
         for (let color = 0; color < nbColors; color++) {
           for (let col = 0; col < nbColumns; col++) {
-            color_selection_code = simpleCodeHandler.setColor(color_selection_code, color+1, col+1);
+            color_selection_code = smmCodeHandler.setColor(color_selection_code, color+1, col+1);
           }
           displayCode(color_selection_code, nbMaxAttemptsToDisplay+transition_height+scode_height+transition_height+color, ctx, false, gameOnGoing());
         }
@@ -3987,7 +3727,7 @@ function draw_graphic_bis() {
 
         ctx.font = basic_bold_font;
         for (let col = 0; col < nbColumns; col++) {
-          if (simpleCodeHandler.getColor(colorsFoundCodes[currentPossibleCodeShown-1], col+1) != emptyColor) {
+          if (smmCodeHandler.getColor(colorsFoundCodes[currentPossibleCodeShown-1], col+1) != emptyColor) {
             displayString(tickChar, attempt_nb_width+(70*(nbColumns+1))/100+col*2, nbMaxAttemptsToDisplay+transition_height+nbPossibleCodesShown, 2,
                           greenColor, backgroundColor_2, ctx, false, true, 0, true, 1, true /* (ignoreRanges) */);
           }
@@ -4139,7 +3879,7 @@ function draw_graphic_bis() {
         document.getElementById("playRandomCodeButton").className = "button";
       }
 
-      document.getElementById("revealSecretColorButton").disabled = !(gameOnGoing() && (nbColumns > 3) && (currentAttemptNumber >= 2) && (simpleCodeHandler.nbEmptyColors(sCodeRevealed) == nbColumns));
+      document.getElementById("revealSecretColorButton").disabled = !(gameOnGoing() && (nbColumns > 3) && (currentAttemptNumber >= 2) && (smmCodeHandler.nbEmptyColors(sCodeRevealed) == nbColumns));
       if ( gameOnGoing() && (currentAttemptNumber > 1) // (Note: full condition duplicated at several places in this file)
            && !(document.getElementById("revealSecretColorButton").disabled)
            && (sCodeRevealed == 0)
@@ -4566,7 +4306,7 @@ function displayColor(color, x_cell, y_cell, ctx, secretCodeCase, displayColorMo
 
 function displayCode(code, y_cell, ctx, secretCodeCase = false, checkDisabledColors = false) {
   for (let col = 0; col < nbColumns; col++) {
-    let color = simpleCodeHandler.getColor(code, col+1);
+    let color = smmCodeHandler.getColor(code, col+1);
     displayColor(color, attempt_nb_width+(70*(nbColumns+1))/100+col*2, y_cell, ctx, secretCodeCase, true, (checkDisabledColors ?  obviouslyImpossibleColors[color] : false));
   }
 }

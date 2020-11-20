@@ -6,6 +6,9 @@
 
 "use strict";
 
+// Constants
+// *********
+
 let emptyColor = 0; // (0 is also the Java default table init value)
 let nbMinColors = 5;
 let nbMaxColors = 10;
@@ -21,6 +24,9 @@ let PerformanceMinValidValue = -1.50; // (a valid relative performance can be < 
 let PerformanceMaxValidValue = +1.30; // (a valid relative performance can be > 0.00 in some rare (impossible code) cases / Some values observed: +0.94 for 5-colmuns game {4B0W 11223; 11456}, +1.04 for 6-colmuns game {5B0W 112234; 112567}
 let PerformanceLOW = -0.25;
 let PerformanceVERYLOW = -0.50;
+
+// Variables (only usable by one thread) 
+// *************************************
 
 let marks_already_computed_table = null;
 

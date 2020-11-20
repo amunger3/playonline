@@ -2168,7 +2168,7 @@ best_sum=sum;
 if(depth <=1){
 let appliedMaxPerformanceEvaluationTime=maxPerformanceEvaluationTime;
 if(areCurrentGameOrCodePrecalculated >=0){
-appliedMaxPerformanceEvaluationTime=appliedMaxPerformanceEvaluationTime * 1.27;
+appliedMaxPerformanceEvaluationTime=appliedMaxPerformanceEvaluationTime * 1.25;
 }
 if(first_call){
 if((!compute_sum_ini)&&(nbCodes > 100)){

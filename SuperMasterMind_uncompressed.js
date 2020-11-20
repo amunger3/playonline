@@ -2207,7 +2207,7 @@ function get_and_check_extra_precalculated_str() {
 
 function completePrecalculatedGamesOnTheFly(code_str_1, mark_str_1, code_str_2, mark_str_2) {
 
-  let ontheflytimeout = 10000;
+  let ontheflytimeout = 12000;
   if (gamesolver_buffered_msg_status == 0) {
     gamesolver_buffered_msg_status = 1;
     // Defensive behaviour (should never be entered): always trigger debuffering after a certain time to avoid any game blockage

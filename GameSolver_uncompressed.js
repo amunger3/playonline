@@ -1,13 +1,14 @@
-// *************************************************************************
-// *************************************************************************
-// Global Super Master Mind variables
-// *************************************************************************
-// *************************************************************************
+// ***************************************
+// ********** GameSolver script **********
+// ***************************************
 
 "use strict";
 
-// Constants
-// *********
+// *************************************************************************
+// *************************************************************************
+// Global constants (shared between threads)
+// *************************************************************************
+// *************************************************************************
 
 let emptyColor = 0; // (0 is also the Java default table init value)
 let nbMinColors = 5;
@@ -25,18 +26,37 @@ let PerformanceMaxValidValue = +1.30; // (a valid relative performance can be > 
 let PerformanceLOW = -0.25;
 let PerformanceVERYLOW = -0.50;
 
-// Variables (only usable by one thread) 
-// *************************************
-
-let marks_already_computed_table = null;
-
 // *************************************************************************
-// Global code handler class
+// *************************************************************************
+// Global CodeHandler class (shared between threads)
+// *************************************************************************
 // *************************************************************************
 
 class CodeHandler {
 
   constructor(nbColumns_p, nbColors_p, nbMinColumns_p, nbMaxColumns_p, emptyColor_p, marks_optimization_mask_p, game_solver_call_p) {
+    if (nbColumns_p == undefined) {
+      throw new Error("CodeHandler: undefined nbColumns_p");
+    }
+    if (nbColors_p == undefined) {
+      throw new Error("CodeHandler: undefined nbColors_p");
+    }
+    if (nbMinColumns_p == undefined) {
+      throw new Error("CodeHandler: undefined nbMinColumns_p");
+    }
+    if (nbMaxColumns_p == undefined) {
+      throw new Error("CodeHandler: undefined nbMaxColumns_p");
+    }
+    if (emptyColor_p == undefined) {
+      throw new Error("CodeHandler: undefined emptyColor_p");
+    }
+    if (marks_optimization_mask_p == undefined) {
+      throw new Error("CodeHandler: undefined marks_optimization_mask");
+    }
+    if (game_solver_call_p == undefined) {
+      throw new Error("CodeHandler: undefined game_solver_call_p");
+    }
+
     if ( (nbColumns_p < Math.max(nbMinColumns_p,3)) || (nbColumns_p > Math.min(nbMaxColumns_p,7)) /* 3 and 7 is hardcoded in some methods of this class for better performances */ ) {
       throw new Error("CodeHandler: invalid nb of columns (" + nbColumns_p + ", " + nbMinColumns_p + "," + nbMaxColumns_p + ")");
     }
@@ -49,6 +69,7 @@ class CodeHandler {
     this.emptyColor = emptyColor_p;
     this.marks_optimization_mask = marks_optimization_mask_p;
     this.game_solver_call = game_solver_call_p;
+    this.marks_already_computed_table = null; // (shall be updated later on when applicable)
 
     if (this.game_solver_call && (this.marks_optimization_mask < 7500)) {
       throw new Error("CodeHandler: invalid marks_optimization_mask: (" + this.marks_optimization_mask + ")");
@@ -537,7 +558,7 @@ class CodeHandler {
       let key = ( (min_code + sum_max_code /* (use LSBs) */
                   + ((min_code ^ (sum_max_code >> 3)) >> 9) /* (use MSBs) */ ) & this.marks_optimization_mask );
 
-      marks_already_computed_table_cell = marks_already_computed_table[key];
+      marks_already_computed_table_cell = this.marks_already_computed_table[key];
       codeX = marks_already_computed_table_cell.code1a;
       codeY = marks_already_computed_table_cell.code2a;
       if ((codeX == min_code) && (codeY == max_code)) {
@@ -730,6 +751,24 @@ try {
 
   // *************************************************************************
   // *************************************************************************
+  // GsCodeHandler class
+  // *************************************************************************
+  // *************************************************************************
+
+  class GsCodeHandler extends CodeHandler {
+
+    constructor(nbColumns_p, nbColors_p, nbMinColumns_p, nbMaxColumns_p, emptyColor_p, marks_optimization_mask_p) {
+      super(nbColumns_p, nbColors_p, nbMinColumns_p, nbMaxColumns_p, emptyColor_p, marks_optimization_mask_p, true);
+    }
+
+    updateMarksAlreadyComputedTable(marks_already_computed_table_p) {
+      this.marks_already_computed_table = marks_already_computed_table_p;
+    }
+
+  }
+
+  // *************************************************************************
+  // *************************************************************************
   // GameSolver variables
   // *************************************************************************
   // *************************************************************************
@@ -805,6 +844,7 @@ try {
   let listsOfPossibleCodes;
   let nbOfPossibleCodes;
   let listOfEquivalentCodesAndPerformances;
+  let marks_already_computed_table = null;
   let nbCodesLimitForEquivalentCodesCheck = 40; // (value determined empirically)
 
   let initialInitDone = false;
@@ -816,7 +856,7 @@ try {
   let cur_permutations_table_size;
   let cur_permutations_table;
 
- // *************************************************************************
+  // *************************************************************************
   // *************************************************************************
   // Game precalculation
   // *************************************************************************
@@ -3337,7 +3377,7 @@ try {
           throw new Error("INIT phase / invalid nbColumns: " + nbColumns);
       }
 
-      codeHandler = new CodeHandler(nbColumns, nbColors, nbMinColumns, nbMaxColumns, emptyColor, marks_optimization_mask, true);
+      codeHandler = new GsCodeHandler(nbColumns, nbColors, nbMinColumns, nbMaxColumns, emptyColor, marks_optimization_mask);
 
       if ((nbOfCodesForSystematicEvaluation <= 0) || (nbOfCodesForSystematicEvaluation_AllCodesEvaluated <= 0) || (nbOfCodesForSystematicEvaluation_ForMemAlloc <= 0) || (refNbOfCodesForSystematicEvaluation_AllCodesEvaluated > refNbOfCodesForSystematicEvaluation)) {
         throw new Error("INIT phase / internal error: [ref]nbOfCodesForSystematicEvaluation series");
@@ -3602,6 +3642,7 @@ try {
                                               code1c:0, code2c:0, nbBlacksc:-1, nbWhitesc:-1,
                                               write_index:0};
         }
+        codeHandler.updateMarksAlreadyComputedTable(marks_already_computed_table);
       }
 
       if (curAttemptNumber == 1) { // first attempt

@@ -1306,7 +1306,7 @@ show_play_store_app("<font color=#C900A1>Hello "+localStorage.firstname+"</font>
 show_play_store_app("<font color=#C900A1>Hello "+localStorage.firstname+"</font><hr style='height:1.0vh;padding:0;margin:0;visibility:hidden;'>If you want to merge your smartphone account & your computer account (to share the same scores on all devices), just send an email using the&nbsp;<a href='contact_info.html'>contact info</a> page", true);
 } */
 else if( localStorage.firstname&&localStorage.gamesok&&(Number(localStorage.gamesok) >=103)
-&&localStorage.lastDonationTimeT&&((new Date()).getTime() - localStorage.lastDonationTimeT > 1.6*31*24*60*60*1000 /* (~2 months) */) ){
+&&localStorage.lastDonationTimeT&&((new Date()).getTime() - localStorage.lastDonationTimeT > 1.9*31*24*60*60*1000 /* (~2 months) */) ){
 let paypalStr=
 "If you enjoy this free "+(! android_appli? "Super Master Mind game" : "Android app")+",<br>you can make a gift &#x1F381; to its author.<br>\
 <hr style='height:0.75vh;padding:0;margin:0;visibility:hidden;'>\

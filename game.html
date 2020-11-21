@@ -302,6 +302,9 @@
       var gameRulesDisplayed = false;
       var debug_game_state = -1;
       var debug_on_unload = 0;
+      var github_unicorn_error = false;
+      var github_html_error = false;
+      var github_load_error = false;
       var gameInv = 0;
 
       var modernDisplay = false;
@@ -1188,7 +1191,9 @@
 
       // Temporary error handling (from this point in this file to simplify / will be overwritten later)
       function tmp_game_onerror(errorStr, errStack) {
-        submitForm("***** GAME ERROR ***** (" + html_compatibility_game_version + "): " + errorStr + " / " + errStack + " in " + userAgentStr + " (start time:" + pageLoadStartTime + "/error time:" + new Date() + ")", true);
+        submitForm("***** GAME ERROR ***** (" + html_compatibility_game_version + "): "
+                   + (github_unicorn_error ? "github unicorn error - " : "") + (github_html_error ? "github html error - " : "") + (github_load_error ? "github load error - " : "")
+                   + errorStr + " / " + errStack + " in " + userAgentStr + " (start time:" + pageLoadStartTime + "/error time:" + new Date() + ")", true);
       }
       window.onerror = tmp_game_onerror;
       window.onmessageerror = tmp_game_onerror;
@@ -2560,6 +2565,17 @@
       .done(function(data) { // Success case
         debug_game_state = 71;
         // console.log(data); // data contains GameSolver script contents
+        if (data.indexOf("nicorn") != -1) {
+          github_unicorn_error = true;
+        }
+        if ( (data.indexOf("<html") != -1) || (data.indexOf("<HTML") != -1) || (data.indexOf("<body") != -1) || (data.indexOf("<BODY") != -1) ) {
+          github_html_error = true;
+        }
+        if ( (data.indexOf("too long to load") != -1) || (data.indexOf("did not respond") != -1)
+             || (data.indexOf("o server is currently available") != -1) /* 'o' for 'no' */
+             || (data.indexOf("emporarily Offline") != -1)  || (data.indexOf("emporarily offline") != -1) ) {
+          github_load_error = true;
+        }
         gamesolver_blob = new Blob([data], {type: "application/javascript"});
         // Super Master Mind script is only loaded once GameSolver script has been loaded successfully
         setTimeout("loadSuperMasterMindScript();", 44);

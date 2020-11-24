@@ -812,7 +812,11 @@ nbPossibleCodesShown=-1;
 currentPossibleCodeShown=-1;
 }
 else{
-nbPossibleCodesShown=Math.max(nbMinPossibleCodesShown, Math.min(nbMaxPossibleCodesShown/2 /* (half display) */, 20+(nbMaxAttempts+1 - currentAttemptNumber)));
+let targetedCodesShown=20+(nbMaxAttempts+1 - currentAttemptNumber);
+if(targetedCodesShown > nbMaxPossibleCodesShown/2 /* (half display) */){
+throw new Error("invalid nbMaxPossibleCodesShown: "+nbMaxPossibleCodesShown);
+}
+nbPossibleCodesShown=Math.max(nbMinPossibleCodesShown/2 /* (half display) */, targetedCodesShown);
 if(newPossibleCodeShown==-1){
 let interesting_attempt_idx=0;
 let interesting_attempt_idx_was_updated=false;
@@ -1362,8 +1366,11 @@ throw new Error("invalid nbMaxAttempts: "+nbMaxAttempts);
 smmCodeHandler=new SmmCodeHandler(nbColumns, nbColors, nbMinColumns, nbMaxColumns, emptyColor);
 showPossibleCodesMode=false;
 showPossibleCodesOffsetMode=false;
-nbMinPossibleCodesShown=nbColumns+nbColors+4;
-nbMaxPossibleCodesShown=70;
+nbMinPossibleCodesShown=2*(nbColumns+nbColors+4);
+nbMaxPossibleCodesShown=2*(20+nbMaxAttempts);
+if(nbMaxPossibleCodesShown < nbMinPossibleCodesShown){
+throw new Error("inconsistent nbMinPossibleCodesShown and nbMaxPossibleCodesShown");
+}
 nbPossibleCodesShown=-1;
 currentPossibleCodeShown=-1;
 disableMouseMoveEffects=false;
@@ -1696,6 +1703,7 @@ if( (nb_possible_codes_listed <=0)||(possibleCodesList_p.length < nb_possible_co
 ||(attempt_nb <=0)||(attempt_nb > nbMaxAttempts)
 ||(possibleCodesListsSizes[attempt_nb-1]!=0 /* initial value */)
 ||(possibleCodesListsSubdivisions[attempt_nb-1]!=-1 /* initial value */)
+||(nb_possible_codes_listed > nbOfPossibleCodes[attempt_nb-1])
 ||((nbOfPossibleCodes[attempt_nb-1] <=nbMaxPossibleCodesShown)&&(nb_possible_codes_listed!=nbOfPossibleCodes[attempt_nb-1]))
 ||((nbOfPossibleCodes[attempt_nb-1] > nbMaxPossibleCodesShown)&&(nb_possible_codes_listed!=nbMaxPossibleCodesShown)) ){
 displayGUIError("invalid stats ("+attempt_nb+", "+nbOfStatsFilled_NbPossibleCodes+", "+nbOfPossibleCodes[attempt_nb-1]+", "+nb_possible_codes_listed+") (3)", new Error().stack);
@@ -3239,16 +3247,27 @@ drawLine(ctx, x_0, y_0, x_1, y_1);
 }
 let best_global_perf=global_best_performances[currentPossibleCodeShown-1];
 let valid_best_global_perf=((best_global_perf!=PerformanceUNKNOWN)&&(best_global_perf > 0.01));
+let code_ratio=1.0;
+if( (2*nbPossibleCodesShown < possibleCodesListsSizes[currentPossibleCodeShown-1])
+&&(possibleCodesListsSubdivisions[currentPossibleCodeShown-1]==-1) 
+&&(currentPossibleCodeShown > 2)
+&&valid_best_global_perf){
+code_ratio=possibleCodesListsSizes[currentPossibleCodeShown-1] / (2*nbPossibleCodesShown);
+}
 for (let codeidx=0;codeidx < nbOfCodesListed;codeidx++){
-let code=possibleCodesLists[currentPossibleCodeShown-1][codeidx+code_list_offset];
+let codeidx_with_ratio=Math.floor((codeidx+code_list_offset) * code_ratio);
+if(codeidx_with_ratio >=possibleCodesListsSizes[currentPossibleCodeShown-1]){
+displayGUIError("invalid codeidx_with_ratio;"+codeidx_with_ratio+", "+possibleCodesListsSizes[currentPossibleCodeShown-1], new Error().stack);
+}
+let code=possibleCodesLists[currentPossibleCodeShown-1][codeidx_with_ratio];
 let y_cell=nbMaxAttemptsToDisplay+transition_height+nbPossibleCodesShown-1-codeidx;
 ctx.font=basic_bold_font;
 displayCode(code, y_cell, ctx);
 let global_perf=PerformanceUNKNOWN;
 let relative_perf=PerformanceUNKNOWN;
 if( valid_best_global_perf
-&&(globalPerformancesList[currentPossibleCodeShown-1][codeidx+code_list_offset]!=PerformanceUNKNOWN)&&(globalPerformancesList[currentPossibleCodeShown-1][codeidx+code_list_offset] > 0.01) ){
-global_perf=globalPerformancesList[currentPossibleCodeShown-1][codeidx+code_list_offset];
+&&(globalPerformancesList[currentPossibleCodeShown-1][codeidx_with_ratio]!=PerformanceUNKNOWN)&&(globalPerformancesList[currentPossibleCodeShown-1][codeidx_with_ratio] > 0.01) ){
+global_perf=globalPerformancesList[currentPossibleCodeShown-1][codeidx_with_ratio];
 relative_perf=best_global_perf - global_perf;
 }
 ctx.font=stats_font;
@@ -3256,6 +3275,9 @@ let backgroundColor=backgroundColor_2;
 displayPerf(relative_perf, y_cell, backgroundColor, 0, true, false /* valid_best_global_perf&&(currentPossibleCodeShown <=1) */, PerformanceNA /* best_global_perf */, ctx, (code==codesPlayed[currentPossibleCodeShown-1]));
 if( (possibleCodesListsSubdivisions[currentPossibleCodeShown-1]!=-1)
 &&(possibleCodesListsSubdivisions[currentPossibleCodeShown-1]==codeidx+code_list_offset+1) ){
+if(code_ratio!=1.0){
+displayGUIError("invalid code_ratio: "+code_ratio, new Error().stack);
+}
 x_0=get_x_pixel(x_min+x_step*(attempt_nb_width+(70*(nbColumns+1))/100+nbColumns*2+nb_possible_codes_width));
 y_0=get_y_pixel(y_min+y_step*y_cell);
 x_1=get_x_pixel(x_min+x_step*(attempt_nb_width+(70*(nbColumns+1))/100+nbColumns*2+nb_possible_codes_width+optimal_width));

@@ -989,7 +989,11 @@ function showPossibleCodesButtonClick(invertMode = true, newPossibleCodeShown = 
       currentPossibleCodeShown = -1;
     }
     else {
-      nbPossibleCodesShown = Math.max(nbMinPossibleCodesShown, Math.min(nbMaxPossibleCodesShown/2 /* (half display) */, 20 + (nbMaxAttempts+1 - currentAttemptNumber)));
+      let targetedCodesShown = 20 + (nbMaxAttempts+1 - currentAttemptNumber); // (**)
+      if (targetedCodesShown > nbMaxPossibleCodesShown/2 /* (half display) */) {
+        throw new Error("invalid nbMaxPossibleCodesShown: " + nbMaxPossibleCodesShown);
+      }
+      nbPossibleCodesShown = Math.max(nbMinPossibleCodesShown/2 /* (half display) */, targetedCodesShown);
       if (newPossibleCodeShown == -1) {
         let interesting_attempt_idx = 0;
         let interesting_attempt_idx_was_updated = false;
@@ -1620,8 +1624,11 @@ function resetGameAttributes(nbColumnsSelected) {
 
   showPossibleCodesMode = false;
   showPossibleCodesOffsetMode = false;
-  nbMinPossibleCodesShown = nbColumns+nbColors+4;
-  nbMaxPossibleCodesShown = 70;
+  nbMinPossibleCodesShown = 2*(nbColumns+nbColors+4);
+  nbMaxPossibleCodesShown = 2*(20 + nbMaxAttempts); // (**)
+  if (nbMaxPossibleCodesShown < nbMinPossibleCodesShown) {
+    throw new Error("inconsistent nbMinPossibleCodesShown and nbMaxPossibleCodesShown");
+  }
   nbPossibleCodesShown = -1;
   currentPossibleCodeShown = -1;
   disableMouseMoveEffects = false;
@@ -1997,6 +2004,7 @@ function writePossibleCodes(possibleCodesList_p, nb_possible_codes_listed, possi
         || (attempt_nb <= 0) || (attempt_nb > nbMaxAttempts)
         || (possibleCodesListsSizes[attempt_nb-1] != 0 /* initial value */)
         || (possibleCodesListsSubdivisions[attempt_nb-1] != -1 /* initial value */)
+        || (nb_possible_codes_listed > nbOfPossibleCodes[attempt_nb-1])
         || ((nbOfPossibleCodes[attempt_nb-1] <= nbMaxPossibleCodesShown) && (nb_possible_codes_listed != nbOfPossibleCodes[attempt_nb-1])) // (cf. above assumption on stats writing)
         || ((nbOfPossibleCodes[attempt_nb-1] > nbMaxPossibleCodesShown) && (nb_possible_codes_listed != nbMaxPossibleCodesShown)) ) { // (cf. above assumption on stats writing)
     displayGUIError("invalid stats (" + attempt_nb + ", " + nbOfStatsFilled_NbPossibleCodes + ", " + nbOfPossibleCodes[attempt_nb-1] + ", " + nb_possible_codes_listed + ") (3)", new Error().stack);
@@ -3775,10 +3783,24 @@ function draw_graphic_bis() {
 
         let best_global_perf = global_best_performances[currentPossibleCodeShown-1];
         let valid_best_global_perf = ((best_global_perf != PerformanceUNKNOWN) && (best_global_perf > 0.01)); // valid global_best_performances value
+
+        let code_ratio = 1.0;
+        if ( (2*nbPossibleCodesShown < possibleCodesListsSizes[currentPossibleCodeShown-1]) // all codes cannot be displayed with 2x half display
+             && (possibleCodesListsSubdivisions[currentPossibleCodeShown-1] == -1)  // no subdivision to be displayed
+             && (currentPossibleCodeShown > 2) // codes shall always be listed in sequence for very first attempts
+             && valid_best_global_perf ) { // no need to apply a ratio if no valid performance
+          code_ratio = possibleCodesListsSizes[currentPossibleCodeShown-1] / (2*nbPossibleCodesShown); // (> 1.0)
+        }
+
         for (let codeidx = 0; codeidx < nbOfCodesListed; codeidx++) {
 
+          let codeidx_with_ratio = Math.floor((codeidx+code_list_offset) * code_ratio);
+          if (codeidx_with_ratio >= possibleCodesListsSizes[currentPossibleCodeShown-1]) {
+            displayGUIError("invalid codeidx_with_ratio; " + codeidx_with_ratio + ", " + possibleCodesListsSizes[currentPossibleCodeShown-1], new Error().stack);
+          }
+
           // Display code
-          let code = possibleCodesLists[currentPossibleCodeShown-1][codeidx+code_list_offset];
+          let code = possibleCodesLists[currentPossibleCodeShown-1][codeidx_with_ratio];
           let y_cell = nbMaxAttemptsToDisplay+transition_height+nbPossibleCodesShown-1-codeidx;
           ctx.font = basic_bold_font;
           displayCode(code, y_cell, ctx);
@@ -3787,8 +3809,8 @@ function draw_graphic_bis() {
           let global_perf = PerformanceUNKNOWN;
           let relative_perf = PerformanceUNKNOWN;
           if ( valid_best_global_perf
-               && (globalPerformancesList[currentPossibleCodeShown-1][codeidx+code_list_offset] != PerformanceUNKNOWN) && (globalPerformancesList[currentPossibleCodeShown-1][codeidx+code_list_offset] > 0.01) ) { // valid globalPerformancesList value
-            global_perf = globalPerformancesList[currentPossibleCodeShown-1][codeidx+code_list_offset];
+               && (globalPerformancesList[currentPossibleCodeShown-1][codeidx_with_ratio] != PerformanceUNKNOWN) && (globalPerformancesList[currentPossibleCodeShown-1][codeidx_with_ratio] > 0.01) ) { // valid globalPerformancesList value
+            global_perf = globalPerformancesList[currentPossibleCodeShown-1][codeidx_with_ratio];
             relative_perf = best_global_perf - global_perf;
           }
           ctx.font = stats_font;
@@ -3798,6 +3820,9 @@ function draw_graphic_bis() {
           // Display subdivision
           if ( (possibleCodesListsSubdivisions[currentPossibleCodeShown-1] != -1)
                && (possibleCodesListsSubdivisions[currentPossibleCodeShown-1] == codeidx+code_list_offset+1) ) {
+            if (code_ratio != 1.0) {
+              displayGUIError("invalid code_ratio: " + code_ratio, new Error().stack);
+            }
             x_0 = get_x_pixel(x_min+x_step*(attempt_nb_width+(70*(nbColumns+1))/100+nbColumns*2+nb_possible_codes_width));
             y_0 = get_y_pixel(y_min+y_step*y_cell);
             x_1 = get_x_pixel(x_min+x_step*(attempt_nb_width+(70*(nbColumns+1))/100+nbColumns*2+nb_possible_codes_width+optimal_width));

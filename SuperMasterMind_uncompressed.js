@@ -3787,7 +3787,7 @@ function draw_graphic_bis() {
         let code_ratio = 1.0;
         if ( (2*nbPossibleCodesShown < possibleCodesListsSizes[currentPossibleCodeShown-1]) // all codes cannot be displayed with 2x half display
              && (possibleCodesListsSubdivisions[currentPossibleCodeShown-1] == -1)  // no subdivision to be displayed
-             && (currentPossibleCodeShown > 2) // codes shall always be listed in sequence for very first attempts
+             && (currentPossibleCodeShown > 1) // codes shall always be listed in sequence for first attempt
              && valid_best_global_perf ) { // no need to apply a ratio if no valid performance
           code_ratio = possibleCodesListsSizes[currentPossibleCodeShown-1] / (2*nbPossibleCodesShown); // (> 1.0)
         }

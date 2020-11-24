@@ -3250,7 +3250,7 @@ let valid_best_global_perf=((best_global_perf!=PerformanceUNKNOWN)&&(best_global
 let code_ratio=1.0;
 if( (2*nbPossibleCodesShown < possibleCodesListsSizes[currentPossibleCodeShown-1])
 &&(possibleCodesListsSubdivisions[currentPossibleCodeShown-1]==-1) 
-&&(currentPossibleCodeShown > 2)
+&&(currentPossibleCodeShown > 1)
 &&valid_best_global_perf){
 code_ratio=possibleCodesListsSizes[currentPossibleCodeShown-1] / (2*nbPossibleCodesShown);
 }

@@ -4181,7 +4181,7 @@ try {
             let swap_done = false;
             for (let i = 0; i < cnt-1; i++) {
               let j = i+1;
-              if (globalPerformancesShown[i] > globalPerformancesShown[j]) {
+              if (globalPerformancesShown[i] > globalPerformancesShown[j]) { // Order will keep unchanged if all performances are PerformanceUNKNOWN
                 // swap cells (bubble sort)
                 let tmp_code = possibleCodesShown[j];
                 possibleCodesShown[j] = possibleCodesShown[i];

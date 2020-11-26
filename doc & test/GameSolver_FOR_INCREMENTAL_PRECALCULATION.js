@@ -891,7 +891,7 @@ try {
   // ***************************************************************************************************************
 
   let precalculated_games_5columns =
-  "TBC with dept-2 or dept-3 precalculations";
+  "XXX TBC with depth-2 or depth-3 precalculations";
 
   // ***************************
   // Look for precalculated game
@@ -2603,7 +2603,7 @@ try {
       // 74: 11223
       // 83: 11234
       // 668: 12345
-      if (first_call && (idx1 != 1)) {
+      if (first_call && (idx1 != 1)) { // XXX TBC
         continue;
       }
       if (idx1 < nbCodes) {

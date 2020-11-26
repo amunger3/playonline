@@ -2573,7 +2573,7 @@ try {
       let seconds = date.getSeconds();
       let minutes = date.getMinutes();
       let hour = date.getHours();
-      send_trace_msg("-" + str + "... " + dd + "/" + mm + "/" + yyyy + " " + hour + ":" + minutes + ":" + seconds);
+      send_trace_msg("-" + str + "... " + dd + "/" + mm + "/" + yyyy + " at " + hour + ":" + minutes + ":" + seconds);
       precalculation_start_time = new Date().getTime();
     }
 

@@ -2558,7 +2558,9 @@ try {
                                 && (next_cur_game_idx <= maxDepthForGamePrecalculation) // (-1 or 3)
                                 && ( (next_cur_game_idx <= 1)
                                      || (next_cur_game_idx == 2)
-                                     || ((next_cur_game_idx == 3) && (nbCodes >= 470)) )
+                                     || (false // (this new depth-3 criterion is skipped as very long and concerns very few cases (~1%) => previous depth-3 results are kept)
+                                         && (next_cur_game_idx == 3) && (nbCodes >= 450))
+                                   )
                                 && (!compute_sum_ini) ); // not a leaf
     let str; // (precalculation mode)
     let precalculation_start_time; // (precalculation mode)

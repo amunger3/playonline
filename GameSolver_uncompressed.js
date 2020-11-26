@@ -819,8 +819,8 @@ try {
   let baseOfMaxPerformanceEvaluationTime = 30000; // 30 seconds / much higher in (precalculation mode)
   let maxPerformanceEvaluationTime = -1;
 
-  let refNbOfCodesForSystematicEvaluation = 2599; // (high values may induce latencies) (***)
-  let refNbOfCodesForSystematicEvaluation_AllCodesEvaluated = 2599; // (shall be <= refNbOfCodesForSystematicEvaluation - high values may induce latencies) (***)
+  let refNbOfCodesForSystematicEvaluation = 2599; // (high values may induce latencies)
+  let refNbOfCodesForSystematicEvaluation_AllCodesEvaluated = 2599; // (shall be <= refNbOfCodesForSystematicEvaluation - high values may induce latencies)
   let nbOfCodesForSystematicEvaluation = -1;
   let nbOfCodesForSystematicEvaluation_AllCodesEvaluated = -1;
   let nbOfCodesForSystematicEvaluation_ForMemAlloc = -1;
@@ -891,7 +891,7 @@ try {
   // ***************************************************************************************************************
 
   let precalculated_games_5columns =
-    "0||N:32768|11111:28B03,11112:25A19,11122:24BF0,11123:24501,11223:23ED9,11234:23F55,12345:244BA.";
+    "0||N:32768|11111:28B03,11112:25A19,11122:24BF0,11123:24501,11223:23ED9,11234:23F55,12345:244BA."; // (precalculation mode: TBC with depth-2 or depth-3 precalculations)
 
   // ***************************
   // Look for precalculated game
@@ -2540,7 +2540,11 @@ try {
     let precalculated_cur_game_or_code = (first_call ? areCurrentGameOrCodePrecalculated : -1);
     let precalculated_sum;
     // let write_me; // (traces useful for debug)
+    // let depth2or3 = 2 or 3; // (precalculation mode)
     // let write_me_for_precalculation; // (precalculation mode)
+    // let precalculation_cnt = 0; // (precalculation mode)
+    // let precalculation_cnt_tot = 0; // (precalculation mode)
+    // let skip_lookfor = false; // (precalculation mode)
     let sum;
     let sum_marks;
     let best_sum = 100000000000.0;
@@ -2553,16 +2557,24 @@ try {
     let precalculation_mode = ( (nbCodes >= minNbCodesForPrecalculation) // (**) only games for which there may not be enough CPU capacity / time to calculate performances online
                                 && (next_cur_game_idx <= maxDepthForGamePrecalculation) // (-1 or 3)
                                 && ( (next_cur_game_idx <= 1)
-                                     || ((next_cur_game_idx == 2) && ((possibleGame && (codeHandler.nbDifferentColors(curGame[0]) <= 2)) || ((codeHandler.nbDifferentColors(curGame[0]) <= 2) && codeHandler.isVerySimple(curGame[1])) || (nbCodes <= nbCodesForPrecalculationThreshold))) // (***)
-                                     || ((next_cur_game_idx == 3) && possibleGame && (codeHandler.nbDifferentColors(curGame[0]) <= 2) && (codeHandler.nbDifferentColors(curGame[1]) <= 2) && (codeHandler.nbDifferentColors(curGame[2]) <= 2))
-                                     || ((next_cur_game_idx == 3) && (codeHandler.nbDifferentColors(curGame[0]) == 1) && codeHandler.isVerySimple(curGame[1]) && codeHandler.isVerySimple(curGame[2])) // (this condition could be made totally symmetrical with isVerySimple() called 3 times, with little/no? gains - condition introduced initially to cover frequent "11111|22222|33333-like games" whose evaluation may be a bit too long")
-                                   )
+                                     || (next_cur_game_idx == 2)
+                                     || ((next_cur_game_idx == 3) && (nbCodes >= 470)) )
                                 && (!compute_sum_ini) ); // not a leaf
     let str; // (precalculation mode)
     let precalculation_start_time; // (precalculation mode)
     if (precalculation_mode) { // (precalculation mode)
       str = next_cur_game_idx + "|" + compressed_str_from_lists_of_codes_and_markidxs(curGame, marksIdxs, next_cur_game_idx) + "|N:" + nbCodes + "|";
-      send_trace_msg("-" + str + " is being computed... " + new Date());
+      let date = new Date();
+      let dd = date.getDate();
+      if(dd < 10) {
+        dd = '0' + dd;
+      }
+      let mm = date.getMonth()+1;
+      let yyyy = date.getFullYear();
+      let seconds = date.getSeconds();
+      let minutes = date.getMinutes();
+      let hour = date.getHours();
+      send_trace_msg("-" + str + "... " + dd + "/" + mm + "/" + yyyy + " " + hour + ":" + minutes + ":" + seconds);
       precalculation_start_time = new Date().getTime();
     } */
 
@@ -2593,38 +2605,51 @@ try {
       // 74: 11223
       // 83: 11234
       // 668: 12345
-      // if (first_call && (idx1 != 10) && (idx1 != 74) && (idx1 != 83) && (idx1 != 668)) {
-      //  continue;
-      // }
+      if (first_call && (idx1 != 83)) {
+        continue;
+      }
       if (idx1 < nbCodes) {
         cur_code = listOfCodes[idx1];
       }
       else {
         cur_code = initialCodeListForPrecalculatedMode[idx1 - nbCodes]; // (precalculation mode) / add also impossible codes
-        // Precalculation optimization (1/4): skip cur code if needed
+        // Precalculation optimization (1/3): skip cur code if needed
         if (!precalculation_mode) {
           throw new Error("recursiveEvaluatePerformances: precalculation_mode error");
         }
         let skip_cur_code = false;
+        let four_blacks = false;
         for (let i = 0; i < next_cur_game_idx; i++) {
           // (replayed codes are addressed more generally below through useless codes, as all codes equivalent to replayed codes shall be covered to reach an optimization)
-          // if (cur_code == curGame[i]) {
-          //  skip_cur_code = true; // code replayed
-          //  break;
-          // }
+          if (cur_code == curGame[i]) {
+            skip_cur_code = true; // code replayed
+            break;
+          }
+          codeHandler.fillMark(cur_code, curGame[i], precalculation_mode_mark);
+          if (precalculation_mode_mark.nbBlacks >= 4) {
+            four_blacks = true;
+          }
           if (marksIdxs[i] == worst_mark_idx) { // 0 black + 0 white mark => all colors in this code are obviously impossible
-            codeHandler.fillMark(cur_code, curGame[i], precalculation_mode_mark);
             if ((precalculation_mode_mark.nbBlacks > 0) || (precalculation_mode_mark.nbWhites > 0)) {
               skip_cur_code = true; // obviously impossible color played
               break;
             }
           }
         }
-        // Precalculation optimization (2/4): skip impossible cur code if acceptable (i.e. if its performance [in most cases if not all - "in most cases" meaning possibly "when the code played is not too poor"] can be evaluated relatively quickly with precalculated game)
-        // Too high nbCodesForPrecalculationThreshold values can lead to such precalculated game issues as early as 1100 possible codes, e.g. in this game:
-        // 1B1W 72625; 0B2W 36157 => 1166 possible codes => 42734 is very quick to evaluate but 46257 is very long to evaluate, and even too long on some computers.
-        // Ideally, to always have successful performance evaluations, we should use a lower nbCodesForPrecalculationThreshold value here than the value used in the other parts of the program (not done because of lack of computing resources).
-        if ( (next_cur_game_idx >= 2) && (nbCodes <= nbCodesForPrecalculationThreshold) ) { // (***)
+        // Precalculation optimization (2/3): skip impossible cur code if acceptable (a few classical impossible codes are kept for better coverage)
+        if ( (next_cur_game_idx == 2) && (nbCodes <= nbCodesForPrecalculationThreshold) // (below threshold)
+             && !((nbCodes >= 700) && four_blacks) // a few classical very inefficient impossible codes (1 of 2)
+             && !((nbCodes >= 700) && (codeHandler.nbDifferentColors(cur_code) == 1)) ) { // a few classical very inefficient impossible codes (2 of 2)
+          skip_cur_code = true;
+        }
+        if ( (next_cur_game_idx == 2) && (nbCodes > nbCodesForPrecalculationThreshold) // (above threshold)
+             && !((possibleGame && (codeHandler.nbDifferentColors(curGame[0]) <= 2)) || ((codeHandler.nbDifferentColors(curGame[0]) <= 2) && (codeHandler.nbDifferentColors(curGame[1]) <= 2))) // simple game => relatively reduced number of impossible codes
+             && !((nbCodes >= 700) && four_blacks) // same condition as above
+             && !((nbCodes >= 700) && (codeHandler.nbDifferentColors(cur_code) <= 2)) ) { // more general than above condition for better coverage
+          skip_cur_code = true; // simplification
+        }
+        if ( (next_cur_game_idx >= 3)
+             && !((codeHandler.nbDifferentColors(curGame[0]) == 1) && codeHandler.isVerySimple(curGame[1]) && codeHandler.isVerySimple(curGame[2])) ) { // (covers 11111|22222|33333-like games for which 3125 possibles codes can be left - to simplify this condition is left asymmetrical and only applied to 11111 first codes)
           skip_cur_code = true;
         }
         if (skip_cur_code) {
@@ -2682,6 +2707,38 @@ try {
             // compute_sum = true;
           }
         }
+        /* // (precalculation mode)
+        else if ((next_cur_game_idx == depth2or3) && compute_sum && precalculation_mode && (!compute_sum_ini) && (!skip_lookfor)) { // Do not recalculate 2nd attempt sums if already calculated in the past
+          let sum_tmp = lookForCodeInPrecalculatedGames(cur_code, next_cur_game_idx, nbCodes, reuse_mode);
+          if (sum_tmp > 0) { // precalculated sum found
+            sum = sum_tmp;
+            compute_sum = false;
+            precalculated_sum = true;
+            reuse_mode = 2;
+
+            if (!compute_sum_ini) {
+              listOfEquivalentCodesAndPerformances[next_depth][nbOfEquivalentCodesAndPerformances].equiv_code = cur_code;
+              listOfEquivalentCodesAndPerformances[next_depth][nbOfEquivalentCodesAndPerformances].equiv_sum = sum;
+              nbOfEquivalentCodesAndPerformances++;
+            }
+
+            write_me_for_precalculation = true; // (precalculation mode)
+            precalculation_cnt++;
+          }
+          else {
+            // skip_lookfor = true;
+            if (reuse_mode == 2) {
+              // throw new Error("recursiveEvaluatePerformances: game completion inconsistency in precalculation mode: " + codeHandler.codeToString(cur_code));
+            }
+          }
+          precalculation_cnt_tot++;
+        }
+        else if ( (next_cur_game_idx == depth2or3)
+                  && (next_cur_game_idx == 3) // only applied in case we exclusively focus on updating depth-3 precalculations, i.e. if depth2or3=3. Depth-2 precalculations will then be erroneous and shall be ignored.
+                  && (!precalculation_mode) ) { // skip all classical depth-3 cases where number of possibles code is low
+          continue; // skip cur code
+        }
+        */
       }
 
       if (compute_sum) { // compute_sum
@@ -2712,30 +2769,6 @@ try {
         // Assess cur code
         sum = 0.0;
         sum_marks = 0;
-
-        // Precalculation optimization (3/4): skip "very inefficient" cur code if acceptable
-        /* if ( (next_cur_game_idx == 1)
-             && (!(idx1 < nbCodes)) // (no impact on actual computations)
-             && (!(codeHandler.nbDifferentColors(curGame[0]) <= 2)) ) { // (***) (precalculation mode)
-          let very_inefficient_cur_code = false;
-          for (mark_idx = nbMaxMarks-1; mark_idx >= 0; mark_idx--) {
-            let nextNbCodes = nextNbsCodes[mark_idx];
-            // Go through all sets of possible marks
-            if (nextNbCodes > 0) {
-              // At least one mark with a very high number of remaining possible codes and no further precalculation planned => this code is considered as "very inefficient"
-              if (!(nextNbCodes <= nbCodesForPrecalculationThreshold)) { // (***)
-                very_inefficient_cur_code = true;
-                break;
-              }
-            }
-          }
-          if (very_inefficient_cur_code) { // (precalculation mode)
-            if (idx1 < nbCodes) {
-              throw new Error("recursiveEvaluatePerformances: very_inefficient_cur_code");
-            }
-            continue; // skip "very inefficient" cur code
-          }
-        } */
 
         // let useless_cur_code = false; // (precalculation mode)
         for (mark_idx = nbMaxMarks-1; mark_idx >= 0; mark_idx--) {
@@ -2878,7 +2911,7 @@ try {
           }
         }
         /*
-        // Precalculation optimization (4/4): skip useless cur code if acceptable
+        // Precalculation optimization (3/3): skip useless cur code if acceptable
         if (useless_cur_code) { // (precalculation mode)
           if (idx1 < nbCodes) {
             throw new Error("recursiveEvaluatePerformances: useless_cur_code");
@@ -3063,11 +3096,16 @@ try {
       str = "\"" + str.substring(0, str.length-1) + ".\" +"; // remove last ','
       // console.log(str);
       let precalculation_time = new Date().getTime() - precalculation_start_time;
-      if (precalculation_time >= 2700) { // 2700 = 2.7 seconds on i5 processor or on Linux VB running on i7 processor
+      if (precalculation_cnt > 0) { // keep all already-precalculated games
+        send_trace_msg(str + " // cplt (" + precalculation_cnt + "/" + precalculation_cnt_tot + ")");
+      }
+      else if (precalculation_time >= 2000) { // 2000 = 2.0 seconds on i5 processor or on Linux VB running on i7 processor
         send_trace_msg(str + " // " + precalculation_time + "ms");
       }
       else {
-        send_trace_msg("skipped (" + precalculation_time + "ms)");
+        if (next_cur_game_idx <= 2) {
+          send_trace_msg("skipped (" + precalculation_time + "ms)");
+        }
       }
     } */
 

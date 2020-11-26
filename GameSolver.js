@@ -2331,11 +2331,16 @@ throw new Error("recursiveEvaluatePerformances: internal error (2)");
 }
 str="\""+str.substring(0, str.length-1)+".\" +";
 let precalculation_time=new Date().getTime() - precalculation_start_time;
-if(precalculation_time >=2700){
+if(precalculation_cnt > 0){
+send_trace_msg(str+"
+}
+else if(precalculation_time >=2000){
 send_trace_msg(str+"
 }
 else{
+if(next_cur_game_idx <=2){
 send_trace_msg("skipped ("+precalculation_time+"ms)");
+}
 }
 } */
 if(first_call&&(particularCodeToAssess!=0 /* empty code */)){

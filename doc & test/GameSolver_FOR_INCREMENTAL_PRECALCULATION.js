@@ -2732,9 +2732,9 @@ try {
           precalculation_cnt_tot++;
         }
         else if ( (next_cur_game_idx == depth2or3)
-                  && (next_cur_game_idx == 3) // only applied in case we exclusively focus on updating depth-3 precalculations, i.e. if depth2or3=3. Depth-2 precalculations will then be erroneous and shall be ignored.
+                  && (next_cur_game_idx == 3) // only applied in case we EXCLUSIVELY focus on updating depth-3 precalculations, i.e. if depth2or3=3. Depth-2 precalculations will then be erroneous and shall be ignored.
                   && (!precalculation_mode) ) { // skip all classical depth-3 cases where number of possibles code is low
-          continue; // skip cur code
+          continue; // skip cur POSSIBLE code
         }
       }
 

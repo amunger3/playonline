@@ -2620,6 +2620,11 @@ try {
           throw new Error("recursiveEvaluatePerformances: precalculation_mode error");
         }
         let skip_cur_code = false;
+        // "Only logical codes" mode
+        let only_logical_codes = false;
+        if (only_logical_codes) {
+          skip_cur_code = true;
+        }
         let four_blacks = false;
         for (let i = 0; i < next_cur_game_idx; i++) {
           // (replayed codes are addressed more generally below through useless codes, as all codes equivalent to replayed codes shall be covered to reach an optimization)

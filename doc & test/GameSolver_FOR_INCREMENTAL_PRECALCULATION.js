@@ -2619,8 +2619,8 @@ try {
         }
         let skip_cur_code = false;
         // "Only logical codes" mode
-        let only_logical_codes = false;
-        if (only_logical_codes) {
+        let only_logical_codes_from_depth2 = false;
+        if ((next_cur_game_idx >= 2) && only_logical_codes_from_depth2) {
           skip_cur_code = true;
         }        
         let four_blacks = false;

@@ -819,8 +819,8 @@ try {
   let baseOfMaxPerformanceEvaluationTime = 300000000000000000; // 30 seconds / much higher in (precalculation mode)
   let maxPerformanceEvaluationTime = -1;
 
-  let refNbOfCodesForSystematicEvaluation = 1300; // (high values may induce latencies)
-  let refNbOfCodesForSystematicEvaluation_AllCodesEvaluated = 1300; // (shall be <= refNbOfCodesForSystematicEvaluation - high values may induce latencies)
+  let refNbOfCodesForSystematicEvaluation = 1300; // XXX TBC (high values may induce latencies)
+  let refNbOfCodesForSystematicEvaluation_AllCodesEvaluated = 1300; // XXX TBC (shall be <= refNbOfCodesForSystematicEvaluation - high values may induce latencies)
   let nbOfCodesForSystematicEvaluation = -1;
   let nbOfCodesForSystematicEvaluation_AllCodesEvaluated = -1;
   let nbOfCodesForSystematicEvaluation_ForMemAlloc = -1;
@@ -2619,7 +2619,7 @@ try {
         }
         let skip_cur_code = false;
         // "Only logical codes" mode
-        let only_logical_codes_from_depth2 = false;
+        let only_logical_codes_from_depth2 = false; // XXX TBC
         if ((next_cur_game_idx >= 2) && only_logical_codes_from_depth2) {
           skip_cur_code = true;
         }        
@@ -3102,7 +3102,7 @@ try {
       if (precalculation_cnt > 0) { // keep all already-precalculated games
         send_trace_msg(str + " // cplt (" + precalculation_cnt + "/" + precalculation_cnt_tot + ")");
       }
-      else if (precalculation_time >= 2000) { // 2000 = 2.0 seconds on i5 processor or on Linux VB running on i7 processor
+      else if (precalculation_time >= 2000) { // XXX TBC 2000 = 2.0 seconds on i5 processor or on Linux VB running on i7 processor
         send_trace_msg(str + " // " + precalculation_time + "ms");
       }
       else {

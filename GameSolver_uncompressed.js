@@ -816,7 +816,7 @@ try {
   // Performance-related variables
   // *****************************
 
-  let baseOfMaxPerformanceEvaluationTime = 30000; // 30 seconds / much higher in (precalculation mode)
+  let baseOfMaxPerformanceEvaluationTime = 30000; // 30 seconds / much higher in (precalculation mode => see GameSolver_FOR_INCREMENTAL_PRECALCULATION.js)
   let maxPerformanceEvaluationTime = -1;
 
   let refNbOfCodesForSystematicEvaluation = 2599; // (high values may induce latencies)

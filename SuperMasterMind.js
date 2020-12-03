@@ -1622,6 +1622,7 @@ nbUnknownPerfs++;
 if( (nbColumns==5)&&(attempt_nb==3)&&(currentAttemptNumber==4)&&gameOnGoing()
 &&(smmCodeHandler.nbDifferentColors(codesPlayed[0]) > 2)
 &&(smmCodeHandler.nbDifferentColors(codesPlayed[1]) <=2)
+&&(smmCodeHandler.nbDifferentColors(codesPlayed[2]) <=2)
 ){
 let mark_tmp={nbBlacks:0, nbWhites:0};
 smmCodeHandler.fillMark(codesPlayed[0], codesPlayed[1], mark_tmp);
@@ -1629,7 +1630,7 @@ if(!smmCodeHandler.marksEqual(mark_tmp, marks[0])
 &&(!((marks[1].nbBlacks==0)&&(marks[1].nbWhites==0))
 ||((mark_tmp.nbBlacks==0)&&(mark_tmp.nbWhites==0)) )
 ){
-console.log("invert game rows (1)");
+console.log("invert game rows");
 next_code1=codesPlayed[1];
 next_code2=codesPlayed[0];
 next_code3=0;

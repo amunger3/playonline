@@ -2565,7 +2565,11 @@ try {
     let str; // (precalculation mode)
     let precalculation_start_time; // (precalculation mode)
     if (precalculation_mode) { // (precalculation mode)
-      str = next_cur_game_idx + "|" + compressed_str_from_lists_of_codes_and_markidxs(curGame, marksIdxs, next_cur_game_idx) + "|N:" + nbCodes + "|";
+      let NAprefix = "";
+      if ((depth2or3 == 3) && (next_cur_game_idx < 3)) {
+        NAprefix = "N.A.";
+      }      
+      str = NAprefix + next_cur_game_idx + "|" + compressed_str_from_lists_of_codes_and_markidxs(curGame, marksIdxs, next_cur_game_idx) + "|N:" + nbCodes + "|";
       let date = new Date();
       let dd = date.getDate();
       if(dd < 10) {

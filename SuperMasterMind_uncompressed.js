@@ -1770,6 +1770,7 @@ function resetGameAttributes(nbColumnsSelected) {
     setTimeout("playACodeAutomatically(" + next_code1 + ");playACodeAutomatically(" + next_code2 + ");updateAndStoreNbGamesStarted(-1);", 44);
   }
   else if ((next_code1 != 0) && (next_code2 != 0) && (next_code3 != 0) && (next_scode != 0)) {
+    throw new Error("unexpected non-null next_code3");
     worst_mark_alert_already_displayed = true; // (avoid multiple alerts)
     sCode = next_scode;
     if (typeof gameInv !== 'undefined') {gameInv = 2;}
@@ -1929,27 +1930,6 @@ function writePerformanceOfCodePlayed(relative_perf_p, relative_perf_evaluation_
           }
           else {
             setTimeout("if (currentAttemptNumber == 3) {newGameButtonClick_delayed(" + nbColumns + ");}", 14);
-          }
-      }
-    }
-    else if ( (nbColumns == 5) && (attempt_nb == 3) && (currentAttemptNumber == 4) && gameOnGoing() // Unknown performance at 3rd attempt of Super Master Mind game
-              && (smmCodeHandler.nbDifferentColors(codesPlayed[0]) <= 2)
-              && (smmCodeHandler.nbDifferentColors(codesPlayed[1]) <= 2) // (will not loop with above case)
-            ) { // Game row inversion could allow to better evaluate performances asymmetrically
-      let mark_tmp = {nbBlacks:0, nbWhites:0};
-      smmCodeHandler.fillMark(codesPlayed[0], codesPlayed[1], mark_tmp);
-      if ( !smmCodeHandler.marksEqual(mark_tmp, marks[0]) // Impossible 2nd code
-           && smmCodeHandler.marksEqual(mark_tmp, marks[1]) ) { // Inverting codes would make game possible so its performances better evaluated (will not loop)
-          console.log("invert game rows (2)");
-          next_code1 = codesPlayed[1];
-          next_code2 = codesPlayed[0];
-          next_code3 = codesPlayed[2];
-          next_scode = sCode;
-          if ((typeof gameInv !== 'undefined') && (gameInv != 0)) { // defense against loops
-            displayGUIError("unexpected gameInv loop (2): " + gameInv, new Error().stack);
-          }
-          else {
-            setTimeout("if (currentAttemptNumber == 4) {newGameButtonClick_delayed(" + nbColumns + ");}", 14);
           }
       }
     }
@@ -2758,7 +2738,7 @@ function draw_graphic_bis() {
 
               // Try to complete precalculated games "on the fly" from second attempt of 5 columns games
               if ((nbColumns == 5) && (currentAttemptNumber == 3)) {
-                // Future improvement: to make .js file names more precise so their contents shorter, smmCodeHandler.getSMMCodeClassId(currentCode, codesPlayed, 2) 
+                // Future improvement: to make .js file names more precise so their contents shorter, smmCodeHandler.getSMMCodeClassId(currentCode, codesPlayed, 2)
                 //                     could be used here or the number of possible codes (if this call is shifted in time)
                 completePrecalculatedGamesOnTheFly(smmCodeHandler.compressCodeToString(codesPlayed[0]), smmCodeHandler.markToString(marks[0]),
                                                    smmCodeHandler.compressCodeToString(codesPlayed[1]), smmCodeHandler.markToString(marks[1]));

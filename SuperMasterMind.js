@@ -1491,6 +1491,7 @@ if(typeof gameInv!=='undefined'){gameInv=1;}
 setTimeout("playACodeAutomatically("+next_code1+");playACodeAutomatically("+next_code2+");updateAndStoreNbGamesStarted(-1);", 44);
 }
 else if((next_code1!=0)&&(next_code2!=0)&&(next_code3!=0)&&(next_scode!=0)){
+throw new Error("unexpected non-null next_code3");
 worst_mark_alert_already_displayed=true;
 sCode=next_scode;
 if(typeof gameInv!=='undefined'){gameInv=2;}
@@ -1638,27 +1639,6 @@ displayGUIError("unexpected gameInv loop (1): "+gameInv, new Error().stack);
 }
 else{
 setTimeout("if(currentAttemptNumber==3){newGameButtonClick_delayed("+nbColumns+");}", 14);
-}
-}
-}
-else if( (nbColumns==5)&&(attempt_nb==3)&&(currentAttemptNumber==4)&&gameOnGoing()
-&&(smmCodeHandler.nbDifferentColors(codesPlayed[0]) <=2)
-&&(smmCodeHandler.nbDifferentColors(codesPlayed[1]) <=2)
-){
-let mark_tmp={nbBlacks:0, nbWhites:0};
-smmCodeHandler.fillMark(codesPlayed[0], codesPlayed[1], mark_tmp);
-if(!smmCodeHandler.marksEqual(mark_tmp, marks[0])
-&&smmCodeHandler.marksEqual(mark_tmp, marks[1]) ){
-console.log("invert game rows (2)");
-next_code1=codesPlayed[1];
-next_code2=codesPlayed[0];
-next_code3=codesPlayed[2];
-next_scode=sCode;
-if((typeof gameInv!=='undefined')&&(gameInv!=0)){
-displayGUIError("unexpected gameInv loop (2): "+gameInv, new Error().stack);
-}
-else{
-setTimeout("if(currentAttemptNumber==4){newGameButtonClick_delayed("+nbColumns+");}", 14);
 }
 }
 }
@@ -3249,7 +3229,7 @@ let best_global_perf=global_best_performances[currentPossibleCodeShown-1];
 let valid_best_global_perf=((best_global_perf!=PerformanceUNKNOWN)&&(best_global_perf > 0.01));
 let code_ratio=1.0;
 if( (2*nbPossibleCodesShown < possibleCodesListsSizes[currentPossibleCodeShown-1])
-&&(possibleCodesListsSubdivisions[currentPossibleCodeShown-1]==-1) 
+&&(possibleCodesListsSubdivisions[currentPossibleCodeShown-1]==-1)
 &&(currentPossibleCodeShown > 1)
 &&valid_best_global_perf){
 code_ratio=possibleCodesListsSizes[currentPossibleCodeShown-1] / (2*nbPossibleCodesShown);

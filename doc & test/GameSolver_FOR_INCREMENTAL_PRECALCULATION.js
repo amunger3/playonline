@@ -2539,7 +2539,7 @@ try {
     let compute_sum;
     let precalculated_cur_game_or_code = (first_call ? areCurrentGameOrCodePrecalculated : -1);
     let precalculated_sum;
-    let depth2or3 = 2;
+    let depth2or3 = 2; // XXX TBC
     // let write_me; // (traces useful for debug)
     let write_me_for_precalculation; // (precalculation mode)
     let precalculation_cnt = 0; // (precalculation mode)
@@ -2564,7 +2564,11 @@ try {
     let str; // (precalculation mode)
     let precalculation_start_time; // (precalculation mode)
     if (precalculation_mode) { // (precalculation mode)
-      str = next_cur_game_idx + "|" + compressed_str_from_lists_of_codes_and_markidxs(curGame, marksIdxs, next_cur_game_idx) + "|N:" + nbCodes + "|";
+      let NAprefix = "";
+      if ((depth2or3 == 3) && (next_cur_game_idx < 3)) {
+        NAprefix = "N.A.";
+      }            
+      str = NAprefix + next_cur_game_idx + "|" + compressed_str_from_lists_of_codes_and_markidxs(curGame, marksIdxs, next_cur_game_idx) + "|N:" + nbCodes + "|";
       let date = new Date();
       let dd = date.getDate();
       if(dd < 10) {

@@ -2557,7 +2557,7 @@ try {
                                 && (next_cur_game_idx <= maxDepthForGamePrecalculation) // (-1 or 3)
                                 && ( (next_cur_game_idx <= 1)
                                      || (next_cur_game_idx == 2)
-                                     || (false // (this new depth-3 criterion is skipped as very long and concerns very few cases (~1%) => previous depth-3 results are kept)
+                                     || ((depth2or3 == 3) // (new possible depth-3 criterion, skipped when depth-2 is considered)
                                          && (next_cur_game_idx == 3) && (nbCodes >= 450))
                                    )
                                 && (!compute_sum_ini) ); // not a leaf

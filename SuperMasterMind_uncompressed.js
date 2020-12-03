@@ -2758,7 +2758,8 @@ function draw_graphic_bis() {
 
               // Try to complete precalculated games "on the fly" from second attempt of 5 columns games
               if ((nbColumns == 5) && (currentAttemptNumber == 3)) {
-                // Future improvement: smmCodeHandler.getSMMCodeClassId(currentCode, codesPlayed, 2) could be used here
+                // Future improvement: to make .js file names more precise so their contents shorter, smmCodeHandler.getSMMCodeClassId(currentCode, codesPlayed, 2) 
+                //                     could be used here or the number of possible codes (if this call is shifted in time)
                 completePrecalculatedGamesOnTheFly(smmCodeHandler.compressCodeToString(codesPlayed[0]), smmCodeHandler.markToString(marks[0]),
                                                    smmCodeHandler.compressCodeToString(codesPlayed[1]), smmCodeHandler.markToString(marks[1]));
               }

@@ -1767,6 +1767,7 @@ function resetGameAttributes(nbColumnsSelected) {
     worst_mark_alert_already_displayed = true; // (avoid multiple alerts)
     sCode = next_scode;
     if (typeof gameInv !== 'undefined') {gameInv = 1;}
+    // To simplify, impact on game duration (reduction) is ignored in those rare cases
     setTimeout("playACodeAutomatically(" + next_code1 + ");playACodeAutomatically(" + next_code2 + ");updateAndStoreNbGamesStarted(-1);", 44);
   }
   else if ((next_code1 != 0) && (next_code2 != 0) && (next_code3 != 0) && (next_scode != 0)) {
@@ -1774,6 +1775,7 @@ function resetGameAttributes(nbColumnsSelected) {
     worst_mark_alert_already_displayed = true; // (avoid multiple alerts)
     sCode = next_scode;
     if (typeof gameInv !== 'undefined') {gameInv = 2;}
+    // To simplify, impact on game duration (reduction) is ignored in those rare cases
     setTimeout("playACodeAutomatically(" + next_code1 + ");playACodeAutomatically(" + next_code2 + ");playACodeAutomatically(" + next_code3 + ");updateAndStoreNbGamesStarted(-1);", 44);
   }
   else {
@@ -1910,17 +1912,21 @@ function writePerformanceOfCodePlayed(relative_perf_p, relative_perf_evaluation_
 
   if (relative_perf_p == PerformanceUNKNOWN) {
     nbUnknownPerfs++;
-    if ( (nbColumns == 5) && (attempt_nb == 2) && (currentAttemptNumber == 3) && gameOnGoing() // Unknown performance at 2nd attempt of Super Master Mind game
+    // Unknown performance at 3rd attempt of Super Master Mind game
+    // Game row inversion could allow to better evaluate performances asymmetrically
+    // (Future improvement could make precalculations [more] symmetrical)
+    if ( (nbColumns == 5) && (attempt_nb == 3) && (currentAttemptNumber == 4) && gameOnGoing()
          && (smmCodeHandler.nbDifferentColors(codesPlayed[0]) > 2)
          && (smmCodeHandler.nbDifferentColors(codesPlayed[1]) <= 2)
-       ) { // Game row inversion could allow to better evaluate performances asymmetrically
+         && (smmCodeHandler.nbDifferentColors(codesPlayed[2]) <= 2) // code at 3rd attempt for which performance is unknown
+       ) {
       let mark_tmp = {nbBlacks:0, nbWhites:0};
       smmCodeHandler.fillMark(codesPlayed[0], codesPlayed[1], mark_tmp);
       if ( !smmCodeHandler.marksEqual(mark_tmp, marks[0]) // Impossible 2nd code
             && ( !((marks[1].nbBlacks == 0) && (marks[1].nbWhites == 0))
                  || ((mark_tmp.nbBlacks == 0) && (mark_tmp.nbWhites == 0)) ) // worst mark condition avoiding obviously impossible color replay
          ) {
-          console.log("invert game rows (1)");
+          console.log("invert game rows");
           next_code1 = codesPlayed[1];
           next_code2 = codesPlayed[0];
           next_code3 = 0; // (empty code)
@@ -2738,8 +2744,8 @@ function draw_graphic_bis() {
 
               // Try to complete precalculated games "on the fly" from second attempt of 5 columns games
               if ((nbColumns == 5) && (currentAttemptNumber == 3)) {
-                // Future improvement: to make .js file names more precise so their contents shorter, smmCodeHandler.getSMMCodeClassId(currentCode, codesPlayed, 2)
-                //                     could be used here or the number of possible codes (if this call is shifted in time)
+                // Future improvement could make .js file names more precise so their contents shorter: smmCodeHandler.getSMMCodeClassId(currentCode, codesPlayed, 2)
+                // could be used here or the number of possible codes (if this call is shifted in time)
                 completePrecalculatedGamesOnTheFly(smmCodeHandler.compressCodeToString(codesPlayed[0]), smmCodeHandler.markToString(marks[0]),
                                                    smmCodeHandler.compressCodeToString(codesPlayed[1]), smmCodeHandler.markToString(marks[1]));
               }

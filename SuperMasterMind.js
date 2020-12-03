@@ -1619,7 +1619,7 @@ relative_performances_of_codes_played[attempt_nb-1]=relative_perf_p;
 global_best_performances[attempt_nb-1]=best_global_performance_p;
 if(relative_perf_p==PerformanceUNKNOWN){
 nbUnknownPerfs++;
-if( (nbColumns==5)&&(attempt_nb==2)&&(currentAttemptNumber==3)&&gameOnGoing()
+if( (nbColumns==5)&&(attempt_nb==3)&&(currentAttemptNumber==4)&&gameOnGoing()
 &&(smmCodeHandler.nbDifferentColors(codesPlayed[0]) > 2)
 &&(smmCodeHandler.nbDifferentColors(codesPlayed[1]) <=2)
 ){

@@ -2958,7 +2958,7 @@ try {
 
         let appliedMaxPerformanceEvaluationTime = maxPerformanceEvaluationTime;
         if (areCurrentGameOrCodePrecalculated >= 0) { // both game and code were precalculated OR only game was precalculated (Note: "> 0" would not be good here, as a subsequent impossible code evaluation would fail instantly)
-          appliedMaxPerformanceEvaluationTime = appliedMaxPerformanceEvaluationTime * 1.25; // it's a pity not to use precalculated results! (especially at 3rd attempt)
+          appliedMaxPerformanceEvaluationTime = appliedMaxPerformanceEvaluationTime * 1.20; // it's a pity not to use precalculated results! (especially at 3rd attempt)
         }
 
         if (first_call) {

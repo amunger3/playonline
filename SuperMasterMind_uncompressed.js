@@ -4018,7 +4018,7 @@ function displayString(str, x_cell, y_cell, x_cell_width,
   let y_0_next;
   let y_offset = 1; // (works with Chrome & Firefox)
   if (edgeMode) {
-    y_offset = 0;
+    y_offset = 1;
   }
   /* previous offsets:
   let y_offset = 0; // (works with Chrome)
@@ -4117,21 +4117,21 @@ function displayString(str, x_cell, y_cell, x_cell_width,
       ctx.fillStyle = foregroundColor;
       ctx.textAlign = "center"; // horizontal alignment
       ctx.textBaseline = "middle"; // vertical alignment
-      ctx.fillText(str, (x_0 + x_0_next)/2, (y_0 + y_0_next)/2 + y_offset);
+      ctx.fillText(str, (x_0 + x_0_next)/2, Math.ceil((y_0 + y_0_next)/2 + y_offset));
       x_0_for_drawBubble = Math.max((x_0 + x_0_next)/2 - str_width/2, 0);
     }
     else if (justify == 2) { // right
       ctx.fillStyle = foregroundColor;
       ctx.textAlign = "end"; // horizontal alignment
       ctx.textBaseline = "middle"; // vertical alignment
-      ctx.fillText(str, x_0_next, (y_0 + y_0_next)/2 + y_offset);
+      ctx.fillText(str, x_0_next, Math.ceil((y_0 + y_0_next)/2 + y_offset));
       x_0_for_drawBubble = Math.max(x_0_next - str_width, 0);
     }
     else { // left
       ctx.fillStyle = foregroundColor;
       ctx.textAlign = "start"; // horizontal alignment
       ctx.textBaseline = "middle"; // vertical alignment
-      ctx.fillText(str, x_0, (y_0 + y_0_next)/2 + y_offset);
+      ctx.fillText(str, x_0, Math.ceil((y_0 + y_0_next)/2 + y_offset));
       x_0_for_drawBubble = x_0;
     }
 

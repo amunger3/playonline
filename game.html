@@ -737,7 +737,7 @@
         }
       }
       let firefoxMode = (navigator.userAgent.toUpperCase().search("FIREFOX") != -1);
-      let edgeMode    = ((!firefoxMode) && (navigator.userAgent.toUpperCase().search("EDGE/") != -1));
+      let edgeMode    = ((!firefoxMode) && ((navigator.userAgent.toUpperCase().search("EDG/") != -1) || (navigator.userAgent.toUpperCase().search("EDGE/") != -1)));
       let chromeMode  = ((!firefoxMode) && (!edgeMode) && (getChromeVersion() != -1));
       let safariMode  = ((!firefoxMode) && (!edgeMode) && (!chromeMode) && (navigator.userAgent.toUpperCase().search("SAFARI") != -1));
 

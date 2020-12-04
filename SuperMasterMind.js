@@ -3440,7 +3440,7 @@ let y_0;
 let y_0_next;
 let y_offset=1;
 if(edgeMode){
-y_offset=0;
+y_offset=1;
 }
 /* previous offsets:
 let y_offset=0;
@@ -3535,21 +3535,21 @@ ctx.fillRect(x_0+(x_0_next - x_0)/2 - half_hidding_rect_width, y_0_next+3, 2*hal
 ctx.fillStyle=foregroundColor;
 ctx.textAlign="center";
 ctx.textBaseline="middle";
-ctx.fillText(str, (x_0+x_0_next)/2, (y_0+y_0_next)/2+y_offset);
+ctx.fillText(str, (x_0+x_0_next)/2, Math.ceil((y_0+y_0_next)/2+y_offset));
 x_0_for_drawBubble=Math.max((x_0+x_0_next)/2 - str_width/2, 0);
 }
 else if(justify==2){
 ctx.fillStyle=foregroundColor;
 ctx.textAlign="end";
 ctx.textBaseline="middle";
-ctx.fillText(str, x_0_next, (y_0+y_0_next)/2+y_offset);
+ctx.fillText(str, x_0_next, Math.ceil((y_0+y_0_next)/2+y_offset));
 x_0_for_drawBubble=Math.max(x_0_next - str_width, 0);
 }
 else{
 ctx.fillStyle=foregroundColor;
 ctx.textAlign="start";
 ctx.textBaseline="middle";
-ctx.fillText(str, x_0, (y_0+y_0_next)/2+y_offset);
+ctx.fillText(str, x_0, Math.ceil((y_0+y_0_next)/2+y_offset));
 x_0_for_drawBubble=x_0;
 }
 if(drawInBubble){

@@ -3439,8 +3439,8 @@ let x_0_next=get_x_pixel(x_min+x_step*(x_cell+x_cell_width));
 let y_0;
 let y_0_next;
 let y_offset=1;
-if(edgeMode){
-y_offset=1;
+if(firefoxMode){
+y_offset=0;
 }
 /* previous offsets:
 let y_offset=0;

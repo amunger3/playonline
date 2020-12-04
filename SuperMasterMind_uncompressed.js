@@ -4017,8 +4017,8 @@ function displayString(str, x_cell, y_cell, x_cell_width,
   let y_0;
   let y_0_next;
   let y_offset = 1; // (works with Chrome & Firefox)
-  if (edgeMode) {
-    y_offset = 1;
+  if (firefoxMode) {
+    y_offset = 0;
   }
   /* previous offsets:
   let y_offset = 0; // (works with Chrome)

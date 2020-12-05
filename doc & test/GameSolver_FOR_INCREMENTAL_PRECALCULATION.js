@@ -2557,8 +2557,14 @@ try {
                                 && (next_cur_game_idx <= maxDepthForGamePrecalculation) // (-1 or 3)
                                 && ( (next_cur_game_idx <= 1)
                                      || (next_cur_game_idx == 2)
-                                     || ((depth2or3 == 3) // (new possible depth-3 criterion, skipped when depth-2 is considered)
-                                         && (next_cur_game_idx == 3) && (nbCodes >= 450))
+                                     || ( (depth2or3 == 3) // (new possible depth-3 criterion, skipped when depth-2 is considered)
+                                          && (next_cur_game_idx == 3) && (nbCodes >= 450)
+                                          // simple games to reduce precalculation efforts + avoid too big precalculated files (can be an issue with only one file transfer at 2nd attempt)
+                                          && ( (possibleGame && (codeHandler.nbDifferentColors(curGame[0]) <= 2) && (codeHandler.nbDifferentColors(curGame[1]) <= 2) && (codeHandler.nbDifferentColors(curGame[2]) <= 2))
+                                               || ((codeHandler.nbDifferentColors(curGame[0]) <= 2) && codeHandler.isVerySimple(curGame[1]) && codeHandler.isVerySimple(curGame[2]))
+                                               || ((codeHandler.nbDifferentColors(curGame[1]) <= 2) && codeHandler.isVerySimple(curGame[0]) && codeHandler.isVerySimple(curGame[2]))
+                                               || ((codeHandler.nbDifferentColors(curGame[2]) <= 2) && codeHandler.isVerySimple(curGame[0]) && codeHandler.isVerySimple(curGame[1])) )
+                                        )
                                    )
                                 && (!compute_sum_ini) ); // not a leaf
     let str; // (precalculation mode)
@@ -2567,7 +2573,7 @@ try {
       let NAprefix = "";
       if ((depth2or3 == 3) && (next_cur_game_idx < 3)) {
         NAprefix = "N.A.";
-      }            
+      }
       str = NAprefix + next_cur_game_idx + "|" + compressed_str_from_lists_of_codes_and_markidxs(curGame, marksIdxs, next_cur_game_idx) + "|N:" + nbCodes + "|";
       let date = new Date();
       let dd = date.getDate();
@@ -2626,7 +2632,7 @@ try {
         let only_logical_codes_from_depth2 = false; // XXX TBC
         if ((next_cur_game_idx >= 2) && only_logical_codes_from_depth2) {
           skip_cur_code = true;
-        }        
+        }
         let four_blacks = false;
         for (let i = 0; i < next_cur_game_idx; i++) {
           // (replayed codes are addressed more generally below through useless codes, as all codes equivalent to replayed codes shall be covered to reach an optimization)
@@ -2652,13 +2658,13 @@ try {
           skip_cur_code = true;
         }
         if ( (next_cur_game_idx == 2) && (nbCodes > nbCodesForPrecalculationThreshold) // (above threshold)
-             && !((possibleGame && (codeHandler.nbDifferentColors(curGame[0]) <= 2)) || ((codeHandler.nbDifferentColors(curGame[0]) <= 2) && (codeHandler.nbDifferentColors(curGame[1]) <= 2))) // simple game => relatively reduced number of impossible codes
+             && !((possibleGame && (codeHandler.nbDifferentColors(curGame[0]) <= 2)) || ((codeHandler.nbDifferentColors(curGame[0]) <= 2) && (codeHandler.nbDifferentColors(curGame[1]) <= 2))) // simple games => relatively reduced number of impossible codes
              && !((nbCodes >= 700) && four_blacks) // same condition as above
              && !((nbCodes >= 700) && (codeHandler.nbDifferentColors(cur_code) <= 2)) ) { // more general than above condition for better coverage
           skip_cur_code = true; // simplification
         }
         if ( (next_cur_game_idx >= 3)
-             && !((codeHandler.nbDifferentColors(curGame[0]) == 1) && codeHandler.isVerySimple(curGame[1]) && codeHandler.isVerySimple(curGame[2])) ) { // (covers 11111|22222|33333-like games for which 3125 possibles codes can be left - to simplify this condition is left asymmetrical and only applied to 11111 first codes)
+             && !((codeHandler.nbDifferentColors(curGame[0]) == 1) && (codeHandler.nbDifferentColors(curGame[1]) == 1) && (codeHandler.nbDifferentColors(curGame[2]) == 1)) ) { // (covers 11111|22222|33333-like games for which 3125 possibles codes can be left)
           skip_cur_code = true;
         }
         if (skip_cur_code) {

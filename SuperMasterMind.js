@@ -3442,7 +3442,7 @@ let str_width=ctx.measureText(str).width;
 let str_height=parseInt(ctx.font.match(/\d+/)[0]);
 if(0==halfLine){
 if(!drawInBubble){
-str_height=str_height * 0.82;
+str_height=font_size * 0.82;
 }
 y_0=get_y_pixel(y_min+y_step*y_cell);
 y_0_next=get_y_pixel(y_min+y_step*(y_cell+1), ignoreRanges);
@@ -3529,21 +3529,21 @@ ctx.fillRect(x_0+(x_0_next - x_0)/2 - half_hidding_rect_width, y_0_next+3, 2*hal
 ctx.fillStyle=foregroundColor;
 ctx.textAlign="center";
 ctx.textBaseline="top";
-ctx.fillText(str, (x_0+x_0_next)/2, y_0+(y_0_next - y_0 - str_height)/2);
+ctx.fillText(str, (x_0+x_0_next)/2, Math.round(y_0+(y_0_next - y_0 - str_height)/2));
 x_0_for_drawBubble=Math.max((x_0+x_0_next)/2 - str_width/2, 0);
 }
 else if(justify==2){
 ctx.fillStyle=foregroundColor;
 ctx.textAlign="end";
 ctx.textBaseline="top";
-ctx.fillText(str, x_0_next, y_0+(y_0_next - y_0 - str_height)/2);
+ctx.fillText(str, x_0_next, Math.round(y_0+(y_0_next - y_0 - str_height)/2));
 x_0_for_drawBubble=Math.max(x_0_next - str_width, 0);
 }
 else{
 ctx.fillStyle=foregroundColor;
 ctx.textAlign="start";
 ctx.textBaseline="top";
-ctx.fillText(str, x_0, y_0+(y_0_next - y_0 - str_height)/2);
+ctx.fillText(str, x_0, Math.round(y_0+(y_0_next - y_0 - str_height)/2));
 x_0_for_drawBubble=x_0;
 }
 if(drawInBubble){

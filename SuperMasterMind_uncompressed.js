@@ -4015,11 +4015,11 @@ function displayString(str, x_cell, y_cell, x_cell_width,
   let y_0;
   let y_0_next;
   let str_width = ctx.measureText(str).width;
-  let str_height = parseInt(ctx.font.match(/\d+/)[0]); // only get numbers (no influence - corrective factor applied below) => this is the font height
+  let str_height = parseInt(ctx.font.match(/\d+/)[0]); // only get numbers (no always an influence - corrective calculation applied below) => this is the font height
 
   if (0 == halfLine) {
     if (!drawInBubble) {
-      str_height = str_height * 0.82; // "* 0.82" to reflect the actual height of number characters
+      str_height = font_size * 0.82; // "* 0.82" to reflect the actual height of number characters
     }
     y_0 = get_y_pixel(y_min+y_step*y_cell);
     y_0_next = get_y_pixel(y_min+y_step*(y_cell+1), ignoreRanges);
@@ -4108,21 +4108,21 @@ function displayString(str, x_cell, y_cell, x_cell_width,
       ctx.fillStyle = foregroundColor;
       ctx.textAlign = "center"; // horizontal alignment
       ctx.textBaseline = "top"; // vertical alignment ("top" instead of "middle" to takeadjusted str_height into account)
-      ctx.fillText(str, (x_0 + x_0_next)/2, y_0 + (y_0_next - y_0 - str_height)/2);
+      ctx.fillText(str, (x_0 + x_0_next)/2, Math.round(y_0 + (y_0_next - y_0 - str_height)/2));
       x_0_for_drawBubble = Math.max((x_0 + x_0_next)/2 - str_width/2, 0);
     }
     else if (justify == 2) { // right
       ctx.fillStyle = foregroundColor;
       ctx.textAlign = "end"; // horizontal alignment
       ctx.textBaseline = "top"; // vertical alignment ("top" instead of "middle" to takeadjusted str_height into account)
-      ctx.fillText(str, x_0_next, y_0 + (y_0_next - y_0 - str_height)/2);
+      ctx.fillText(str, x_0_next, Math.round(y_0 + (y_0_next - y_0 - str_height)/2));
       x_0_for_drawBubble = Math.max(x_0_next - str_width, 0);
     }
     else { // left
       ctx.fillStyle = foregroundColor;
       ctx.textAlign = "start"; // horizontal alignment
       ctx.textBaseline = "top"; // vertical alignment ("top" instead of "middle" to takeadjusted str_height into account)
-      ctx.fillText(str, x_0, y_0 + (y_0_next - y_0 - str_height)/2);
+      ctx.fillText(str, x_0, Math.round(y_0 + (y_0_next - y_0 - str_height)/2));
       x_0_for_drawBubble = x_0;
     }
 

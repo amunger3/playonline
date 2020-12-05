@@ -229,7 +229,7 @@ class CodeHandler {
         }
       }
     }
-    let res1 = nbBlacks * (this.nbColumns+1) + nbWhites;
+    let res1 = nbBlacks * 10 + nbWhites;
 
     // 2) Total number of colors
     let totalnbcolors = 0;

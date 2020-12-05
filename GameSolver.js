@@ -201,7 +201,7 @@ break;
 }
 }
 }
-let res1=nbBlacks * (this.nbColumns+1)+nbWhites;
+let res1=nbBlacks * 10+nbWhites;
 let totalnbcolors=0;
 for (let color=1;color <=this.nbColors;color++){
 if((this.different_colors[color] > 0)||(this.different_colors_bis[color] > 0)){

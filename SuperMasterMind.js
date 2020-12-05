@@ -3232,7 +3232,7 @@ let code_ratio=1.0;
 if( (2*nbPossibleCodesShown < possibleCodesListsSizes[currentPossibleCodeShown-1])
 &&(possibleCodesListsSubdivisions[currentPossibleCodeShown-1]==-1)
 &&(currentPossibleCodeShown > 1)
-&&valid_best_global_perf){
+&&valid_best_global_perf ){
 code_ratio=possibleCodesListsSizes[currentPossibleCodeShown-1] / (2*nbPossibleCodesShown);
 }
 for (let codeidx=0;codeidx < nbOfCodesListed;codeidx++){
@@ -3438,18 +3438,12 @@ let x_0_for_drawBubble;
 let x_0_next=get_x_pixel(x_min+x_step*(x_cell+x_cell_width));
 let y_0;
 let y_0_next;
-let y_offset=1;
-if(firefoxMode){
-y_offset=0;
-}
-/* previous offsets:
-let y_offset=0;
-if(firefoxMode){
-y_offset=1;
-} */
 let str_width=ctx.measureText(str).width;
 let str_height=parseInt(ctx.font.match(/\d+/)[0]);
 if(0==halfLine){
+if(!drawInBubble){
+str_height=str_height * 0.82;
+}
 y_0=get_y_pixel(y_min+y_step*y_cell);
 y_0_next=get_y_pixel(y_min+y_step*(y_cell+1), ignoreRanges);
 }
@@ -3534,22 +3528,22 @@ ctx.fillRect(x_0+(x_0_next - x_0)/2 - half_hidding_rect_width, y_0_next+3, 2*hal
 }
 ctx.fillStyle=foregroundColor;
 ctx.textAlign="center";
-ctx.textBaseline="middle";
-ctx.fillText(str, (x_0+x_0_next)/2, Math.ceil((y_0+y_0_next)/2+y_offset));
+ctx.textBaseline="top";
+ctx.fillText(str, (x_0+x_0_next)/2, y_0+(y_0_next - y_0 - str_height)/2);
 x_0_for_drawBubble=Math.max((x_0+x_0_next)/2 - str_width/2, 0);
 }
 else if(justify==2){
 ctx.fillStyle=foregroundColor;
 ctx.textAlign="end";
-ctx.textBaseline="middle";
-ctx.fillText(str, x_0_next, Math.ceil((y_0+y_0_next)/2+y_offset));
+ctx.textBaseline="top";
+ctx.fillText(str, x_0_next, y_0+(y_0_next - y_0 - str_height)/2);
 x_0_for_drawBubble=Math.max(x_0_next - str_width, 0);
 }
 else{
 ctx.fillStyle=foregroundColor;
 ctx.textAlign="start";
-ctx.textBaseline="middle";
-ctx.fillText(str, x_0, Math.ceil((y_0+y_0_next)/2+y_offset));
+ctx.textBaseline="top";
+ctx.fillText(str, x_0, y_0+(y_0_next - y_0 - str_height)/2);
 x_0_for_drawBubble=x_0;
 }
 if(drawInBubble){

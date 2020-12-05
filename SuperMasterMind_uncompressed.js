@@ -4019,7 +4019,7 @@ function displayString(str, x_cell, y_cell, x_cell_width,
 
   if (0 == halfLine) {
     if (!drawInBubble) {
-      str_height = str_height * (firefoxMode ? 0.85 : 0.82); // "* 0.82" to reflect the actual height of number characters on Chrome & Edge - Firefox behaves differently
+      str_height = str_height * 0.85; // "* 0.85" to reflect the actual height of number characters
     }
     y_0 = get_y_pixel(y_min+y_step*y_cell);
     y_0_next = get_y_pixel(y_min+y_step*(y_cell+1), ignoreRanges);

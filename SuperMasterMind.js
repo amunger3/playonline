@@ -3442,7 +3442,7 @@ let str_width=ctx.measureText(str).width;
 let str_height=parseInt(ctx.font.match(/\d+/)[0]);
 if(0==halfLine){
 if(!drawInBubble){
-str_height=font_size * (firefoxMode ? 0.78 : 0.82);
+str_height=font_size * (firefoxMode ? 0.85 : 0.82);
 }
 y_0=get_y_pixel(y_min+y_step*y_cell);
 y_0_next=get_y_pixel(y_min+y_step*(y_cell+1), ignoreRanges);

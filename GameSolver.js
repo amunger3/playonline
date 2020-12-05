@@ -69,6 +69,7 @@ this.code1_colors=new Array(this.nbMaxColumns);
 this.code2_colors=new Array(this.nbMaxColumns);
 this.colors_int=new Array(this.nbMaxColumns);
 this.different_colors=new Array(this.nbColors+1);
+this.different_colors_bis=new Array(this.nbColors+1);
 this.complete_game=new Array(overallNbMaxAttempts+1);
 this.different_game_colors_per_row=new Array(overallNbMaxAttempts+1);
 for (let i=0;i < overallNbMaxAttempts+1;i++){
@@ -153,6 +154,69 @@ sum=sum+1;
 }
 }
 return sum;
+}
+getSMMGameIdAfter2Attempts(code1, code2){
+if(this.nbColumns!=5){
+throw new Error("CodeHandler: getGameIdFrom2Codes ("+this.nbColumns+")");
+}
+let nbBlacks=0;
+let nbWhites=0;
+let col, col1, col2;
+this.colors_int[0]=true;
+this.colors_int[1]=true;
+this.colors_int[2]=true;
+this.colors_int[3]=true;
+this.colors_int[4]=true;
+this.code1_colors[0]=(code1 & 0x0000000F);
+this.code1_colors[1]=((code1 >> 4) & 0x0000000F);
+this.code1_colors[2]=((code1 >> 8) & 0x0000000F);
+this.code1_colors[3]=((code1 >> 12) & 0x0000000F);
+this.code1_colors[4]=((code1 >> 16) & 0x0000000F);
+this.code2_colors[0]=(code2 & 0x0000000F);
+this.code2_colors[1]=((code2 >> 4) & 0x0000000F);
+this.code2_colors[2]=((code2 >> 8) & 0x0000000F);
+this.code2_colors[3]=((code2 >> 12) & 0x0000000F);
+this.code2_colors[4]=((code2 >> 16) & 0x0000000F);
+this.different_colors.fill(0);
+for (let col=0;col < this.nbColumns;col++){
+let color=this.code1_colors[col];
+this.different_colors[color]++;
+}
+this.different_colors_bis.fill(0);
+for (let col=0;col < this.nbColumns;col++){
+let color=this.code2_colors[col];
+this.different_colors_bis[color]++;
+}
+for (col1=0;col1 < this.nbColumns;col1++){
+if(this.code1_colors[col1]==this.code2_colors[col1]){
+nbBlacks++;
+}
+else{
+for (col2=0;col2 < this.nbColumns;col2++){
+if((this.code1_colors[col1]==this.code2_colors[col2])&&(this.code1_colors[col2]!=this.code2_colors[col2])&&this.colors_int[col2]){
+this.colors_int[col2]=false;
+nbWhites++;
+break;
+}
+}
+}
+}
+let res1=nbBlacks * (this.nbColumns+1)+nbWhites;
+let totalnbcolors=0;
+for (let color=1;color <=this.nbColors;color++){
+if((this.different_colors[color] > 0)||(this.different_colors_bis[color] > 0)){
+totalnbcolors++;
+}
+}
+let res2=0;
+for (col=0;col < this.nbColumns;col++){
+let color1=this.code1_colors[col];
+let color2=this.code2_colors[col];
+let delta=this.different_colors[color1] * (this.different_colors_bis[color2]+10)
+* (this.different_colors[color2]+100) * (this.different_colors_bis[color1]+1000);
+res2=res2+delta;
+}
+return totalnbcolors+res1 * 10+res2 * 1000;
 }
 getSMMCodeClassId(code, game=null, game_size=0){
 if(this.nbColumns!=5){

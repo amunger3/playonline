@@ -32,4 +32,3 @@ For GameSolver.js: manual deletion of comments:
 - let nbCodesToGoThrough=
 - else if((next_cur_game_idx==depth2or3)&&compute_sum&&precalculation_mode&&(!compute_sum_ini)&&(!skip_lookfor)){
 - if((depth <=1)&&(!compute_sum_ini)){
-- if( (next_cur_game_idx==1)

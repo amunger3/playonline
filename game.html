@@ -509,8 +509,8 @@
           var m = date.getMonth();
           var d = date.getDate();
           if (!android_appli) {
-            if ( ((m == 11) && (d >= 7)) // after December 7th
-                 || ((m == 0) && (d <= 7)) ) { // before January 7th
+            if ( ((m == 11) && (d >= 10)) // after December 10th
+                 || ((m == 0) && (d <= 5)) ) { // before January 5th
               // (Display values will be updated below if necessary)
               document.write("<img id='img_1' style='display:none;' src='img/End_of_year.png'>&nbsp;<br><img id='img_2' style='display:none;' src='img/End_of_year2.png'>&nbsp;");
             }

@@ -1,6 +1,7 @@
 import java.lang.*;
 import java.io.*;
 import java.util.regex.*;
+import java.util.Arrays;
 
 // The goal of this program is to store all precalculated performances into plenty of small files that will be quick to load
 
@@ -20,6 +21,18 @@ public class extractPrecalculatedPerfs {
   // ***********
 
   private static String[] file_table =
+    // NEW PERFS 4
+    {
+      "STAGE2 - RESULTS_11111_270_1300_2s_plus_depth3only_270_1300_2.7sec.txt",
+      "STAGE2 - RESULTS_11112_270_1300_2s_plus_depth3only_270_1300_4.4sec.txt",
+      "STAGE2 - RESULTS_11122_270_1500_2s_plus_depth3only_270_1500_4.4sec.txt",
+      "STAGE2 - RESULTS_11123_depth2_onlylogicalcodesatdepth2_270_32000_2.7s.txt",
+      "STAGE2 - RESULTS_11223_depth2_onlylogicalcodesatdepth2_270_32000_2.7s.txt",
+      "STAGE2 - RESULTS_11234_depth2_onlylogicalcodesatdepth2_270_32000_2.7s.txt",
+      "STAGE2 - RESULTS_12345_depth2_onlylogicalcodesatdepth2_270_32000_2.7s.txt"
+    };
+    /*
+    // NEW PERFS 3
     {
       "STAGE2 - RESULTS_300_to_1300_3.5sec_11111 (OK).txt",
       "STAGE3 - 1 of 5 Precalculated perfs in range 300..1300 and 3.5 seconds for 11112 first codes.txt",
@@ -28,7 +41,7 @@ public class extractPrecalculatedPerfs {
       "STAGE3 - RESULTS_270_to_2222_2.7sec_11223 (OK).txt",
       "STAGE2 - RESULTS_270_to_1700_2.7sec_11234 (OK).txt",
       "STAGE2 - RESULTS_270_to_1700_2.7sec_12345 (OK).txt"
-    };
+    }; */
 
   private static boolean dim_inversion_mode = false;
 
@@ -39,9 +52,14 @@ public class extractPrecalculatedPerfs {
   private static int nb_doubles[] = new int[2];
   private static int one_double_color[] = new int[2];
   private static String output_str[] = new String[2];
+  private static boolean colors_int[] = new boolean[5];
+  private static int code1_colors[] = new int[5];
+  private static int code2_colors[] = new int[5];
+  private static int different_colors[] = new int[9];
+  private static int different_colors_bis[] = new int[9];
   private static String determine_smm_jscriptname(String code_str_1, String mark_str_1, String code_str_2, String mark_str_2) throws Exception {
 
-  // ***** CODE DUPLICATED IN SuperMasterMind.js ******
+  // ***** CODE DUPLICATED IN SuperMasterMind.js & GameSolver.js ******
 
   // Handle each couple (code, mark)
   // *******************************
@@ -144,30 +162,107 @@ public class extractPrecalculatedPerfs {
   // Determine output filename
   // *************************
 
-  int totalnbcolors = 0;
-  for (int color = 0; color < table_tmp[0].length; color++) {
-    if ((table_tmp[0][color] > 0) || (table_tmp[1][color] > 0)) {
-      totalnbcolors++;
+  String suffix = "";
+  if (false) { // "simplistic" game identification
+    int totalnbcolors = 0;
+    for (int color = 0; color < table_tmp[0].length; color++) {
+      if ((table_tmp[0][color] > 0) || (table_tmp[1][color] > 0)) {
+        totalnbcolors++;
+      }
+    }
+    suffix = "_" + Integer.toString(totalnbcolors) + "X";
+    if ((!is_there_triple[1]) && (nb_doubles[1] == 1)) { // many combinations in case of 1 double => a suffix is necessary / 1 double => this color is not equivalent to any other
+      suffix = suffix + "_" +  Integer.toString(table_tmp[0][one_double_color[1]]) + "Y";
+      if ((!is_there_triple[0]) && (nb_doubles[0] == 1)) { // many combinations in case of 1 double => an extra suffix is necessary
+        int nb_double_intersections = 0;
+        for (int column = 0; column < 5; column++) {
+          int color_1 = code_str_1.charAt(column) - 48;
+          if (color_1 == one_double_color[0]) {
+            int color_2 = code_str_2.charAt(column) - 48;
+            if (color_2 == one_double_color[1]) {
+              nb_double_intersections++;
+            }
+          }
+        }
+        suffix = suffix + "_" + Integer.toString(nb_double_intersections) + "Z";
+      }
     }
   }
+  else {
 
-  String suffix = "";
-  suffix = "_" + Integer.toString(totalnbcolors) + "X";
-  if ((!is_there_triple[1]) && (nb_doubles[1] == 1)) { // many combinations in case of 1 double => a suffix is necessary / 1 double => this color is not equivalent to any other
-    suffix = suffix + "_" +  Integer.toString(table_tmp[0][one_double_color[1]]) + "Y";
-    if ((!is_there_triple[0]) && (nb_doubles[0] == 1)) { // many combinations in case of 1 double => an extra suffix is necessary
-      int nb_double_intersections = 0;
-      for (int column = 0; column < 5; column++) {
-        int color_1 = code_str_1.charAt(column) - 48;
-        if (color_1 == one_double_color[0]) {
-          int color_2 = code_str_2.charAt(column) - 48;
-          if (color_2 == one_double_color[1]) {
-            nb_double_intersections++;
+    int nbBlacks = 0;
+    int nbWhites = 0;
+    int col, col1, col2;
+
+    colors_int[0] = true;
+    colors_int[1] = true;
+    colors_int[2] = true;
+    colors_int[3] = true;
+    colors_int[4] = true;
+    code1_colors[0] = code_str_1.charAt(0) - 48;
+    code1_colors[1] = code_str_1.charAt(1) - 48;
+    code1_colors[2] = code_str_1.charAt(2) - 48;
+    code1_colors[3] = code_str_1.charAt(3) - 48;
+    code1_colors[4] = code_str_1.charAt(4) - 48;
+    code2_colors[0] = code_str_2.charAt(0) - 48;
+    code2_colors[1] = code_str_2.charAt(1) - 48;
+    code2_colors[2] = code_str_2.charAt(2) - 48;
+    code2_colors[3] = code_str_2.charAt(3) - 48;
+    code2_colors[4] = code_str_2.charAt(4) - 48;
+
+    Arrays.fill(different_colors, 0);
+    for (col = 0; col < 5; col++) {
+      int color = code1_colors[col];
+      different_colors[color]++;
+    }
+
+    Arrays.fill(different_colors_bis, 0);
+    for (col = 0; col < 5; col++) {
+      int color = code2_colors[col];
+      different_colors_bis[color]++;
+    }
+
+    // 1) Mark
+    for (col1 = 0; col1 < 5; col1++) {
+      if (code1_colors[col1] == code2_colors[col1]) {
+        nbBlacks++;
+      }
+      else {
+        for (col2 = 0; col2 < 5; col2++) {
+          if ((code1_colors[col1] == code2_colors[col2]) && (code1_colors[col2] != code2_colors[col2]) && colors_int[col2]) {
+            colors_int[col2] = false;
+            nbWhites++;
+            break;
           }
         }
       }
-      suffix = suffix + "_" + Integer.toString(nb_double_intersections) + "Z";
     }
+    int res1 = nbBlacks * 10 + nbWhites;
+
+    // 2) Total number of colors
+    int totalnbcolors = 0;
+    for (int color = 1; color <= 8; color++) {
+      if ((different_colors[color] > 0) || (different_colors_bis[color] > 0)) {
+        totalnbcolors++;
+      }
+    }
+
+    // 3) Ponderated color correspondance (does not vary when permuting columns)
+    long res2 = 0;
+    for (col = 0; col < 5; col++) {
+      int color1 = code1_colors[col];
+      int color2 = code2_colors[col];
+      long delta = (long)different_colors[color1] * (long)(different_colors_bis[color2] + 10)
+                   * (long)(different_colors[color2] + 100) * (long)(different_colors_bis[color1] + 1000);
+      res2 = res2 + delta;
+    }
+
+    long final_res = totalnbcolors + res1 * 10 + res2 * 1000;
+    if (final_res <= 0) {
+      throw new Error("invalid final_res value: " + final_res + " for " + output_str[0] + " " + output_str[1]);
+    }
+    suffix = "_" + Long.toString(final_res);
+
   }
 
   // Return filename

@@ -1486,13 +1486,13 @@ setTimeout("displayRandomCodesHintIfNeeded();", 444);
 }
 gameSolverDbg=8;
 if((next_code1!=0)&&(next_code2!=0)&&(next_code3==0)&&(next_scode!=0)){
+throw new Error("unexpected null next_code3");
 worst_mark_alert_already_displayed=true;
 sCode=next_scode;
 if(typeof gameInv!=='undefined'){gameInv=1;}
 setTimeout("playACodeAutomatically("+next_code1+");playACodeAutomatically("+next_code2+");updateAndStoreNbGamesStarted(-1);", 44);
 }
 else if((next_code1!=0)&&(next_code2!=0)&&(next_code3!=0)&&(next_scode!=0)){
-throw new Error("unexpected non-null next_code3");
 worst_mark_alert_already_displayed=true;
 sCode=next_scode;
 if(typeof gameInv!=='undefined'){gameInv=2;}
@@ -1634,13 +1634,13 @@ if(!smmCodeHandler.marksEqual(mark_tmp, marks[0])
 console.log("invert game rows");
 next_code1=codesPlayed[1];
 next_code2=codesPlayed[0];
-next_code3=0;
+next_code3=codesPlayed[2];
 next_scode=sCode;
 if((typeof gameInv!=='undefined')&&(gameInv!=0)){
 displayGUIError("unexpected gameInv loop (1): "+gameInv, new Error().stack);
 }
 else{
-setTimeout("if(currentAttemptNumber==3){newGameButtonClick_delayed("+nbColumns+");}", 14);
+setTimeout("if(currentAttemptNumber==4){newGameButtonClick_delayed("+nbColumns+");}", 14);
 }
 }
 }

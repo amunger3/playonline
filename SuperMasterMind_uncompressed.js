@@ -1765,6 +1765,7 @@ function resetGameAttributes(nbColumnsSelected) {
   gameSolverDbg = 8;
 
   if ((next_code1 != 0) && (next_code2 != 0) && (next_code3 == 0) && (next_scode != 0)) {
+    throw new Error("unexpected null next_code3");
     worst_mark_alert_already_displayed = true; // (avoid multiple alerts)
     sCode = next_scode;
     if (typeof gameInv !== 'undefined') {gameInv = 1;}
@@ -1772,7 +1773,6 @@ function resetGameAttributes(nbColumnsSelected) {
     setTimeout("playACodeAutomatically(" + next_code1 + ");playACodeAutomatically(" + next_code2 + ");updateAndStoreNbGamesStarted(-1);", 44);
   }
   else if ((next_code1 != 0) && (next_code2 != 0) && (next_code3 != 0) && (next_scode != 0)) {
-    throw new Error("unexpected non-null next_code3");
     worst_mark_alert_already_displayed = true; // (avoid multiple alerts)
     sCode = next_scode;
     if (typeof gameInv !== 'undefined') {gameInv = 2;}
@@ -1930,13 +1930,13 @@ function writePerformanceOfCodePlayed(relative_perf_p, relative_perf_evaluation_
           console.log("invert game rows");
           next_code1 = codesPlayed[1];
           next_code2 = codesPlayed[0];
-          next_code3 = 0; // (empty code)
+          next_code3 = codesPlayed[2];
           next_scode = sCode;
           if ((typeof gameInv !== 'undefined') && (gameInv != 0)) { // defense against loops
             displayGUIError("unexpected gameInv loop (1): " + gameInv, new Error().stack);
           }
           else {
-            setTimeout("if (currentAttemptNumber == 3) {newGameButtonClick_delayed(" + nbColumns + ");}", 14);
+            setTimeout("if (currentAttemptNumber == 4) {newGameButtonClick_delayed(" + nbColumns + ");}", 14);
           }
       }
     }

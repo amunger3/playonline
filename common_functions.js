@@ -66,7 +66,7 @@ function write_sidebar() {
       + month_and_year_str +
       "</b><br><br>\
       Version 4.0<br>\
-      optimal strategy assessed for nearly all of Super Master Mind games (5 columns, 8 colors)<br><br>\
+      optimal strategy assessed for nearly all Super Master Mind games (5 columns, 8 colors)<br><br>\
       Version 3.0<br>\
       optimal strategy assessed for a great proportion of Super Master Mind games<br><br>\
       Version 2.0<br>\

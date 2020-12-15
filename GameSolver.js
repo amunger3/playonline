@@ -216,7 +216,11 @@ let delta=this.different_colors[color1] * (this.different_colors_bis[color2]+10)
 * (this.different_colors[color2]+100) * (this.different_colors_bis[color1]+1000);
 res2=res2+delta;
 }
-return totalnbcolors+res1 * 10+res2 * 1000;
+let final_res=totalnbcolors+res1 * 10+res2 * 1000;
+if(final_res <=0){
+throw new Error("CodeHandler: getSMMGameIdAfter2Attempts - invalid final_res value: "+final_res);
+}
+return final_res;
 }
 getSMMCodeClassId(code, game=null, game_size=0){
 if(this.nbColumns!=5){

@@ -62,11 +62,13 @@ function write_sidebar() {
   document.write("\
     <div class='sidebar'>\
       <h1 style='margin-top:0'>History</h1>\
-      <b>Current version: 3.5<br>"
+      <b>Current version: 4.0<br>"
       + month_and_year_str +
       "</b><br><br>\
+      Version 4.0<br>\
+      optimal strategy assessed for nearly all of Super Master Mind games (5 columns, 8 colors)<br><br>\
       Version 3.0<br>\
-      optimal strategy assessed for a great proportion of Super Master Mind games (5 columns, 8 colors)<br><br>\
+      optimal strategy assessed for a great proportion of Super Master Mind games<br><br>\
       Version 2.0<br>\
       optimal strategy assessed for all possible Master Mind games (4 columns, 6 colors)<br><br>\
       Version 1.5<br>\
@@ -74,10 +76,7 @@ function write_sidebar() {
       Version 1.2<br>\
       possible codes listed for each attempt<br><br>\
       Version 1.0<br>\
-      online game scores<br><br>\
-      Version 0.5<br>\
-      basic gameplay\
-      <br>\
+      basic gameplay & online game scores<br><br>\
       <h1>Interesting links</h1>\
       <ul>\
         <li style='margin-left:0;margin-top:0;'><a href='https://wearethemutants.com/2017/03/27/cunning-and-logic-the-international-imagery-of-mastermind/'>The international imagery of &quot;Mastermind&quot;</a></li>\

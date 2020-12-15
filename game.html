@@ -509,7 +509,7 @@
           var m = date.getMonth();
           var d = date.getDate();
           if (!android_appli) {
-            if ( ((m == 11) && (d >= 10)) // after December 10th
+            if ( ((m == 11) && (d >= 12)) // after December 12th
                  || ((m == 0) && (d <= 5)) ) { // before January 5th
               // (Display values will be updated below if necessary)
               document.write("<img id='img_1' style='display:none;' src='img/End_of_year.png'>&nbsp;<br><img id='img_2' style='display:none;' src='img/End_of_year2.png'>&nbsp;");
@@ -522,7 +522,7 @@
     <!-- Initializations -->
 
     <script>
-      let html_compatibility_game_version = "Ver_OAMOUR";
+      let html_compatibility_game_version = "Ver_OB";
       let nb_errors_submitted = 0;
       let mobileMode = false;
       let androidMode = false;
@@ -693,9 +693,9 @@
     <script>
 
       let loaded_sizes = new Array(3);
-      loaded_sizes[0] = 115000; // game.html ~ 115KB - NOTE: 115 / (115 + 115 + 345) = 20% = round progress
-      loaded_sizes[1] = 115000; // GameSolver.js ~ 115KB (state: 1) - NOTE: (115 + 115) / (115 + 115 + 345) = 40% = round progress
-      loaded_sizes[2] = 345000; // SuperMasterMind.js ~ 345KB (state: 2)
+      loaded_sizes[0] = 120000; // game.html - NOTE: 120 / (120 + 120 + 360) = 20% = round progress
+      loaded_sizes[1] = 120000; // GameSolver.js (state: 1) - NOTE: (120 + 120) / (120 + 120 + 360) = 40% = round progress
+      loaded_sizes[2] = 36000; // SuperMasterMind.js (state: 2)
       function getGlobalProgress(progress, state) {
         if ((progress < 0) || (progress > 1)) { // error case
           return 0;

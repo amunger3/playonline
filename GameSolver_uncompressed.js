@@ -177,6 +177,8 @@ class CodeHandler {
 
   getSMMGameIdAfter2Attempts(code1, code2) {
 
+    // ***** CODE DUPLICATED IN extractPrecalculatedPerfs.java ******
+
     if (this.nbColumns != 5) { // function only for Super Master Mind games
       throw new Error("CodeHandler: getGameIdFrom2Codes (" + this.nbColumns + ")");
     }
@@ -185,7 +187,6 @@ class CodeHandler {
     let nbWhites = 0;
     let col, col1, col2;
 
-    // The below operations are unrolled for better performances
     this.colors_int[0] = true;
     this.colors_int[1] = true;
     this.colors_int[2] = true;
@@ -215,6 +216,7 @@ class CodeHandler {
     }
 
     // 1) Mark
+    // (duplicated code from fillMark())
     for (col1 = 0; col1 < this.nbColumns; col1++) {
       if (this.code1_colors[col1] == this.code2_colors[col1]) {
         nbBlacks++;
@@ -249,7 +251,11 @@ class CodeHandler {
       res2 = res2 + delta;
     }
 
-    return totalnbcolors + res1 * 10 + res2 * 1000;
+    let final_res = totalnbcolors + res1 * 10 + res2 * 1000;
+    if (final_res <= 0) {
+      throw new Error("CodeHandler: getSMMGameIdAfter2Attempts - invalid final_res value: " + final_res);
+    }
+    return final_res;
 
   }
 
@@ -3672,7 +3678,7 @@ try {
         throw new Error("NEW_ATTEMPT phase / invalid mark: " + mark_nbBlacks + "B, " + mark_nbWhites + "W, " + nbColumns);
       }
 
-      if (data.precalculated_games == undefined) { // (duplicated code)
+      if (data.precalculated_games == undefined) {
         throw new Error("NEW_ATTEMPT phase / precalculated_games is undefined");
       }
       if (data.precalculated_games != "") { // (duplicated code - begin)
@@ -4462,7 +4468,7 @@ try {
           if (data.smm_buffer_messages != 'no') {
             throw new Error("DEBUFFER message / invalid smm_buffer_messages");
           }
-          if (data.precalculated_games == undefined) { // (duplicated code)
+          if (data.precalculated_games == undefined) {
             throw new Error("DEBUFFER phase / precalculated_games is undefined");
           }
           if (data.precalculated_games != "") { // (duplicated code - begin)

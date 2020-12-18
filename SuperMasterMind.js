@@ -1592,6 +1592,34 @@ return false;
 nbOfStatsFilled_NbPossibleCodes=attempt_nb;
 main_graph_update_needed=true;
 draw_graphic(false);
+if( (nbColumns==5)&&(attempt_nb==4)&&(currentAttemptNumber==4)&&gameOnGoing()&&(nbOfPossibleCodes[2] >=700)
+&&(smmCodeHandler.nbDifferentColors(codesPlayed[0]) > 2)
+&&(smmCodeHandler.nbDifferentColors(codesPlayed[1]) <=2)
+&&(smmCodeHandler.nbDifferentColors(codesPlayed[2]) <=2)
+){
+let mark_tmp1={nbBlacks:0, nbWhites:0};
+let mark_tmp2a={nbBlacks:0, nbWhites:0};
+let mark_tmp2b={nbBlacks:0, nbWhites:0};
+smmCodeHandler.fillMark(codesPlayed[0], codesPlayed[1], mark_tmp1);
+smmCodeHandler.fillMark(codesPlayed[0], codesPlayed[2], mark_tmp2a);
+smmCodeHandler.fillMark(codesPlayed[1], codesPlayed[2], mark_tmp2b);
+if( (!smmCodeHandler.marksEqual(mark_tmp2a, marks[0]) ||!smmCodeHandler.marksEqual(mark_tmp2b, marks[1]))
+&&(!((marks[1].nbBlacks==0)&&(marks[1].nbWhites==0))
+||((mark_tmp1.nbBlacks==0)&&(mark_tmp1.nbWhites==0)) )
+){
+console.log("invert game rows");
+next_code1=codesPlayed[1];
+next_code2=codesPlayed[0];
+next_code3=codesPlayed[2];
+next_scode=sCode;
+if((typeof gameInv!=='undefined')&&(gameInv!=0)){
+displayGUIError("unexpected gameInv loop (1): "+gameInv, new Error().stack);
+}
+else{
+setTimeout("if(currentAttemptNumber==4){newGameButtonClick_delayed("+nbColumns+");}", 14);
+}
+}
+}
 return true;
 }
 // Code performances
@@ -1620,30 +1648,6 @@ relative_performances_of_codes_played[attempt_nb-1]=relative_perf_p;
 global_best_performances[attempt_nb-1]=best_global_performance_p;
 if(relative_perf_p==PerformanceUNKNOWN){
 nbUnknownPerfs++;
-if( (nbColumns==5)&&(attempt_nb==3)&&(currentAttemptNumber==4)&&gameOnGoing()
-&&(smmCodeHandler.nbDifferentColors(codesPlayed[0]) > 2)
-&&(smmCodeHandler.nbDifferentColors(codesPlayed[1]) <=2)
-&&(smmCodeHandler.nbDifferentColors(codesPlayed[2]) <=2)
-){
-let mark_tmp={nbBlacks:0, nbWhites:0};
-smmCodeHandler.fillMark(codesPlayed[0], codesPlayed[1], mark_tmp);
-if(!smmCodeHandler.marksEqual(mark_tmp, marks[0])
-&&(!((marks[1].nbBlacks==0)&&(marks[1].nbWhites==0))
-||((mark_tmp.nbBlacks==0)&&(mark_tmp.nbWhites==0)) )
-){
-console.log("invert game rows");
-next_code1=codesPlayed[1];
-next_code2=codesPlayed[0];
-next_code3=codesPlayed[2];
-next_scode=sCode;
-if((typeof gameInv!=='undefined')&&(gameInv!=0)){
-displayGUIError("unexpected gameInv loop (1): "+gameInv, new Error().stack);
-}
-else{
-setTimeout("if(currentAttemptNumber==4){newGameButtonClick_delayed("+nbColumns+");}", 14);
-}
-}
-}
 }
 else{
 sumPerfs=sumPerfs+relative_perf_p;

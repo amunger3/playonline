@@ -2931,11 +2931,9 @@ if(nbOfClassesFirstCall <=0){
 throw new Error("NEW_ATTEMPT phase / invalid nbOfClassesFirstCall: "+nbOfClassesFirstCall);
 }
 if(precalculated_cur_game_or_code > 0){
-if(performanceListsInitDone){
-throw new Error("NEW_ATTEMPT phase / inconsistent game precalculation");
-}
 if(!performanceListsInitDoneForPrecalculatedGames){
 performanceListsInitDoneForPrecalculatedGames=true;
+performanceListsInitDone=false;
 arraySizeAtInit=Math.ceil((3*previousNbOfPossibleCodes+nbOfCodesForSystematicEvaluation_ForMemAlloc)/4);
 listOfGlobalPerformances=new Array(arraySizeAtInit);
 maxDepthApplied=1;
@@ -2965,6 +2963,7 @@ throw new Error("NEW_ATTEMPT phase / internal error (precalculated_cur_game_or_c
 }
 if(!performanceListsInitDone){
 performanceListsInitDone=true;
+performanceListsInitDoneForPrecalculatedGames=false;
 arraySizeAtInit=Math.ceil((3*previousNbOfPossibleCodes+nbOfCodesForSystematicEvaluation)/4);
 listOfGlobalPerformances=new Array(arraySizeAtInit);
 maxDepthApplied=maxDepth;

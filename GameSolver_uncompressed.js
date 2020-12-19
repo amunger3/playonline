@@ -3921,12 +3921,10 @@ try {
 
           // ***** First evaluation phase in a game *****
           if (precalculated_cur_game_or_code > 0) { // both game and code were precalculated
-            if (performanceListsInitDone) {
-              throw new Error("NEW_ATTEMPT phase / inconsistent game precalculation");
-            }
             // - Array allocations
             if (!performanceListsInitDoneForPrecalculatedGames) {
               performanceListsInitDoneForPrecalculatedGames = true;
+              performanceListsInitDone = false;
               arraySizeAtInit = Math.ceil((3*previousNbOfPossibleCodes + nbOfCodesForSystematicEvaluation_ForMemAlloc)/4); // (overestimated for low values of previousNbOfPossibleCodes to ensure proper subsequent mem_reduc_factor application)
               listOfGlobalPerformances = new Array(arraySizeAtInit);
               maxDepthApplied = 1; // "one-recursive-depth computing of performances" for current game and code (whether possible or impossible) => memory optimization
@@ -3958,6 +3956,7 @@ try {
             // - Array allocations
             if (!performanceListsInitDone) {
               performanceListsInitDone = true;
+              performanceListsInitDoneForPrecalculatedGames = false;
               arraySizeAtInit = Math.ceil((3*previousNbOfPossibleCodes + nbOfCodesForSystematicEvaluation)/4); // (overestimated for low values of previousNbOfPossibleCodes to ensure proper subsequent mem_reduc_factor application)
               listOfGlobalPerformances = new Array(arraySizeAtInit);
               maxDepthApplied = maxDepth;

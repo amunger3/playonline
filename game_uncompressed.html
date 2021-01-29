@@ -1,0 +1,2433 @@
+<!DOCTYPE html>
+<html lang="en">
+
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <title>Super Master Mind</title> <!-- (this title will be overwritten) -->
+    <meta name="robots" content="noindex"> <!-- (this page shall be preferably accessed from the main site page) -->
+    <meta name="title" content="Super Master Mind">
+    <meta name="description" content="Play Super Master Mind / Code breaker online, assisted by a calculator which knows the optimal strategy!">
+    <meta name="keywords" content="super master mind, code breaker, game, online, optimal strategy, javascript">
+
+    <!-- no viewport tag in this page as it makes canvas fuzzy! -->
+
+    <!-- Remote console at http://console.re/supermastermind displaying console text (provided all calls to "console.log(xxx)" are replaced by "console.re.log(xxx)")
+         and console errors (provided the .js scripts to be debugged are copied/pasted directly into this HTML file between <script>...</script> tags,
+         otherwise error details, among which error line numbers, will be lost):
+      <script src="https://console.re/connector.js" data-channel="supermastermind" id="consolerescript"></script>
+      <script>console.re.log('remote log enabled!');</script>
+    -->
+
+    <script>
+      var pageLoadStartTime = new Date();
+    </script>
+
+    <style>
+      /* *** Main styles *** */
+      body {
+        font-family: 'Verdana';
+        margin: 0%;
+        padding: 0%;
+        /* border: thin solid white; */
+        color: #777777;
+        font-size: calc(7px + .34vw);
+        background: black;
+      }
+      #my_canvas {
+        margin: 0;
+        padding: 0;
+        border: 2px solid purple; /* (may be modified in SuperMasterMind.js) */
+        background: white;
+        width: 98.5%;
+        height: 93%;
+        border-radius: 1.5%;
+        zoom: 1.0; /* (used by Chrome, ignored by Firefox) */
+      }
+      /* *** Classes for button styling using CSS *** */
+      .button {
+        font-family: Verdana;
+        background-color: white;
+        border: 2px solid purple; /* (may be modified in SuperMasterMind.js) */
+        color: black;
+        padding: 1.0vh 0.5vw 1.0vh 0.5vw; /* top right bottom left */
+        text-align: center;
+        text-decoration: none;
+        /* font-size: 15px; */
+        font-weight: bold;
+        cursor: pointer;
+        width: 100%;
+        display: block;
+        margin-top: 1.0vh;
+        margin-bottom: 1.0vh;
+        border-radius: 20%;
+        -webkit-backface-visibility: visible;
+      }
+      .button:hover {
+        background-color: orange;
+        color: white;
+      }
+      .disabled {
+          opacity: 0.4;
+          font-weight: normal;
+          cursor: not-allowed;
+      }
+      /* Safari 4.0 - 8.0 */
+      @-webkit-keyframes glowing {
+        0%   {background-color: white;}
+        20%  {background-color: white;}
+        33%  {background-color: purple;}
+        47%  {background-color: white;}
+        60%  {background-color: purple;}
+        73%  {background-color: white;}
+        87%  {background-color: purple;}
+        100% {background-color: white;}
+      }
+      /* Standard syntax */
+      @keyframes glowing {
+        0%   {background-color: white;}
+        20%  {background-color: white;}
+        33%  {background-color: purple;}
+        47%  {background-color: white;}
+        60%  {background-color: purple;}
+        73%  {background-color: white;}
+        87%  {background-color: purple;}
+        100% {background-color: white;}
+      }
+
+      .blinking {
+        -webkit-animation-name: glowing; /* Safari 4.0 - 8.0 */
+        -webkit-animation-duration: 3.75s; /* Safari 4.0 - 8.0 */
+        animation-name: glowing;
+        animation-duration: 3.75s;
+        -webkit-backface-visibility: hidden;
+       }
+      .fast_blinking {
+        -webkit-animation-name: glowing; /* Safari 4.0 - 8.0 */
+        -webkit-animation-duration: 2.75s; /* Safari 4.0 - 8.0 */
+        animation-name: glowing;
+        animation-duration: 2.75s;
+        -webkit-backface-visibility: hidden;
+       }
+
+      @-webkit-keyframes kdo_anim {
+        0% {opacity: 0;}
+        100% {width: 16%; opacity: 0.9;}
+      }
+
+      @keyframes kdo_anim {
+        0% {opacity: 0;}
+        100% {width: 16%; opacity: 0.9;}
+      }
+
+      .kdo
+      {
+        -webkit-animation: kdo_anim 3.33s;
+        animation: kdo_anim 3.33s;
+      }
+
+      .radio {
+        font-family: Verdana;
+        color: black;
+        white-space: nowrap; /* no line breaks */
+        padding: 0;
+        margin: 0;
+        text-align: left;
+        text-decoration: none;
+        /* font-size: 14px; */
+        font-weight: bold;
+        box-shadow: none;
+        /* text not selectable */
+        -webkit-touch-callout: none;
+        -webkit-user-select: none;
+        -khtml-user-select: none;
+        -moz-user-select: none;
+        -ms-user-select: none;
+        user-select: none;
+      }
+
+      .not_selectable {
+        /* text not selectable */
+        -webkit-touch-callout: none;
+        -webkit-user-select: none;
+        -khtml-user-select: none;
+        -moz-user-select: none;
+        -ms-user-select: none;
+        user-select: none;
+      }
+
+      .game_loading /* (used during page loading) */
+      { position: fixed;
+        height: 100%;
+        width: 100%;
+        top:0;
+        left: 0;
+        background: rgba(0, 0, 0, 0.6);
+        z-index:11111;
+        font-size: 2.0vh;
+        text-align: center;
+        padding-top: 25.0vh;
+        color: #fff;
+        /* text not selectable */
+        -webkit-touch-callout: none;
+        -webkit-user-select: none;
+        -khtml-user-select: none;
+        -moz-user-select: none;
+        -ms-user-select: none;
+        user-select: none;
+      }
+
+      .page_transition /* (used during page transition) */
+      { position: fixed;
+        height: 100%;
+        width: 100%;
+        top:0;
+        left: 0;
+        background: rgba(0, 0, 0, 0.6);
+        z-index:11111;
+        font-size: 2.0vh;
+        text-align: center;
+        padding-top: 25.0vh;
+        color: #fff;
+        /* text not selectable */
+        -webkit-touch-callout: none;
+        -webkit-user-select: none;
+        -khtml-user-select: none;
+        -moz-user-select: none;
+        -ms-user-select: none;
+        user-select: none;
+      }
+
+      .game_aborted /* (used at game abortion) */
+      { position: fixed;
+        height: 100%;
+        width: 100%;
+        top:0;
+        left: 0;
+        background: rgba(0, 0, 0, 0.6);
+        z-index:11111;
+        font-size: 2.0vh;
+        text-align: center;
+        padding-top: 25.0vh;
+        color: #fff;
+        /* text not selectable */
+        -webkit-touch-callout: none;
+        -webkit-user-select: none;
+        -khtml-user-select: none;
+        -moz-user-select: none;
+        -ms-user-select: none;
+        user-select: none;
+      }
+
+    </style>
+
+    <script>
+      var globalErrorStatus = 0;
+      try {
+        eval('"use strict"; class foo {}; let test_let_inst = 1;'); // Interner Explorer does not support classes and old versions of Safari (< 10) will fail on the "let" instruction (error tested on Safari 9.1)
+      } catch (err) {
+        var errorMsg = "Your browser cannot run this game. This game can be run with the last versions of Chrome, Firefox, Edge and Safari: update your browser version if necessary.";
+        alert(errorMsg);
+        globalErrorStatus = 1;
+        throw new Error(errorMsg);
+      }
+      if (typeof(Worker) == "undefined") {
+        var workerErrorMsg = "Your browser cannot run this game because it does not support Web workers. This game can be run with the last versions of Chrome, Firefox, Edge and Safari: update your browser version if necessary.";
+        alert(workerErrorMsg);
+        globalErrorStatus = 2;
+        throw new Error(workerErrorMsg);
+      }
+
+      var userAgentStr = "";
+      var androidAppliInfoStr = null;
+      var android_appli = false;
+      var versionNameStr = "?";
+      var versionCodeStr = "?";
+      var versionCodeInt = -1;
+      var scriptsFullyLoaded = false;
+      var smm = (decodeURI(location.href).indexOf('https://supermastermind.github.io/playonline/game.html') != -1);
+      try {
+        androidAppliInfoStr = new URL(decodeURI(location.href)).searchParams.get("android_appli");
+        if (androidAppliInfoStr != null) { // check if ...?android_appli=xxx in the URL
+          userAgentStr = "Android appli sdk:" + androidAppliInfoStr + " ";
+          android_appli = true;
+          try {
+            versionNameStr = new URL(decodeURI(location.href)).searchParams.get("version_name");
+            if (versionNameStr == null) {
+              versionNameStr = "?";
+            }
+            versionCodeStr = new URL(decodeURI(location.href)).searchParams.get("version_code");
+            if (versionCodeStr == null) {
+              versionCodeStr = "?";
+            }
+            else {
+              try {
+                versionCodeInt = parseInt(versionCodeStr);
+                if (isNaN(versionCodeInt) || (versionCodeInt < 0) || (versionCodeStr.indexOf(".") != -1)) {
+                  versionCodeInt = -1;
+                }
+              }
+              catch (exc) {
+                versionCodeInt = -1;
+              }
+            }
+            var playerIdStr = new URL(decodeURI(location.href)).searchParams.get("player_id"); // (kept for backward compatibility)
+            if (playerIdStr != null) {
+              if (!localStorage.playerid) {
+                localStorage.playerid = playerIdStr;
+              }
+            }
+            var playerIdStr2 = new URL(decodeURI(location.href)).searchParams.get("pi"); // (new version)
+            if (playerIdStr2 != null) {
+              if (!localStorage.playerid) {
+                localStorage.playerid = playerIdStr2;
+              }
+            }
+          } catch (err_versioning) {}
+          userAgentStr = userAgentStr + "vn:" + versionNameStr + " vc:" + versionCodeStr + " ";
+        }
+        userAgentStr = userAgentStr + navigator.userAgent;
+      } catch (err) {
+        userAgentStr = "??? " + navigator.userAgent;
+      }
+      var rulesTableWidthStr = "44%";
+      var scoresTableWidthStr = "100%";
+      var scoresFontSizeStr = "1.6vw";
+      var abbreviateScores = true;
+
+      var nbGamesPlayedAndWon = 0;
+      var someGamesWereWon = false;
+      var nbGamesPlayed = 0;
+      var nbCodesPlayed = 0;
+      var nbColorSelections = 0;
+      var gameRulesDisplayed = false;
+      var debug_game_state = -1;
+      var debug_on_unload = 0;
+      var github_unicorn_error = false;
+      var github_html_error = false;
+      var github_load_error = false;
+      var gameInv = 0;
+
+      var modernDisplay = false;
+      var legacyDisplayVariant = 0;
+
+      var HTML_geoloc_android_attempts = 0;
+      var HTML_geoloc_successes = 0;
+      var HTML_geoloc_errors = 0;
+
+      var newGameButtonClick = function(nbColumns_p) {
+        console.log("newGameButtonClick event skipped (" + nbColumns_p + ")");
+      }
+
+      var storageErrorMet = true;
+      try {
+        if (typeof(Storage) !== 'undefined') {
+          localStorage.test_storage_ok = "abc";
+          if (localStorage.test_storage_ok == "abc") {
+            storageErrorMet = false;
+          }
+        }
+      }
+      catch (exc) {
+      }
+      if (storageErrorMet) {
+        // Note: such an error occurs for Edge run locally
+        var storageErrorMsg = "Your browser cannot run this game because it cannot store local data. This game can be run with the last versions of Chrome, Firefox, Edge and Safari: update your browser version if necessary.";
+        alert(storageErrorMsg);
+        globalErrorStatus = 3;
+        throw new Error(storageErrorMsg);
+      }
+
+      if (!localStorage.firstgamegeoloc) { // Keep existing value if it exists
+        localStorage.firstgamegeoloc = "fa";
+      }
+    </script>
+    <script src='lib/jquery-3.4.1.min.js'></script>
+    <script>
+      // Animation during page loading:
+      // 1) when document is ready
+      $(document).ready(function () {
+        console.log("(ready)");
+        // Less beautiful + can put some problems with Chrome while drawing canvas: $(".mainxxx").hide(); // hide the mainxxx div
+      });
+      // 2) when all elements of the page are completely loaded
+      $(window).on('load', function() {
+        console.log("(on load)");
+        // $(".game_loading").fadeOut("slow"); // game_loading div fades out -> postponed after all scripts have been loaded
+        // Less beautiful + can put some problems with Chrome while drawing canvas: $(".mainxxx").fadeIn("slow"); // mainxxx div fades in
+      });
+      // 2') Defense timeout to allow interactions with the page
+      // setTimeout("console.log('(on load timeout)');$('.game_loading').fadeOut('slow');", 5000); // game_loading div fades out -> not applied
+
+      $(window).on('beforeunload', function() { // Ask for a confirmation on window exit when a game is ongoing (***)
+        if (!android_appli) { // in case of android_appli, webview reload can be (a bit) delayed
+          try {
+            debug_on_unload = 1;
+            if (gameOnGoing() && (currentAttemptNumber > 1)) {
+              if (someGamesWereWon && (nbColumns >= 5)) { // (condition duplicated)
+                return "Do you really want to abort current game?"; // (message not displayed by all browsers, some browsers will display a generic message instead - code duplicated)
+              }
+            }
+          }
+          catch (exc) {
+            console.log("error encountered at game abortion: " + exc);
+            return; // (no confirmation asked)
+          }
+        }
+      });
+
+      function makeid() {
+        let text = "";
+        let possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+        for (let i = 0; i < 5; i++) {
+          text += possible.charAt(Math.floor(Math.random() * possible.length));
+        }
+        return text;
+      }
+
+      function formatDate(date) {
+        if (date == null) {
+          return "?";
+        }
+        day = String(date.getDate());
+        if (day.length < 2) {
+          day = '0' + day;
+        }
+        month = String(date.getMonth() + 1);
+        if (month.length < 2) {
+          month = '0' + month;
+        }
+        year = String(date.getYear()-100);
+        return "-" + day + month + year; // (versus "_ddMMyy" in android appli)
+      }
+
+      if (typeof(Storage) !== 'undefined') {
+        if (!localStorage.firstaccessid) {
+          let firstaccessid = 'GA - ' + makeid() + formatDate(new Date());
+          localStorage.firstaccessid = firstaccessid;
+        }
+      }
+
+      let nbLocationURLs = 3;
+      let locationURLs = new Array(nbLocationURLs);
+      let extraStr = (smm ? "" : "x"); // avoid distant location request in local mode
+      locationURLs[0] = 'https://api.ip' + extraStr + 'data.co/en?api-key=102' + 'c5eac3a9c7c5dad17519b2029bb6bdf4a076b60dde282eecaf99f'; // (free key => create another free key on this web site if needed)
+      locationURLs[1] = 'https://api.ip' + extraStr + 'infodb.com/v3/ip-city/?key=792' + 'e8cda21ab40a7f5a349cddc79beb41ff95910c2ec0d05bfea593961e01c7a&format=json'; // (free key => create another free key on this web site if needed) (specific conversion for this dimension index [1])
+      locationURLs[2] = 'https://ip' + extraStr + 'info.io/json/?token=ca8' + '32119df7bb5'; // (free key => create another free key on this web site if needed) (specific conversion for this dimension index [2])
+    </script>
+
+    <link rel='stylesheet' type='text/css' href='lib/tingle-master/dist/tingle.min.css'>
+  </head>
+
+  <body onresize="eval('try{draw_graphic();}catch(e){}');" onunload="/* See (***) */ debug_on_unload = 2;console.log('exit...');">
+
+    <div id="game_loading_id" class="game_loading">
+      <img src='img/loading.gif' style='height:12%;'><br>Loading... <!-- (not rem unit as no viewport! / duplicated code) -->
+    </div>
+
+    <div class="page_transition" style='display:none;'>
+    </div>
+
+    <div class="game_aborted" style='display:none;'>
+      Current game was aborted!
+      <script>
+        if (typeof(Storage) !== 'undefined') {
+          if (localStorage.firstname && localStorage.gamesok && (Number(localStorage.gamesok) >= 30)) {
+            someGamesWereWon = true;
+            document.write("<hr style='height:0.75vh; visibility:hidden;' />You shall win 5 consecutive games<br>to get your total score<br>computed and compared to other players'");
+          }
+        }
+      </script>
+      <br>
+      <img src="img/loading.gif" style='height:12%;'><br>  <!-- (not rem unit as no viewport!) -->
+      Starting a new game...
+    </div>
+
+    <!-- HTML controls and canvas -->
+
+    <table id='my_table' style='width:75%;height:90%;position:absolute;left:12.5%;top:2%;border:0px ridge orange;border-radius:1%;margin:0;padding:0;'>
+      <tr style='height:100%;'>
+        <td style='width:0.1%;margin:0;padding:0;'></td>
+        <td style='width:6.2%;margin:0;padding:0;vertical-align:middle;text-align:center;white-space:nowrap'>
+          <input id='newGameButton' class='button disabled' type='button' value='NEW GAME' title='Start a new game' onclick='newGameButtonClick(0)' onfocus='this.blur()' style='margin-bottom:0.5vh;' disabled>
+          <form action='' class='not_selectable'>
+            <label title='Very easy game'>&nbsp;&nbsp;&nbsp;<input id='columnslabel_3b' class='radio disabled' type='radio' value='3' name='nbColumnsSelection' style='vertical-align:middle;' onclick='newGameButtonClick(3)' disabled></label><a onclick="$('#columnslabel_3b').prop('checked', true);newGameButtonClick(3);">&nbsp;</a><label title='Very easy game' onclick="$('#columnslabel_3b').prop('checked', true);newGameButtonClick(3);"><span id='columnslabel_3' class='radio disabled' style='vertical-align:middle;'> 3 columns&nbsp;<br></span></label>
+            <label title='Master Mind'>&nbsp;&nbsp;&nbsp;<input id='columnslabel_4b' class='radio disabled' type='radio' value='4' name='nbColumnsSelection' style='vertical-align:middle;' onclick='newGameButtonClick(4)' disabled></label><a onclick="$('#columnslabel_4b').prop('checked', true);newGameButtonClick(4);">&nbsp;</a><label title='Master Mind' onclick="$('#columnslabel_4b').prop('checked', true);newGameButtonClick(4);"><span id='columnslabel_4' class='radio disabled' style='vertical-align:middle;'> 4 columns&nbsp;<br></span></label>
+            <label title='Super Master Mind'>&nbsp;&nbsp;&nbsp;<input id='columnslabel_5b' class='radio disabled' type='radio' value='5' name='nbColumnsSelection' style='vertical-align:middle;' onclick='newGameButtonClick(5)' disabled></label><a onclick="$('#columnslabel_5b').prop('checked', true);newGameButtonClick(5);">&nbsp;</a><label title='Super Master Mind' onclick="$('#columnslabel_5b').prop('checked', true);newGameButtonClick(5);"><span id='columnslabel_5' class='radio disabled' style='vertical-align:middle;'> 5 columns&nbsp;<br></span></label>
+            <label title='Mega Master Mind'>&nbsp;&nbsp;&nbsp;<input id='columnslabel_6b' class='radio disabled' type='radio' value='6' name='nbColumnsSelection' style='vertical-align:middle;' onclick='newGameButtonClick(6)' disabled></label><a onclick="$('#columnslabel_6b').prop('checked', true);newGameButtonClick(6);">&nbsp;</a><label title='Mega Master Mind' onclick="$('#columnslabel_6b').prop('checked', true);newGameButtonClick(6);"><span id='columnslabel_6' class='radio disabled' style='vertical-align:middle;'> 6 columns&nbsp;<br></span></label>
+            <label title='Giga Master Mind'>&nbsp;&nbsp;&nbsp;<input id='columnslabel_7b' class='radio disabled' type='radio' value='7' name='nbColumnsSelection' style='vertical-align:middle;' onclick='newGameButtonClick(7)' disabled></label><a onclick="$('#columnslabel_7b').prop('checked', true);newGameButtonClick(7);">&nbsp;</a><label title='Giga Master Mind' onclick="$('#columnslabel_7b').prop('checked', true);newGameButtonClick(7);"><span id='columnslabel_7' class='radio disabled' style='vertical-align:middle;'> 7 columns&nbsp;<br></span></label>
+          </form>
+          <input id='resetCurrentCodeButton' class='button disabled' type='button' value='Reset current code' title='Reset current code' onclick='resetCurrentCodeButtonClick()' onfocus='this.blur()' disabled>
+          <input id='playRandomCodeButton' class='button disabled' type='button' value='Play random code' title='Play a random code' onclick='playRandomCodeButtonClick()' onfocus='this.blur()' disabled>
+          <input id='revealSecretColorButton' class='button disabled' type='button' value='Reveal secret color' title='Reveal a color of the secret code' onclick='revealSecretColorButtonClick()' onfocus='this.blur()' disabled>
+          <input id='showPossibleCodesButton' class='button disabled' type='button' value='Show possible codes' title='Show possible codes at each stage of the game (when game is over)' onfocus='this.blur()' onclick='showPossibleCodesButtonClick()' disabled>
+        </td>
+        <td style='width:0.1%;margin:0;padding:0;'></td>
+        <td style='width:93.6%;margin:0;padding:0;vertical-align:middle;align:right;text-align:left;'><canvas id='my_canvas'><font color=red>Error: HTML canvas are not supported!</font></canvas></td>
+      </tr>
+    </table>
+
+    <!-- Display extra text and pictures -->
+
+    <p style='text-align:right'>
+      <script>
+        if (typeof(Storage) !== 'undefined') {
+          let welcome_str = "Welcome";
+          try {
+            if ((navigator.language == "fr") || (navigator.language.indexOf("fr-") == 0)) { // covers "fr", "fr-FR", "fr-BE", "fr-CA", "fr-CH", "fr-LU"
+              welcome_str = "Bienvenue";
+            }
+          }
+          catch (exc) {}
+          if (localStorage.firstname) {
+            let kdo_str = "";
+            if ((localStorage.firstname == "Jeannot") && (Math.floor(Math.random() * 3) == 0)) {
+              kdo_str = "<br><img src='img/Kdo.png' align='left' class='kdo' style='width:7.7%;margin:0.5% 0 0 1.0%;border-radius:40%'>";
+            }
+            document.write("<font color=#DDDDDD><span id='welcome_id' style='float:left;'>&nbsp;&nbsp;" + welcome_str + " <b><font color=yellow>" + localStorage.firstname + "</font></b>!</span></font>" + "<span id='kdo_id'>" + kdo_str + "</span>");
+            setTimeout(function() {
+              $("#welcome_id").fadeOut().empty();
+            }, 60000);
+            setTimeout(function() {
+              $("#kdo_id").fadeOut().empty();
+            }, 60000);
+          }
+        }
+      </script>
+      <b><a href='index.html'>&#x2302; Main page</a></b>&nbsp;&nbsp;&nbsp;<br>
+      <b><a href='index.html#game_rules'>&#x2302; Game rules</a></b>&nbsp;&nbsp;&nbsp;<br>
+      <b><a href='screenshots.html'>&#x2302; Game examples</a></b>&nbsp;&nbsp;&nbsp;<br>
+      <b><a href='optimal_strategy.html'>&#x2302; Optimal strategy</a></b>&nbsp;&nbsp;&nbsp;<br>
+      <b><a href='contact_info.html'>&#x2302; Contact info</a></b>&nbsp;&nbsp;&nbsp;<br><br>
+      <script>
+        {
+          var date = new Date();
+          var m = date.getMonth();
+          var d = date.getDate();
+          if (!android_appli) {
+            if ( ((m == 11) && (d >= 12)) // after December 12th
+                 || ((m == 0) && (d <= 5)) ) { // before January 5th
+              // (Display values will be updated below if necessary)
+              document.write("<img id='img_1' style='display:none;' src='img/End_of_year.png'>&nbsp;<br><img id='img_2' style='display:none;' src='img/End_of_year2.png'>&nbsp;");
+            }
+          }
+        }
+      </script>
+    </p>
+
+    <!-- Initializations -->
+
+    <script>
+      let html_compatibility_game_version = "Ver_OD";
+      let nb_errors_submitted = 0;
+      let mobileMode = false;
+      let androidMode = false;
+      let modeAlreadySelected = false;
+      let lastKeyCheck = false;
+      document.body.onkeydown = function(e) {
+        if (modeAlreadySelected) {
+          return;
+        }
+        let keycheck1 = (String.fromCharCode(e.keyCode).toLowerCase() == '1');
+        let keycheck2 = ((String.fromCharCode(e.keyCode).toLowerCase() == 'l') && e.shiftKey);
+        if (keycheck1 && (!lastKeyCheck)) {
+          lastKeyCheck = true;
+        }
+        else if (keycheck2 && lastKeyCheck) {
+          var mode = prompt("Which mode do you want to select?", "444");
+          if (mode != null) {
+            document.getElementById('form_list_id').value = mode.trim();
+            setTimeout("submitForm();", 444);
+          }
+          modeAlreadySelected = true;
+        }
+        else {
+          lastKeyCheck = false;
+        }
+      };
+      // Set AJAX timeout to X seconds (this will set all AJAX requests the program makes, even via $.getJSON, to have a timeout of X seconds)
+      $.ajaxSetup({
+        timeout: 40000 // 40 seconds
+      });
+    </script>
+
+    <!-- Handle player's info -->
+
+    <script src='lib/tingle-master/dist/tingle.min.js'></script>
+    <script>
+
+      var modal_mode = -1;
+      var store_time = new Date().getTime();
+
+      var modal = new tingle.modal({
+          footer: false,
+          stickyFooter: false,
+          closeMethods: ['overlay', 'button', 'escape'],
+          // closeMethods: ['button'],
+          closeLabel: "Close",
+          cssClass: ['custom-class-1', 'custom-class-2'],
+          onOpen: function() {
+            console.log('(modal onOpen)');
+          },
+          onClose: function() {
+            console.log('(modal onClose)');
+          },
+          beforeClose: function() {
+
+            console.log('(modal beforeClose)');
+            if (modal_mode == 1) {
+
+              // Get firstname entered
+              try {
+                let firstname_entered = document.getElementById("firstname_input").value;
+                firstname_entered = firstname_entered.trim();
+                if ( (firstname_entered.length >= 3) && (firstname_entered.length <= 11) && (/^[A-Za-zÀ-ÿ'-]+$/.test(firstname_entered)) /* (only letters) */ && isCorrect(firstname_entered) ) {
+                  if (typeof(Storage) !== 'undefined') {
+                    localStorage.firstname = capitalizeFirstLetters(firstname_entered);
+                  }
+                }
+                else {
+                  if (typeof(Storage) !== 'undefined') {
+                    localStorage.previousfirstname = firstname_entered;
+                  }
+                  alert("Invalid first name: " + firstname_entered);
+                }
+              }
+              catch (exc) {
+                console.log("error encountered at first name selection: " + exc);
+              }
+
+              if (typeof(Storage) !== 'undefined') {
+                if (!localStorage.firstnameAsked) {
+                  localStorage.firstnameAsked = 0;
+                }
+                localStorage.firstnameAsked = Number(localStorage.firstnameAsked) + 1;
+                if (localStorage.firstname) {
+                  console.log("new firstname: " + localStorage.firstname);
+                  document.getElementById('form_firstname_id').value = localStorage.firstname;
+                }
+                else if ((localStorage.gamesok) && (Number(localStorage.gamesok) >= 100)) {
+                  // modal_mode unchanged and form not submitted waiting for proper user input
+                  return false; // do not close the modal
+                }
+              }
+              setTimeout("submitForm();", 444);
+
+              modal_mode = -1;
+              return true; // close the modal
+
+            }
+
+            else if (modal_mode == 2) {
+
+              setTimeout("showPossibleCodesButtonClick(false, -1, true);", 444);
+              // (same effect: setTimeout("document.getElementById('showPossibleCodesButton').click();", 444);)
+
+              modal_mode = -1;
+              return true; // close the modal
+            }
+
+            // else (modal_mode >= 3)
+            modal_mode = -1;
+            return true; // close the modal
+            // return false; // nothing happens
+
+          }
+      });
+      /* // add a button
+      modal.addFooterBtn('OK', 'tingle-btn tingle-btn--primary', function() {
+        // here goes some logic
+        modal.close();
+      }); */
+
+    </script>
+
+    <iframe style='display:none;' name='my_frame'>Your browser does not support iframes!</iframe> <!-- suppress style='display:none;' to see the form's response -->
+    <form  style='display:none;' id='my_form' target='my_frame' action='https://script.google.com/macros/s/AKfycbwHJh1Tz7idd8VQJNdWIqWd-6jMxInhRtqY_O96NN7OvEKiY_ox/exec'>
+
+      playerid: <input id='form_playerid_id' name='playerid' type='text' value='-'><br>
+      firstname: <input id='form_firstname_id' name='firstname' type='text' value='-'><br>
+
+      nbcolumns: <input id='form_nbcolumns_id' name='nbcolumns' type='text' value='-'><br>
+      score: <input id='form_score_id' name='score' type='text' value='-'><br>
+      attempts: <input id='form_attempts_id' name='attempts' type='text' value='-'><br>
+      time: <input id='form_time_id' name='time' type='text' value='-'><br>
+      perfs: <input id='form_perfs_id' name='perfs' type='text' value='-'><br>
+      nbuknperfs: <input id='form_nbuknperfs_id' name='nbuknperfs' type='text' value='-'><br>
+      help: <input id='form_help_id' name='help' type='text' value='-'><br>
+
+      gamesok: <input id='form_gamesok_id' name='gamesok' type='text' value='-'><br>
+      deltagames: <input id='form_deltagames_id' name='deltagames' type='text' value='-'><br>
+      app: <input id='form_app_id' name='app' type='text' value='-'><br>
+
+      country: <input id='form_country_id' name='country' type='text' value='-'><br>
+      region: <input id='form_region_id' name='region' type='text' value='-'><br>
+      zip: <input id='form_zip_id' name='zip' type='text' value='-'><br>
+      city: <input id='form_city_id' name='city' type='text' value='-'><br>
+      geoloc: <input id='form_geoloc_id' name='geoloc' type='text' value='-'><br>
+      timezone: <input id='form_timezone_id' name='timezone' type='text' value='-'><br>
+      latitude: <input id='form_latitude_id' name='latitude' type='text' value='-'><br>
+      longitude: <input id='form_longitude_id' name='longitude' type='text' value='-'><br>
+      ipaddress: <input id='form_ipaddress_id' name='ipaddress' type='text' value='-'><br>
+
+      platform: <input id='form_platform_id' name='platform' type='text' value='-'><br> <!-- OS -->
+      browserlanguage: <input id='form_browserlanguage_id' name='browserlanguage' type='text' value='-'><br> <!-- Browser language -->
+      useragent: <input id='form_useragent_id' name='useragent' type='text' value='-'><br> <!-- Browser (more or less) -->
+      href: <input id='form_href_id' name='href' type='text' value='-'><br>
+      formsubmitdate: <input id='form_formsubmitdate_id' name='formsubmitdate' type='text' value='-'><br>
+      debuginfo: <input id='form_debuginfo_id' name='debuginfo' type='text' value='-'><br>
+
+      list: <input id='form_list_id' name='list' type='text' value='-'><br>
+
+      rankings: <input id='form_rankings_id' name='rankings' type='text' value='-'><br>
+
+    </form>
+
+    <form  style='display:none;' id='my_all_scripts_loaded_form' target='my_frame' action='https://ALL_SCRIPTS_LOADED'>
+    </form>
+
+    <script>
+
+      let loaded_sizes = new Array(3);
+      loaded_sizes[0] = 117000; // game.html - NOTE: 117 / (117 + 117 + 351) = 20% = round progress
+      loaded_sizes[1] = 117000; // GameSolver.js (state: 1) - NOTE: (117 + 117) / (117 + 117 + 351) = 40% = round progress
+      loaded_sizes[2] = 35100; // SuperMasterMind.js (state: 2)
+      function getGlobalProgress(progress, state) {
+        if ((progress < 0) || (progress > 1)) { // error case
+          return 0;
+        }
+        let sum_loaded_sizes = loaded_sizes[0] + loaded_sizes[1] + loaded_sizes[2];
+
+        if (state == 0) {
+          let percent_min = 0;
+          let percent_max = 100 * loaded_sizes[0] / sum_loaded_sizes;
+          return Math.min(100, Math.round(percent_min + progress * (percent_max - percent_min)));
+        }
+        else if (state == 1) {
+          let percent_min = 100 * loaded_sizes[0] / sum_loaded_sizes;
+          let percent_max = 100 * (loaded_sizes[0]+loaded_sizes[1]) / sum_loaded_sizes;
+          return Math.min(100, Math.round(percent_min + progress * (percent_max - percent_min)));
+        }
+        else if (state == 2) {
+          let percent_min = 100 * (loaded_sizes[0]+loaded_sizes[1]) / sum_loaded_sizes;
+          let percent_max = 100;
+          return Math.min(100, Math.round(percent_min + progress * (percent_max - percent_min)));
+        }
+        else {
+          throw new Error("getGlobalProgress: invalid state: " + progress + ", " + state);
+        }
+      }
+      var globalProgressForHTMLGame1 = getGlobalProgress(0.25 /* (rough value) */, 0);
+      console.log("current progress: " + globalProgressForHTMLGame1 + "% (g)"); // !WARNING! -> this console text will be read by the android appli so shall not be modified
+      if (globalProgressForHTMLGame1 > 0) {
+        $("#game_loading_id").html("<img src='img/loading.gif' style='height:12%;'><br>Loading (" + globalProgressForHTMLGame1 + "%)"); // (not rem unit as no viewport! / duplicated code)
+      }
+
+      function getChromeVersion() { // return -1 if N.A. / Note: covers also MS Edge!
+        try {
+          var raw = navigator.userAgent.match(/Chrom(e|ium)\/([0-9]+)\./);
+          return (raw ? parseInt(raw[2], 10) : -1);
+        }
+        catch (exc) {
+          return -1;
+        }
+      }
+      let firefoxMode = (navigator.userAgent.toUpperCase().search("FIREFOX") != -1);
+      let edgeMode    = ((!firefoxMode) && ((navigator.userAgent.toUpperCase().search("EDG/") != -1) || (navigator.userAgent.toUpperCase().search("EDGE/") != -1)));
+      let chromeMode  = ((!firefoxMode) && (!edgeMode) && (getChromeVersion() != -1));
+      let safariMode  = ((!firefoxMode) && (!edgeMode) && (!chromeMode) && (navigator.userAgent.toUpperCase().search("SAFARI") != -1));
+
+      // String.replaceAll() method definition
+      String.prototype.replaceAll = function(search, replacement) {
+        let target = this;
+        return target.replace(new RegExp(search, 'g'), replacement);
+      };
+
+      function capitalizeFirstLetters(str) {
+        if (str.length == 0) {
+          return "";
+        }
+        else if (str.length == 1) {
+          return str.charAt(0).toUpperCase();
+        }
+        else {
+          let res = str.toLowerCase();
+          res = res.charAt(0).toUpperCase() + res.slice(1);
+
+          let res2 = "";
+          let index = res.indexOf('-');
+          while ((index != -1) && (index+1 < res.length)) {
+            res2 = res2 + res.substring(0, index+1) + res.charAt(index+1).toUpperCase();
+            if (index+2 < res.length) {
+              res = res.slice(index+2);
+              index = res.indexOf('-');
+            }
+            else {
+              res = "";
+              index = -1;
+            }
+          }
+          res2 = res2 + res;
+          res = res2;
+          res2 = "";
+          index = res.indexOf(' ');
+          while ((index != -1) && (index+1 < res.length)) {
+            res2 = res2 + res.substring(0, index+1) + res.charAt(index+1).toUpperCase();
+            if (index+2 < res.length) {
+              res = res.slice(index+2);
+              index = res.indexOf(' ');
+            }
+            else {
+              res = "";
+              index = -1;
+            }
+          }
+          res2 = res2 + res;
+
+          res = res2;
+          res2 = "";
+          index = res.indexOf("'");
+          while ((index != -1) && (index+1 < res.length)) {
+            res2 = res2 + res.substring(0, index+1) + res.charAt(index+1).toUpperCase();
+            if (index+2 < res.length) {
+              res = res.slice(index+2);
+              index = res.indexOf("'");
+            }
+            else {
+              res = "";
+              index = -1;
+            }
+          }
+          res2 = res2 + res;
+
+          res2 = res2.replace(" D'"," d'");
+          res2 = res2.replace(" Sur "," sur ");
+
+          return res2;
+        }
+      }
+
+      function guessUserId() {
+        let guessedIdStr = "";
+        if (firefoxMode) {
+          guessedIdStr = "F";
+        }
+        else if (edgeMode) {
+          guessedIdStr = "E";
+        }
+        else if (chromeMode) {
+          guessedIdStr = "C";
+        }
+        else if (safariMode) {
+          guessedIdStr = "S";
+        }
+        else {
+          guessedIdStr = "O";
+        }
+        return "GID:" + guessedIdStr + ((screen.width * screen.height * screen.colorDepth) % 997);
+      }
+
+      function getLocation() {
+        switch(location.protocol) {
+           case 'http:':
+             return 'P1';
+           case 'https:':
+             return 'P1b';
+           case 'file:':
+             return 'P2';
+           default:
+             // (other protocols)
+             return 'P3';
+        }
+      }
+
+      function nbVowels(str)
+      {
+        var vowel_list = 'aeiouyAEIOUY'; // (accentuated vowels are not considered here)
+        var vowel_count = 0;
+        for (var i = 0 ; i < str.length ; i++) {
+          if (vowel_list.indexOf(str[i]) !== -1) {
+            vowel_count++;
+          }
+        }
+        return vowel_count;
+      }
+
+      // ISO 3166-1 alpha-2 country codes
+      let isoCountries = {
+        'AF':'Afghanistan','AX':'Aland Islands','AL':'Albania','DZ':'Algeria','AS':'American Samoa','AD':'Andorra','AO':'Angola','AI':'Anguilla','AQ':'Antarctica','AG':'Antigua And Barbuda','AR':'Argentina','AM':'Armenia','AW':'Aruba','AU':'Australia','AT':'Austria','AZ':'Azerbaijan','BS':'Bahamas','BH':'Bahrain','BD':'Bangladesh','BB':'Barbados','BY':'Belarus','BE':'Belgium','BZ':'Belize','BJ':'Benin','BM':'Bermuda','BT':'Bhutan','BO':'Bolivia','BA':'Bosnia And Herzegovina','BW':'Botswana','BV':'Bouvet Island','BR':'Brazil','IO':'British Indian Ocean Territory','BN':'Brunei Darussalam','BG':'Bulgaria','BF':'Burkina Faso','BI':'Burundi','KH':'Cambodia','CM':'Cameroon','CA':'Canada','CV':'Cape Verde','KY':'Cayman Islands','CF':'Central African Republic','TD':'Chad','CL':'Chile','CN':'China','CX':'Christmas Island','CC':'Cocos (Keeling) Islands','CO':'Colombia','KM':'Comoros','CG':'Congo','CD':'Congo, Democratic Republic','CK':'Cook Islands','CR':'Costa Rica','CI':'Cote D\'Ivoire','HR':'Croatia','CU':'Cuba','CY':'Cyprus','CZ':'Czech Republic','DK':'Denmark','DJ':'Djibouti','DM':'Dominica','DO':'Dominican Republic','EC':'Ecuador','EG':'Egypt','SV':'El Salvador','GQ':'Equatorial Guinea','ER':'Eritrea','EE':'Estonia','ET':'Ethiopia','FK':'Falkland Islands (Malvinas)','FO':'Faroe Islands','FJ':'Fiji','FI':'Finland','FR':'France','GF':'French Guiana','PF':'French Polynesia','TF':'French Southern Territories','GA':'Gabon','GM':'Gambia','GE':'Georgia','DE':'Germany','GH':'Ghana','GI':'Gibraltar','GR':'Greece','GL':'Greenland','GD':'Grenada','GP':'Guadeloupe','GU':'Guam','GT':'Guatemala','GG':'Guernsey','GN':'Guinea','GW':'Guinea-Bissau','GY':'Guyana','HT':'Haiti','HM':'Heard Island & Mcdonald Islands','VA':'Holy See (Vatican City State)','HN':'Honduras','HK':'Hong Kong','HU':'Hungary','IS':'Iceland','IN':'India','ID':'Indonesia','IR':'Iran, Islamic Republic Of','IQ':'Iraq','IE':'Ireland','IM':'Isle Of Man','IL':'Israel','IT':'Italy','JM':'Jamaica','JP':'Japan','JE':'Jersey','JO':'Jordan','KZ':'Kazakhstan','KE':'Kenya','KI':'Kiribati','KR':'Korea','KW':'Kuwait','KG':'Kyrgyzstan','LA':'Lao People\'s Democratic Republic','LV':'Latvia','LB':'Lebanon','LS':'Lesotho','LR':'Liberia','LY':'Libyan Arab Jamahiriya','LI':'Liechtenstein','LT':'Lithuania','LU':'Luxembourg','MO':'Macao','MK':'Macedonia','MG':'Madagascar','MW':'Malawi','MY':'Malaysia','MV':'Maldives','ML':'Mali','MT':'Malta','MH':'Marshall Islands','MQ':'Martinique','MR':'Mauritania','MU':'Mauritius','YT':'Mayotte','MX':'Mexico','FM':'Micronesia, Federated States Of','MD':'Moldova','MC':'Monaco','MN':'Mongolia','ME':'Montenegro','MS':'Montserrat','MA':'Morocco','MZ':'Mozambique','MM':'Myanmar','NA':'Namibia','NR':'Nauru','NP':'Nepal','NL':'Netherlands','AN':'Netherlands Antilles','NC':'New Caledonia','NZ':'New Zealand','NI':'Nicaragua','NE':'Niger','NG':'Nigeria','NU':'Niue','NF':'Norfolk Island','MP':'Northern Mariana Islands','NO':'Norway','OM':'Oman','PK':'Pakistan','PW':'Palau','PS':'Palestinian Territory, Occupied','PA':'Panama','PG':'Papua New Guinea','PY':'Paraguay','PE':'Peru','PH':'Philippines','PN':'Pitcairn','PL':'Poland','PT':'Portugal','PR':'Puerto Rico','QA':'Qatar','RE':'Reunion','RO':'Romania','RU':'Russian Federation','RW':'Rwanda','BL':'Saint Barthelemy','SH':'Saint Helena','KN':'Saint Kitts And Nevis','LC':'Saint Lucia','MF':'Saint Martin','PM':'Saint Pierre And Miquelon','VC':'Saint Vincent And Grenadines','WS':'Samoa','SM':'San Marino','ST':'Sao Tome And Principe','SA':'Saudi Arabia','SN':'Senegal','RS':'Serbia','SC':'Seychelles','SL':'Sierra Leone','SG':'Singapore','SK':'Slovakia','SI':'Slovenia','SB':'Solomon Islands','SO':'Somalia','ZA':'South Africa','GS':'South Georgia And Sandwich Isl.','ES':'Spain','LK':'Sri Lanka','SD':'Sudan','SR':'Suriname','SJ':'Svalbard And Jan Mayen','SZ':'Swaziland','SE':'Sweden','CH':'Switzerland','SY':'Syrian Arab Republic','TW':'Taiwan','TJ':'Tajikistan','TZ':'Tanzania','TH':'Thailand','TL':'Timor-Leste','TG':'Togo','TK':'Tokelau','TO':'Tonga','TT':'Trinidad And Tobago','TN':'Tunisia','TR':'Turkey','TM':'Turkmenistan','TC':'Turks And Caicos Islands','TV':'Tuvalu','UG':'Uganda','UA':'Ukraine','AE':'United Arab Emirates','GB':'United Kingdom','US':'United States','UM':'United States Outlying Islands','UY':'Uruguay','UZ':'Uzbekistan','VU':'Vanuatu','VE':'Venezuela','VN':'Viet Nam','VG':'Virgin Islands, British','VI':'Virgin Islands, U.S.','WF':'Wallis And Futuna','EH':'Western Sahara','YE':'Yemen','ZM':'Zambia','ZW':'Zimbabwe'
+      };
+
+      function getCountryName(countryCode) {
+        if ((typeof countryCode == 'undefined') || (countryCode == undefined) || (countryCode == null)) {
+          return '-';
+        }
+        let prop = countryCode.toUpperCase();
+        if (isoCountries.hasOwnProperty(prop)) {
+          return isoCountries[prop];
+        }
+        else {
+          return countryCode;
+        }
+      }
+
+      function getCountryNameFromBrowserLanguage(defaultCountryName) {
+        let browserlanguage = navigator.language;
+        let dashIdx = browserlanguage.indexOf("-");
+        if (dashIdx != -1) {
+          browserlanguage = browserlanguage.substring(dashIdx+1);
+        }
+        let prop = browserlanguage.toUpperCase();
+        if (isoCountries.hasOwnProperty(prop)) {
+          return isoCountries[prop];
+        }
+        else {
+          return defaultCountryName;
+        }
+      }
+
+      function getHTMLListOfCountries() {
+        let str = "";
+        for (let prop in isoCountries) {
+          if (isoCountries.hasOwnProperty(prop)) {
+            let countrycode = prop;
+            let countryname = isoCountries[prop];
+            str = str + "<option value=\\\"" + countrycode + "\\\">" + countryname + "</option>";
+          }
+        }
+        return str;
+      }
+
+      function convertRegionIfNeeded(country_p, region_p) {
+
+          var us_regions = [
+              ['Alabama', 'AL'],
+              ['Alaska', 'AK'],
+              ['American Samoa', 'AS'],
+              ['Arizona', 'AZ'],
+              ['Arkansas', 'AR'],
+              ['California', 'CA'],
+              ['Colorado', 'CO'],
+              ['Connecticut', 'CT'],
+              ['Delaware', 'DE'],
+              ['District Of Columbia', 'DC'],
+              ['Florida', 'FL'],
+              ['Georgia', 'GA'],
+              ['Guam', 'GU'],
+              ['Hawaii', 'HI'],
+              ['Idaho', 'ID'],
+              ['Illinois', 'IL'],
+              ['Indiana', 'IN'],
+              ['Iowa', 'IA'],
+              ['Kansas', 'KS'],
+              ['Kentucky', 'KY'],
+              ['Louisiana', 'LA'],
+              ['Maine', 'ME'],
+              ['Marshall Islands', 'MH'],
+              ['Maryland', 'MD'],
+              ['Massachusetts', 'MA'],
+              ['Michigan', 'MI'],
+              ['Minnesota', 'MN'],
+              ['Mississippi', 'MS'],
+              ['Missouri', 'MO'],
+              ['Montana', 'MT'],
+              ['Nebraska', 'NE'],
+              ['Nevada', 'NV'],
+              ['New Hampshire', 'NH'],
+              ['New Jersey', 'NJ'],
+              ['New Mexico', 'NM'],
+              ['New York', 'NY'],
+              ['North Carolina', 'NC'],
+              ['North Dakota', 'ND'],
+              ['Northern Mariana Islands', 'NP'],
+              ['Ohio', 'OH'],
+              ['Oklahoma', 'OK'],
+              ['Oregon', 'OR'],
+              ['Pennsylvania', 'PA'],
+              ['Puerto Rico', 'PR'],
+              ['Rhode Island', 'RI'],
+              ['South Carolina', 'SC'],
+              ['South Dakota', 'SD'],
+              ['Tennessee', 'TN'],
+              ['Texas', 'TX'],
+              ['US Virgin Islands', 'VI'],
+              ['Utah', 'UT'],
+              ['Vermont', 'VT'],
+              ['Virginia', 'VA'],
+              ['Washington', 'WA'],
+              ['West Virginia', 'WV'],
+              ['Wisconsin', 'WI'],
+              ['Wyoming', 'WY'],
+          ];
+
+          var canada_regions = [
+              ['Alberta', 'AB'],
+              ['British Columbia', 'BC'],
+              ['Manitoba', 'MB'],
+              ['New Brunswick', 'NB'],
+              ['Newfoundland and Labrador', 'NL'],
+              ['Northwest Territories', 'NT'],
+              ['Nova Scotia', 'NS'],
+              ['Nunavut', 'NU'],
+              ['Ontario', 'ON'],
+              ['Prince Edward Island', 'PE'],
+              ['Quebec', 'QC'],
+              ['Saskatchewan', 'SK'],
+              ['Yukon', 'YT']
+          ];
+
+          var regions = null;
+          var country_p_up = country_p.toUpperCase();
+          if ((country_p_up.indexOf("UNITED STATES") == 0) || (country_p_up == "US") || (country_p_up == "USA")) {
+            regions = us_regions;
+          }
+          else if ((country_p_up == "CANADA") || (country_p_up == "CA") || (country_p_up == "CAN")) {
+            regions = canada_regions;
+          }
+          else {
+            return region_p;
+          }
+
+          var region_p_up = region_p.toUpperCase();
+          for (region of regions) {
+              if (region[1] == region_p_up) {
+                  return (region[0]);
+              }
+          }
+          return region_p;
+
+      }
+
+      function isCorrect(str) {
+        if ( (str.toLowerCase().indexOf('sherlo') != -1) // (Sherlock)
+             || (str.toLowerCase().indexOf('holme') != -1) // (Sherlock)
+             || (str.toLowerCase().indexOf('watson') != -1) // (Sherlock)
+             || (str.toLowerCase().indexOf('aaa') != -1)
+             || (str.toLowerCase().indexOf('bbb') != -1)
+             || (str.toLowerCase().indexOf('ccc') != -1)
+             || (str.toLowerCase().indexOf('ddd') != -1)
+             || (str.toLowerCase().indexOf('eee') != -1)
+             || (str.toLowerCase().indexOf('fff') != -1)
+             || (str.toLowerCase().indexOf('ggg') != -1)
+             || (str.toLowerCase().indexOf('hhh') != -1)
+             || (str.toLowerCase().indexOf('iii') != -1)
+             || (str.toLowerCase().indexOf('jjj') != -1)
+             || (str.toLowerCase().indexOf('kkk') != -1)
+             || (str.toLowerCase().indexOf('lll') != -1)
+             || (str.toLowerCase().indexOf('mmm') != -1)
+             || (str.toLowerCase().indexOf('nnn') != -1)
+             || (str.toLowerCase().indexOf('ooo') != -1)
+             || (str.toLowerCase().indexOf('ppp') != -1)
+             || (str.toLowerCase().indexOf('qqq') != -1)
+             || (str.toLowerCase().indexOf('rrr') != -1)
+             || (str.toLowerCase().indexOf('sss') != -1)
+             || (str.toLowerCase().indexOf('ttt') != -1)
+             || (str.toLowerCase().indexOf('uuu') != -1)
+             || (str.toLowerCase().indexOf('vvv') != -1)
+             || (str.toLowerCase().indexOf('www') != -1)
+             || (str.toLowerCase().indexOf('xxx') != -1)
+             || (str.toLowerCase().indexOf('yyy') != -1)
+             || (str.toLowerCase().indexOf('zzz') != -1)
+             || (str.toLowerCase().indexOf('bastard') != -1)
+             || (str.toLowerCase().indexOf('fuck') != -1)
+             || (str.toLowerCase().indexOf('sex') != -1)
+             || (str.toLowerCase().endsWith("bite"))
+             || (str.toLowerCase().indexOf('noname') != -1)
+             || (str.toLowerCase().indexOf('unknown') != -1)
+             || (str.toLowerCase().indexOf('null') != -1)
+             || (str.toLowerCase().indexOf('myname') != -1)
+             || (str.toLowerCase().indexOf('nobody') != -1)
+             || (str.toLowerCase().indexOf('noone') != -1)
+             || (str.toLowerCase().indexOf('dummy') != -1)
+             || (str.toLowerCase().indexOf('empty') != -1)
+             || (str.toLowerCase() == "usa")
+             || (str.toLowerCase() == "eng")
+             || (str.toLowerCase() == "fra")
+             || (str.toLowerCase() == "ger")
+             || (str.toLowerCase() == "deu")
+             || (str.toLowerCase() == "can")
+             || (str.toLowerCase().indexOf('-') == 0)
+             || (str.toLowerCase().lastIndexOf('-') == str.length - 1)
+             || (str.toLowerCase().indexOf('--') != -1)
+             || (str.toLowerCase().indexOf('_') != -1)
+             || (nbVowels(str) == 0)
+             || (nbVowels(str) == str.length) ) {
+          return false;
+        }
+        return true;
+      }
+
+      if (typeof(Storage) !== 'undefined') {
+        if (localStorage.firstname && (!isCorrect(localStorage.firstname))) {
+          localStorage.previousfirstname = localStorage.firstname;
+          localStorage.removeItem('firstname'); // localStorage.firstname
+        }
+      }
+
+      function str_from_jqxhr(jqxhr) { // (jqxhr: XMLHTTPRequest)
+        try {
+          let str = "jqxhr={";
+          try {
+            /* Status:
+               200: "OK"
+               403: "Forbidden"
+               404: "Page not found"
+               ... */
+            str = str + "status:" + jqxhr.status;
+            str = str + ",statusText:" + jqxhr.statusText;
+            /* readyState holds the status of the XMLHttpRequest:
+               0: request not initialized
+               1: server connection established
+               2: request received
+               3: processing request
+               4: request finished and response is ready */
+            str = str + ",readyState:" + jqxhr.readyState;
+          }
+          catch (exc) {
+            str = str + "?";
+          }
+          str = str + "}";
+          return str;
+        }
+        catch (exc) {
+          return "jqxhr=?";
+        }
+      }
+
+      // Interesting links about JSONP:
+      // - https://en.wikipedia.org/wiki/Same-origin_policy and https://www.getfilecloud.com/blog/using-jsonp-for-cross-domain-requests/ (JSONP usage & safety)
+      // - https://ctrlq.org/code/20197-jquery-ajax-call-google-script (usage of JSONP to avoid "Cross Origin" issues)
+      //   => "JSONP" to be replaced by "CORS" in the future when fully supported, which is safer.
+      var oopsAlertAlreadyDisplayedCnt = 0;
+      function submitForm(formStr = "", skipErrorDisplay = false) {
+
+        if (globalErrorStatus > 0) { // skip form submission when a basic global error occurred
+          console.log("(form submission skipped)");
+          return;
+        }
+
+        let my_form_url = document.getElementById("my_form").action + '?';
+        if (formStr == "") { // Nominal case
+          // console.log(JSON.stringify($("#my_form").serializeArray()));
+          let elements = document.getElementById("my_form").elements;
+          for (let i = 0, element; element = elements[i++];) {
+            my_form_url = my_form_url + element.name + '=' + element.value + '&';
+          }
+          if (abbreviateScores) {
+            my_form_url = my_form_url + 'compressrsp=' + abbreviateScores + '&';
+          }
+          if (mobileMode) {
+            my_form_url = my_form_url + 'mobilemode=' + mobileMode + '&';
+          }
+        }
+        else { // Specific case
+          my_form_url = my_form_url + 'form_str=' + formStr + '&';
+        }
+        my_form_url = my_form_url + 'k=' + Math.floor(Math.random()*9999999999+1) + '&';
+        my_form_url = my_form_url + 'my_callback_fct=handle_rsp';
+
+        // Avoid request blocking by Chrome for the following reason:
+        // "Resource requests whose URLs contained both removed whitespace (`\n`, `\r`, `\t`) characters and less-than characters (`<`) are blocked.
+        //  Please remove newlines and encode less-than characters from places like element attribute values in order to load these resources.
+        //  See https://www.chromestatus.com/feature/5735596811091968 for more details."
+        my_form_url = my_form_url.replaceAll("\n"," ");
+        my_form_url = my_form_url.replaceAll("\r","");
+        my_form_url = my_form_url.replaceAll("\t"," ");
+        // my_form_url = my_form_url.replaceAll("<","_");
+        // my_form_url = my_form_url.replaceAll(">","_"); // (symmetrical replace applied)
+
+        // console.log(my_form_url);
+        // Submit form
+        console.log("(submit form" + ((formStr == "") ? "" : " for a specific case") + ")");
+        jQuery.ajax({
+          crossDomain: true,
+          url: my_form_url,
+          method: "GET",
+          dataType: "jsonp",
+          timeout: 40000 // 40 seconds
+        })
+        .fail(function(jqxhr, textStatus, error) { // (jqxhr: XMLHTTPRequest)
+          try {
+            if (jqxhr.status != 200) { // Note: covers the 404 status which corresponds to the error "Loading failed for the <script> with source https://..."
+              console.log(("form submission failure: " + textStatus + " " + error + " " + str_from_jqxhr(jqxhr)).trim());
+
+              jQuery.ajax({
+                crossDomain: true,
+                url: my_form_url,
+                method: "GET",
+                dataType: "jsonp",
+                timeout: 40000 // 40 seconds
+              })
+              .fail(function(jqxhr, textStatus, error) { // (jqxhr: XMLHTTPRequest)
+                try {
+                  if (jqxhr.status != 200) { // Note: covers the 404 status which corresponds to the error "Loading failed for the <script> with source https://..."
+                    console.log(("form submission retry failure: " + textStatus + " " + error + " " + str_from_jqxhr(jqxhr)).trim());
+                  } // else: systematic parse error (with 200 status) is ignored
+                  if ((formStr == "") && (!skipErrorDisplay)) {
+                    if (oopsAlertAlreadyDisplayedCnt < 2) { // Do not display too many successive (sometimes incorrect) alerts
+                      // alert("Oops... a network error occurred!"); -> commented because too many intempestive alerts!
+                      oopsAlertAlreadyDisplayedCnt++;
+                    }
+                  }
+                }
+                catch (exc) {
+                  console.log(("form submission retry failure (abnormal case): " + textStatus + " " + error + " " + str_from_jqxhr(jqxhr)).trim());
+                }
+              });
+            } // else: systematic parse error (with 200 status) is ignored
+          }
+          catch (exc) {
+            console.log(("form submission failure (abnormal case): " + textStatus + " " + error + " " + str_from_jqxhr(jqxhr)).trim());
+          }
+        });
+
+        // document.getElementById('my_form').submit();
+        // $("#my_form").submit();
+      }
+
+      // Temporary error handling (from this point in this file to simplify / will be overwritten later)
+      function tmp_game_onerror(errorStr, errStack) {
+        submitForm("***** GAME ERROR ***** (" + html_compatibility_game_version + "): "
+                   + (github_unicorn_error ? "github unicorn error - " : "") + (github_html_error ? "github html error - " : "") + (github_load_error ? "github load error - " : "")
+                   + errorStr + " / " + errStack + " in " + userAgentStr + " (start time:" + pageLoadStartTime + "/error time:" + new Date() + ")", true);
+      }
+      window.onerror = tmp_game_onerror;
+      window.onmessageerror = tmp_game_onerror;
+      // Promise rejection handling
+      window.onunhandledrejection = function(evt) {
+        var evt_str = "-";
+        try {
+          evt_str = JSON.stringify(evt).substring(0, 101).trim();
+        }
+        catch (exc) {}
+        var evt_promise_str = "-";
+        try {
+          evt_promise_str = JSON.stringify(evt.promise).substring(0, 101).trim();
+        }
+        catch (exc) {}
+        var extra_debug_info = "-";
+        if (localStorage.firstname) {
+          extra_debug_info = localStorage.firstname;
+        }
+        else if (localStorage.playerid) {
+          extra_debug_info = localStorage.playerid;
+        }
+        try {
+          extra_debug_info = extra_debug_info + " gameOnGoing=" + gameOnGoing() + ", currentAttemptNumber=" + currentAttemptNumber + ", gameWon=" + gameWon;
+        }
+        catch (exc) {}
+        let skip_undefined_errors = ((evt == undefined) || ((evt.reason == undefined) && (evt.promise == undefined)));
+        if (!skip_undefined_errors) {
+          submitForm("***** GAME UNHANDLEDREJECTION ERROR ***** (" + html_compatibility_game_version + "): event: " + evt + ", " + evt_str + " / reason: " + evt.reason + " / promise: " + evt.promise + ", " + evt_promise_str + " / debug: " + nbGamesPlayed + ", " + nbGamesPlayedAndWon + ", " + debug_game_state + ", " + debug_on_unload + " for " + extra_debug_info + " in " + userAgentStr, true);
+        }
+        else {
+          console.log("(onunhandledrejection event: skipped)");
+        }
+      };
+      window.onrejectionhandled = function(evt) {
+        var evt_str = "-";
+        try {
+          evt_str = JSON.stringify(evt).substring(0, 101).trim();
+        }
+        catch (exc) {}
+        var evt_promise_str = "-";
+        try {
+          evt_promise_str = JSON.stringify(evt.promise).substring(0, 101).trim();
+        }
+        catch (exc) {}
+        var extra_debug_info = "-";
+        if (localStorage.firstname) {
+          extra_debug_info = localStorage.firstname;
+        }
+        else if (localStorage.playerid) {
+          extra_debug_info = localStorage.playerid;
+        }
+        try {
+          extra_debug_info = extra_debug_info + " gameOnGoing=" + gameOnGoing() + ", currentAttemptNumber=" + currentAttemptNumber + ", gameWon=" + gameWon;
+        }
+        catch (exc) {}
+        let skip_undefined_errors = ((evt == undefined) || ((evt.reason == undefined) && (evt.promise == undefined)));
+        if (!skip_undefined_errors) {
+          submitForm("***** GAME REJECTIONHANDLED ERROR ***** (" + html_compatibility_game_version + "): event: " + evt + ", " + evt_str + " / reason: " + evt.reason + " / promise: " + evt.promise + ", " + evt_promise_str + " / debug: " + nbGamesPlayed + ", " + nbGamesPlayedAndWon + ", " + debug_game_state + ", " + debug_on_unload + " for " + extra_debug_info + " in " + userAgentStr, true);
+        }
+        else {
+          console.log("(onrejectionhandled event: skipped)");
+        }
+      };
+
+      var playerid_prefix = "ID/";
+      function handle_rsp_delayed(e) {
+        debug_game_state = 80;
+        try {
+          if ( (e !== undefined) && (e != null)
+               && (typeof e.parameter !== 'undefined') && (e.parameter != undefined) && (e.parameter != null)
+               && (typeof e.parameter.playerid !== 'undefined')
+               && (typeof e.rsp_cd == 'undefined')
+               && (typeof e.parameter.rankings !== 'undefined') && (e.parameter.rankings.length > 10) ) {
+            var rsp_rankings_str = JSON.stringify(e.parameter.rankings).replaceAll("^\"|\"$", ""); // (suppress leading and ending double quotes)
+            // console.log("1: " + rsp_rankings_str);
+            rsp_rankings_str = rsp_rankings_str.replaceAll("width:TABLE_WIDTH", "width:" + scoresTableWidthStr);
+            rsp_rankings_str = rsp_rankings_str.replaceAll("font-size:HEADER_FTZ", "font-size:2.7vh");
+            rsp_rankings_str = rsp_rankings_str.replaceAll("font-size:FTZ", "font-size:" + scoresFontSizeStr);
+            rsp_rankings_str = rsp_rankings_str.replaceAll("<td>", "<td style='border:1px solid black;margin:2px;padding:2px;text-align:center;font-weight:bold;'>"); // actual <td> syntax is applied
+            rsp_rankings_str = rsp_rankings_str.replace(/[\[][\[]/g, "<td style='border:1px solid black;margin:2px;padding:2px;text-align:center;font-weight:bold;background-image:url(img/Smartphone.png);background-repeat:no-repeat;background-position:right center;background-size:auto 88%'>"); // actual <td> syntax is applied: "[[" -> "<td ...>" / case with background image
+            rsp_rankings_str = rsp_rankings_str.replace(/[\[]/g, "<td style='border:1px solid black;margin:2px;padding:2px;text-align:center;font-weight:bold;'>"); // actual <td> syntax is applied: "[" -> "<td ...>" / case without background image
+            rsp_rankings_str = rsp_rankings_str.replace(/[\]]/g, "</td>"); // actual </td> syntax is applied: "]" -> "</td>"
+            rsp_rankings_str = rsp_rankings_str.replaceAll("<s>", "<small>"); // "<s>" -> "<small>"
+            rsp_rankings_str = rsp_rankings_str.replaceAll("</s>", "</small>"); // "</s>" -> "</small>"
+            rsp_rankings_str = rsp_rankings_str.replace(/(\([0-9]+\))/g, "<font color=#555555>$1</font>"); // apply some color changes
+            rsp_rankings_str = rsp_rankings_str.replace(/(\|[0-9]+)/g, "<font color=#555555>$1</font>"); // apply some color changes
+            // console.log("2: " + rsp_rankings_str);
+            // Rk: top scores are always displayed, even if current game score is not in them
+            try {
+              modal_mode = 2;
+              // set modal content
+              modal.setContent("<div style='-webkit-touch-callout: none; /* iOS Safari */ -webkit-user-select: none; /* Safari */ -khtml-user-select: none; /* Konqueror HTML */ -moz-user-select: none; /* Firefox */ -ms-user-select: none; /* Internet Explorer/Edge */ user-select: none; /* Non-prefixed version, currently supported by Chrome and Opera */'>"
+                               + rsp_rankings_str
+                               + "</div>");
+              // open modal
+              modal.open();
+            }
+            catch (exc) {
+              throw new Error("modal error (" + modal_mode + "): " + exc + ": " + exc.stack);
+            }
+          }
+          else {
+            if ((e == undefined) || (e == null)) {
+              console.log('rsp_cd: ?');
+            }
+            else if (typeof e.rsp_cd !== 'undefined') {
+              console.log('rsp_cd: ' + JSON.stringify(e.rsp_cd));
+            }
+            else {
+              console.log('rsp_cd: ?');
+            }
+          }
+        }
+        catch (exc) {
+          throw new Error("handle_rsp_delayed error: " + exc + ": " + exc.stack);
+        }
+        debug_game_state = 81;
+      }
+      function handle_rsp(e) {
+        console.log("(handle_rsp)");
+
+        var score_display_time = 4444; // (see blinking time)
+        if (mobileMode) {
+          score_display_time = 3444; // (no blinking)
+        }
+
+        var time_to_wait = 44;
+        var time_diff = new Date().getTime() - store_time;
+        if (time_diff < 0) { // (invalid case)
+          time_to_wait = 44;
+        }
+        else if (time_diff < score_display_time) {
+          time_to_wait = score_display_time - time_diff;
+        }
+        else {
+          time_to_wait = 44; // (no time to wait, form submission was long enough)
+        }
+        console.log("(time_diff=" + time_diff + ", time_to_wait=" + time_to_wait + ")");
+        setTimeout("handle_rsp_delayed(" + JSON.stringify(e) + ");", time_to_wait);
+      }
+
+      var globalProgressForHTMLGame2 = getGlobalProgress(0.5 /* (rough value) */, 0);
+      console.log("current progress: " + globalProgressForHTMLGame2 + "% (g)"); // !WARNING! -> this console text will be read by the android appli so shall not be modified
+      if (globalProgressForHTMLGame2 > 0) {
+        $("#game_loading_id").html("<img src='img/loading.gif' style='height:12%;'><br>Loading (" + globalProgressForHTMLGame2 + "%)"); // (not rem unit as no viewport! / duplicated code)
+      }
+
+      var last_location_data_used = null;
+      var id_of_last_location_data_used = -1;
+      var html_geoloc_next_gamesok = -100;
+      var nb_locationURL_accesses = 0;
+
+      function reformatLocationValue(x) {
+        let res = String(x).trim();
+        if ((typeof x == 'undefined') || (x == undefined) || (x == null) || (res == "")) {
+          return '-';
+        }
+        else {
+          return res;
+        }
+      }
+
+      function deg2rad(deg) {
+        return deg * (Math.PI/180);
+      }
+      function getDistanceFromLatLonInKm(lat1, lon1, lat2, lon2) {
+        var R = 6371; // Radius of the earth in km
+        var dLat = deg2rad(lat2-lat1);
+        var dLon = deg2rad(lon2-lon1);
+        var a =
+          Math.sin(dLat/2) * Math.sin(dLat/2) +
+          Math.cos(deg2rad(lat1)) * Math.cos(deg2rad(lat2)) *
+          Math.sin(dLon/2) * Math.sin(dLon/2);
+        var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+        var d = R * c; // Distance in km
+        return d;
+      }
+
+      let bestEffortIpAddressFound = null;
+      let bestEffortCountryNameFound = null;
+      function isLocationDataValid(data_p) {
+        if ((typeof data_p == 'undefined') || (data_p == undefined) ||  (data_p == null)) {
+          return false;
+        }
+        let validIpAddress = ((typeof data_p.ip != 'undefined') && (data_p.ip != undefined) && (data_p.ip != null) && (String(data_p.ip).trim().length >= 7 /* 0.0.0.0 */));
+        let validCountryName = ((typeof data_p.country_name != 'undefined') && (data_p.country_name != undefined) && (data_p.country_name != null) && (data_p.country_name.length >= 3));
+        if (validIpAddress && validCountryName) {
+          bestEffortIpAddressFound = String(data_p.ip).trim();
+          bestEffortCountryNameFound = data_p.country_name;
+        }
+        if ( (typeof data_p.latitude != 'undefined') && (data_p.latitude != undefined) && (data_p.latitude != null)
+             && (typeof data_p.longitude != 'undefined') && (data_p.longitude != undefined)  && (data_p.longitude != null)
+             && ((String(data_p.latitude).indexOf('.') != -1) || (String(data_p.longitude).indexOf('.') != -1))
+             && validCountryName
+             && ((typeof data_p.city != 'undefined') && (data_p.city != undefined) && (data_p.city != null) && (data_p.city.length >= 2)) // (redundant lines)
+             && validIpAddress) {
+          return true;
+        }
+        return false;
+      }
+
+      let precise_location_data = null;
+      let GEOCODING_API_URL_BASE = "https://www.mapquestapi.com/geocoding/v1/reverse?outFormat=json&location=";
+      function HTML_geolocation_success(position, debug_str_p = null) { // called (with debug_str_p parameter filled) by android appli
+        let latitude = position.coords.latitude;
+        let longitude = position.coords.longitude;
+        let accuracy = position.coords.accuracy; // (in meters)
+        console.log("HTML geolocation:");
+        console.log(" latitude: " + latitude);
+        console.log(" longitude: " + longitude);
+        console.log(" accuracy: " + accuracy);
+        let extraStr = (smm ? "" : "x"); // avoid distant location request in local mode
+        let GEOCODING_API_URL = GEOCODING_API_URL_BASE + extraStr + latitude + "," + longitude + "&key=dCKxMASlEZayTGGw5SBfd2bGMSCUuP60";
+        debug_game_state = 10;
+        let debug_str = "";
+        if (debug_str_p != null) {
+          debug_str = " " + debug_str_p;
+        }
+        localStorage.html_geoloc_status = "run_bis" + debug_str;
+        HTML_geoloc_successes++;
+
+        // Do not trigger useless requests to GEOCODING_API_URL
+        if (precise_location_data != null) {
+          if ( isLocationDataValid(precise_location_data)
+               && (getDistanceFromLatLonInKm(precise_location_data.latitude, precise_location_data.longitude, latitude, longitude) < 0.150) ) { // nearly same position as previous one
+            localStorage.html_geoloc_status = "ok nearly same position" + debug_str;
+            return;
+          }
+        }
+
+        $.getJSON(GEOCODING_API_URL)
+        .done(function(location) {
+          debug_game_state = 11;
+          try {
+            if (location.info.statuscode == "0") { // geocoding API success
+              let country = getCountryName(String(location.results[0].locations[0].adminArea1).trim());
+              let region = String(location.results[0].locations[0].adminArea3).trim();
+              let city = String(location.results[0].locations[0].adminArea5).trim();
+              let zip = String(location.results[0].locations[0].postalCode).trim();
+              console.log(location);
+              console.log(" country: " + country);
+              console.log(" region: " + region);
+              console.log(" city: " + city);
+              console.log(" zip: " + zip);
+              console.log(" address: " + String(location.results[0].locations[0].street).trim());
+
+              // country + region + city + firstname are used below to identify unique players
+              var sum = 0;
+              for (var i = 0; i < country.length; i++) {
+                sum = sum + country.charCodeAt(i);
+              }
+              for (var i = 0; i < region.length; i++) {
+                sum = sum + region.charCodeAt(i);
+              }
+              for (var i = 0; i < city.length; i++) {
+                sum = sum + city.charCodeAt(i);
+              }
+              var sum2 = 0;
+              if (localStorage.firstname) {
+                for (var i = 0; i < localStorage.firstname.length; i++) {
+                  sum2 = sum2 + localStorage.firstname.charCodeAt(i);
+                }
+              }
+              var inferred_ip_address = "0." + String(sum2 % 999) + "." + String(Math.floor(sum / 99) % 999) + "." + String(sum % 999);
+
+              precise_location_data = { latitude: reformatLocationValue(latitude),
+                                        longitude: reformatLocationValue(longitude),
+                                        accuracy: accuracy,
+                                        country_name: reformatLocationValue(country),
+                                        region: reformatLocationValue(region),
+                                        city: reformatLocationValue(city),
+                                        postal: zip,
+                                        ip: inferred_ip_address,
+                                        vf_date: new Date() };
+              if (isLocationDataValid(precise_location_data)) {
+                // Reinit last_location_data_used to have it consistent with below localStorage.xxx values
+                last_location_data_used = null;
+                id_of_last_location_data_used = -1;
+
+                localStorage.latitude = reformatLocationValue(latitude);
+                localStorage.longitude = reformatLocationValue(longitude);
+                localStorage.accuracy = accuracy;
+                localStorage.countryname = reformatLocationValue(country);
+                localStorage.region = reformatLocationValue(region);
+                localStorage.city = reformatLocationValue(city);
+                localStorage.ip = inferred_ip_address;
+                localStorage.vf_date = new Date();
+                localStorage.location_id = nbLocationURLs + 10;
+                localStorage.html_geoloc_status = "ok" + debug_str;
+              }
+              else {
+                console.log("HTML geolocation error: invalid location values");
+                localStorage.html_geoloc_status = "ok-invalid (" + precise_location_data.latitude + "," + precise_location_data.longitude + ")" + debug_str;
+              }
+            }
+            else {
+              console.log("HTML geolocation error: status: " + location.info.statuscode);
+              localStorage.html_geoloc_status = "nok-2/" + location.info.statuscode + debug_str;
+            }
+          }
+          catch (exc) {
+            console.log("HTML geolocation error: " + exc);
+            localStorage.html_geoloc_status = "nok-3/" + exc + debug_str;
+          }
+          debug_game_state = 12;
+        })
+        .fail(function(jqxhr, textStatus, error) { // (jqxhr: XMLHTTPRequest)
+          debug_game_state = 13;
+          console.log(("HTML geolocation failure: " + textStatus + " " + error + " " + str_from_jqxhr(jqxhr)).trim());
+          localStorage.html_geoloc_status = "nok-4" + debug_str;
+          debug_game_state = 14;
+        });
+      } // HTML_geolocation_success
+
+      function HTML_geolocation_error(error) { // called (with string parameter) by android appli
+        let error_str = "?";
+        if (error.code != undefined) {
+          switch(error.code) {
+            case error.PERMISSION_DENIED:
+              if (!localStorage.html_geoloc_denied) {
+                localStorage.html_geoloc_denied = 0;
+              }
+              localStorage.html_geoloc_denied = Number(localStorage.html_geoloc_denied) + 1;
+              error_str = "user denied the request for geolocation/" + localStorage.html_geoloc_denied + "x";
+              break;
+            case error.POSITION_UNAVAILABLE:
+              error_str = "location information is unavailable";
+              break;
+            case error.TIMEOUT:
+              error_str = "the request to get user location timed out";
+              break;
+            case error.UNKNOWN_ERROR:
+              error_str = "an unknown error occurred";
+              break;
+          }
+        }
+        else { // android appli call
+          error_str = String(error);
+        }
+        console.log("HTML geolocation error: " + error_str);
+        localStorage.html_geoloc_status = "nok-5/" + error_str;
+        HTML_geoloc_errors++;
+      } // HTML_geolocation_error
+
+      let my_position = null;
+      function attempt_HTML_geolocation() {
+        console.log("(attempt HTML geolocation)");
+        if (android_appli && (versionCodeInt >= 6)) {
+          if (scriptsFullyLoaded) {
+            // In case of android appli, classical calls to navigator.geolocation functions often do not work (unexpected timeout errors)
+            // => request location explicitly to the android appli which will call HTML_geolocation_success or HTML_geolocation_error
+            console.log("(get last location request)"); // !WARNING! -> this console text will be read by the android appli so shall not be modified
+            HTML_geoloc_android_attempts++;
+            localStorage.html_geoloc_status = "run_app";
+          }
+          else {
+            localStorage.html_geoloc_status = "run_app_skipped";
+          }
+        }
+        else if (typeof(Storage) !== 'undefined') {
+          localStorage.html_geoloc_status = "run";
+          if (navigator.geolocation) {
+            // Subject to user acceptance
+            // Version 1:
+            navigator.geolocation.getCurrentPosition(HTML_geolocation_success, HTML_geolocation_error);
+            // Version 2 (support of location updates & more precise than getCurrentPosition() because several iterations are made):
+            /* let my_geolocation = navigator.geolocation.watchPosition(
+                function (position) { // success callback (called N times)
+                  my_position = {coords: {latitude: position.coords.latitude, longitude: position.coords.longitude, accuracy: position.coords.accuracy}};
+                  console.log('HTML geolocation iteration (latitude: ' + position.coords.latitude + ', ' + 'longitude: ' + position.coords.longitude + ', ' + 'accuracy: ' + position.coords.accuracy + ")");
+                },
+                HTML_geolocation_error, // error callback
+                {
+                  maximumAge: 250, // (do not use cache for long)
+                  enableHighAccuracy: true,
+                  timeout: 15000 // (see other timeout value below)
+                }
+            );
+            setTimeout(function() {
+                navigator.geolocation.clearWatch(my_geolocation); // stop further HTML geolocation iterations (i.e. further calls to watchPosition())
+                console.log("stop HTML geolocation iterations");
+                if (my_position != null) { // (at least one HTML geolocation success during the iterations)
+                  HTML_geolocation_success(my_position); // (use last success's position)
+                }
+              },
+              15300 // stop further HTML geolocation iterations (see other timeout value above / And on laptops, this timeout value will "limit the time" the user has to answer yes/no to "ok to share position?")
+            ); */
+          }
+          else {
+            console.log("HTML geolocation error: geolocation is not supported by the browser");
+            localStorage.html_geoloc_status = "nok-6";
+          }
+        }
+      }
+
+      var last_game_cnt = -1;
+      function store_player_info(game_cnt, nbcolumns, score, attempts, timestr, perfs, nbuknperfs, help, gamestr) {
+        debug_game_state = 100;
+        try {
+
+          if (game_cnt == last_game_cnt) { // At most one storage per game
+            return;
+          }
+          last_game_cnt = game_cnt;
+          store_time = new Date().getTime();
+
+          let gamesok = -1;
+          let deltagames = -1;
+          if (typeof(Storage) !== 'undefined') {
+
+            if (!localStorage.lastDonationTimeT) {
+              localStorage.lastDonationTimeT = 0;
+            }
+            if (!localStorage.gamesok) {
+              localStorage.gamesok = 0;
+            }
+            localStorage.gamesok = Number(localStorage.gamesok) + 1;
+            if ( (localStorage.gamesok == 50) || (localStorage.gamesok == 150)
+                 || (localStorage.gamesok == 111) || (localStorage.gamesok == 222) || (localStorage.gamesok == 333) || (localStorage.gamesok == 444) || (localStorage.gamesok == 555) || (localStorage.gamesok == 777) || (localStorage.gamesok == 888) || (localStorage.gamesok == 999)
+                 || (localStorage.gamesok == 1111) || (localStorage.gamesok == 1234)  || (localStorage.gamesok == 2222) || (localStorage.gamesok == 2345) || (localStorage.gamesok == 3333) || (localStorage.gamesok == 3456) || (localStorage.gamesok == 4444) || (localStorage.gamesok == 5555) || (localStorage.gamesok == 7777) || (localStorage.gamesok == 8888) || (localStorage.gamesok == 9999)
+                 || ((localStorage.gamesok <= 2000) && ((localStorage.gamesok % 100) == 0))
+                 || ((localStorage.gamesok % 200) == 0)
+                 || ((localStorage.gamesok % 1000) == 444)
+                 || ((localStorage.gamesok % 1000) == 555)
+                 || ((localStorage.gamesok % 1000) == 777)
+                 || ((localStorage.gamesok % 1000) == 888)
+                 || ((localStorage.gamesok % 1000) == 999) ) {
+              alert("It's your " + localStorage.gamesok + "th game!");
+            }
+            gamesok = Number(localStorage.gamesok);
+
+            if ((gamesok >= 150) && (!localStorage.firstname)) { // No interest for sharing results
+              if ((gamesok % 10) != 1) { // first name will no longer be asked / this condition will let pass some odd gamesok values rarely
+                return;
+              }
+              if (nbcolumns == 3) {
+                return;
+              }
+            }
+            if (localStorage.skip_storing) {
+              return;
+            }
+
+            switch (nbcolumns) {
+
+              case 3:
+                if (!localStorage.nbgamesstarted3) {
+                  localStorage.nbgamesstarted3 = 0;
+                }
+                if (!localStorage.nbgamesstarted3_ref) {
+                  localStorage.nbgamesstarted3_ref = 0;
+                }
+                deltagames = localStorage.nbgamesstarted3 - localStorage.nbgamesstarted3_ref - 1;
+                localStorage.nbgamesstarted3_ref = localStorage.nbgamesstarted3;
+                break;
+              case 4:
+                if (!localStorage.nbgamesstarted4) {
+                  localStorage.nbgamesstarted4 = 0;
+                }
+                if (!localStorage.nbgamesstarted4_ref) {
+                  localStorage.nbgamesstarted4_ref = 0;
+                }
+                deltagames = localStorage.nbgamesstarted4 - localStorage.nbgamesstarted4_ref - 1;
+                localStorage.nbgamesstarted4_ref = localStorage.nbgamesstarted4;
+                break;
+              case 5:
+                if (!localStorage.nbgamesstarted5) {
+                  localStorage.nbgamesstarted5 = 0;
+                }
+                if (!localStorage.nbgamesstarted5_ref) {
+                  localStorage.nbgamesstarted5_ref = 0;
+                }
+                deltagames = localStorage.nbgamesstarted5 - localStorage.nbgamesstarted5_ref - 1;
+                localStorage.nbgamesstarted5_ref = localStorage.nbgamesstarted5;
+                break;
+              case 6:
+                if (!localStorage.nbgamesstarted6) {
+                  localStorage.nbgamesstarted6 = 0;
+                }
+                if (!localStorage.nbgamesstarted6_ref) {
+                  localStorage.nbgamesstarted6_ref = 0;
+                }
+                deltagames = localStorage.nbgamesstarted6 - localStorage.nbgamesstarted6_ref - 1;
+                localStorage.nbgamesstarted6_ref = localStorage.nbgamesstarted6;
+                break;
+
+              case 7:
+                if (!localStorage.nbgamesstarted7) {
+                  localStorage.nbgamesstarted7 = 0;
+                }
+                if (!localStorage.nbgamesstarted7_ref) {
+                  localStorage.nbgamesstarted7_ref = 0;
+                }
+                deltagames = localStorage.nbgamesstarted7 - localStorage.nbgamesstarted7_ref - 1;
+                localStorage.nbgamesstarted7_ref = localStorage.nbgamesstarted7;
+                break;
+
+              default:
+                console.log("Error: invalid nbcolumns in store_player_info(): " + nbcolumns);
+                return;
+
+            }
+
+          }
+
+          var geolocation_handler = {
+
+            nb_JSON_queries_posted: 0,
+
+            convertLocationData: function(data_p, locationId) {
+
+              if (locationId == 1) {
+                return data_p;
+              }
+              else if (locationId == 2) {
+                /* ipinfodb.com response format:
+                   - SUCCESS case:
+                    statusCode	"OK"
+                    statusMessage	""
+                    ipAddress	"94.239.111.222"
+                    countryCode	"FR"
+                    countryName	"France"
+                    regionName	"Ile-de-France"
+                    cityName	"Paris"
+                    zipCode	"75000"
+                    latitude	"48.8534"
+                    longitude	"2.3488"
+                    timeZone	"+01:00"
+                  - FAILURE case:
+                    statusCode	"ERROR"
+                    statusMessage	"Invalid IP Address."
+                    ipAddress	"994.239.111.222"
+                    countryCode	""
+                    countryName	""
+                    regionName	""
+                    cityName	""
+                    zipCode	""
+                    latitude	"0"
+                    longitude	"0"
+                    timeZone	""
+                */
+
+                let converted_data = JSON.stringify(data_p);
+                if ((typeof data_p.statusCode != 'undefined') && (typeof data_p.statusMessage != 'undefined') && (data_p.statusCode != "OK")) {
+                  console.log("geolocation error in convertLocationData: " + locationId + ", " + data_p.statusCode + ", " + data_p.statusMessage);
+                }
+
+                // latitude -> latitude
+                // longitude -> longitude
+                // countryName -> country_name
+                converted_data = converted_data.replace("\"countryName\":", "\"country_name\":");
+                // regionName -> region
+                converted_data = converted_data.replace("\"regionName\":", "\"region\":");
+                // zipCode -> postal
+                converted_data = converted_data.replace("\"zipCode\":", "\"postal\":");
+                // cityName -> city
+                converted_data = converted_data.replace("\"cityName\":", "\"city\":");
+                // timeZone -> time_zone
+                converted_data = converted_data.replace("\"timeZone\":", "\"time_zone\":");
+                // ipAddress -> ip
+                converted_data = converted_data.replace("\"ipAddress\":", "\"ip\":");
+
+                return JSON.parse(converted_data);
+              }
+              else if (locationId == 3) {
+                /* ipinfo.io response format:
+                   - SUCCESS case:
+                    ip	"444.444.444.444"
+                    city	"xxx"
+                    region	"xxx"
+                    country	"US" as a country code
+                    loc	"44.0000,44.0000"
+                    org	"xxx"
+                */
+
+                let data = JSON.parse(JSON.stringify(data_p)); // clone/duplicate data_p into data (using JSON conversion and back)
+
+                try {
+                  // convert country code to country name
+                  data.country = getCountryName(data.country);
+                  // loc -> latitude
+                  // loc -> longitude
+                  let commma_idx = data.loc.indexOf(',');
+                  if (commma_idx == -1) {
+                    throw new Error("(commma_idx == -1)");
+                  }
+                  data.latitude = data.loc.substring(0,commma_idx);
+                  data.longitude = data.loc.substring(commma_idx+1);
+                }
+                catch (e) {
+                  console.log("geolocation error in convertLocationData: " + locationId + ", " + e);
+                }
+
+                let converted_data = JSON.stringify(data);
+
+                // latitude -> latitude
+                // longitude -> longitude
+                // country -> country_name
+                converted_data = converted_data.replace("\"country\":", "\"country_name\":");
+                // region -> region
+                // city -> city
+                // ip -> ip
+
+                return JSON.parse(converted_data);
+              }
+              else {
+                throw new Error("convertLocationData: unexpected locationId value: " + locationId);
+              }
+
+            },
+
+            setFormInfoWithValidLocationData: function(data_p, locationId, extraLocationInfo) {
+
+              // Get location data
+              // *****************
+
+              if (!isLocationDataValid(data_p)) {
+                throw new Error("setFormInfoWithValidLocationData: invalid location data: " + JSON.stringify(data_p) + ", " + locationId + ", " + extraLocationInfo);
+              }
+
+              let latitude = reformatLocationValue(data_p.latitude);
+              let longitude = reformatLocationValue(data_p.longitude);
+              let country = reformatLocationValue(data_p.country_name);
+              let region = reformatLocationValue(data_p.region);
+              let city = reformatLocationValue(data_p.city);
+              let ipaddress = reformatLocationValue(data_p.ip);
+              let zip = '-';
+              if ((typeof data_p.postal != 'undefined') && (data_p.postal != undefined) && (data_p.postal != null) && (String(data_p.postal).trim().length >= 2)) {
+                zip = String(data_p.postal).trim();
+              }
+              let timezone = '-';
+              if ((typeof data_p.time_zone != 'undefined') && (data_p.time_zone != undefined) && (data_p.time_zone != null) && (String(data_p.time_zone).trim().length >= 2)) {
+                if ((typeof data_p.time_zone.name != 'undefined') && (data_p.time_zone.name != undefined) && (data_p.time_zone.name != null) && (String(data_p.time_zone.name).trim().length >= 2)) {
+                  timezone = String(data_p.time_zone.name).trim();
+                }
+                else {
+                  timezone = String(data_p.time_zone).trim();
+                }
+              }
+
+              // Manual updates
+              // **************
+
+              // Manual geolocation table corrections for particular IP addresses
+              /* if ( (ipaddress.indexOf("176.130.42.") == 0) && (ipaddress.length <= 15) ) { // 176.130.42.* IPv4 addresses
+                country = "France";
+                region = "Alsace";
+                city = "Munster";
+              } */
+              if ( (ipaddress.indexOf("77.202.16.251") == 0) && (ipaddress.length <= 15) ) { // 77.202.16.251 IPv4 address
+                country = "France";
+                region = "Grand Est";
+                city = "Munster";
+              }
+
+              // Manual conversions
+              if (localStorage.playerid && (localStorage.playerid.indexOf("0G5V") == 0) && (region == "Illinois") && (city == "Naperville")) {
+                country = "France";
+                region = "Île-de-France";
+                city = "Paris";
+              }
+              else if (localStorage.playerid && (localStorage.playerid.indexOf("0G5V") == 0) && (region == "California") && (city == "San Jose")) {
+                country = "France";
+                region = "Île-de-France";
+                city = "Paris";
+              }
+              else if (localStorage.playerid && (localStorage.playerid.indexOf("0G5V") == 0) && (region == "Bayern") && (city == "Munich")) {
+                country = "France";
+                region = "Île-de-France";
+                city = "Paris";
+              }
+              if (country == "United States of America") {
+                country = "United States";
+              }
+              if (country == "Lao People's Democratic Republic") {
+                country = "Laos";
+              }
+              if (country == "Venezuela, Bolivarian Republic of") {
+                country = "Venezuela";
+              }
+              if ((country == "Portugal") && (region == "Regiao Autonoma da Madeira")) {
+                region = "Madeira";
+              }
+              if (country.indexOf("Republic of") == 0) {
+                country = country.replace("Republic of", "").trim();
+              }
+              let comma_idx = country.indexOf(", ");
+              if (comma_idx >= 4) {
+                country = country.substring(0, comma_idx).trim();
+              }
+
+              // Set location form fields
+              // ************************
+
+              console.log(country);
+              document.getElementById('form_country_id').value = country;
+              console.log(region);
+              document.getElementById('form_region_id').value = convertRegionIfNeeded(country, region);
+              console.log(zip);
+              document.getElementById('form_zip_id').value = zip;
+              console.log(city);
+              document.getElementById('form_city_id').value = ((mobileMode && (!isLocationDataValid(precise_location_data))) ? '-' : city); // (mobile IP-address based geolocation is very imprecise)
+              console.log((locationId + " " + extraLocationInfo).trim());
+              document.getElementById('form_geoloc_id').value = (locationId + " " + extraLocationInfo).trim();
+              console.log(timezone);
+              document.getElementById('form_timezone_id').value = timezone;
+              console.log(latitude);
+              document.getElementById('form_latitude_id').value = latitude;
+              console.log(longitude);
+              document.getElementById('form_longitude_id').value = longitude;
+              console.log(ipaddress);
+              document.getElementById('form_ipaddress_id').value = ipaddress;
+
+              // Store location data for future usage
+              // ************************************
+
+              last_location_data_used = data_p; // (store complete structure)
+              id_of_last_location_data_used = locationId;
+
+              localStorage.latitude = latitude; // (local storage of most useful location information)
+              localStorage.longitude = longitude;
+              localStorage.countryname = country;
+              localStorage.region = region;
+              localStorage.city = city;
+              localStorage.ip = ipaddress;
+              localStorage.location_id = locationId;
+
+              // Other fields
+              // ************
+
+              let playerid;
+              let firstname = "-"; // (firstname may stay equal to this default value if not defined)
+              if (localStorage.firstname) {
+                firstname = localStorage.firstname;
+              }
+              if (!localStorage.playerid) {
+                let id = makeid() + formatDate(new Date());
+                localStorage.playerid = id;
+              }
+              playerid = playerid_prefix + localStorage.playerid;
+
+              console.log(playerid);
+              document.getElementById('form_playerid_id').value = playerid;
+              console.log(firstname);
+              document.getElementById('form_firstname_id').value = firstname;
+              console.log(nbcolumns);
+              document.getElementById('form_nbcolumns_id').value = nbcolumns;
+              console.log(score);
+              document.getElementById('form_score_id').value = score;
+              console.log(attempts);
+              document.getElementById('form_attempts_id').value = attempts;
+              console.log(timestr);
+              document.getElementById('form_time_id').value = timestr;
+              console.log(perfs);
+              document.getElementById('form_perfs_id').value = perfs;
+              console.log(nbuknperfs);
+              document.getElementById('form_nbuknperfs_id').value = nbuknperfs;
+              console.log(help);
+              document.getElementById('form_help_id').value = help;
+              console.log(gamesok);
+              document.getElementById('form_gamesok_id').value = gamesok;
+              console.log(deltagames);
+              document.getElementById('form_deltagames_id').value = deltagames;
+              console.log(((android_appli && (androidAppliInfoStr != null)) ? "an" + androidAppliInfoStr : "-"));
+              document.getElementById('form_app_id').value = ((android_appli && (androidAppliInfoStr != null)) ? "an" + androidAppliInfoStr : "-");
+
+              console.log(navigator.platform);
+              document.getElementById('form_platform_id').value = navigator.platform;
+              console.log(navigator.language);
+              document.getElementById('form_browserlanguage_id').value = navigator.language;
+              console.log(userAgentStr);
+              document.getElementById('form_useragent_id').value = userAgentStr;
+              document.getElementById('form_href_id').value = decodeURI(location.href);
+              document.getElementById('form_formsubmitdate_id').value = new Date();
+
+              var extra_debug_info = "";
+              try {
+                extra_debug_info = extra_debug_info + "/Game:" + gamestr;
+                if (typeof(Storage) !== 'undefined') {
+                  if (localStorage.html_geoloc_status) {
+                    extra_debug_info = extra_debug_info + "/html_geoloc_status:" + localStorage.html_geoloc_status
+                                       + (android_appli ? "/html_geoloc_android_attempts:" + HTML_geoloc_android_attempts : "")
+                                       + "/html_geoloc_successes:" + HTML_geoloc_successes
+                                       + "/html_geoloc_errors:" + HTML_geoloc_errors;
+                  }
+                  if (localStorage.previousfirstname) {
+                    extra_debug_info = extra_debug_info + "/PreviousFirstName:" + localStorage.previousfirstname;
+                  }
+                }
+                extra_debug_info = extra_debug_info + "/Cookies:" + navigator.cookieEnabled;
+                extra_debug_info = extra_debug_info + "/Java:" + navigator.javaEnabled();
+                var pluginsLength = navigator.plugins.length; // (Note: plugin listing is no longer allowed in Firefox for security reasons => length will be less than the actual value)
+                extra_debug_info =  extra_debug_info + "/Plugins:" + pluginsLength;
+                if (pluginsLength > 0) {
+                  for (var i = 0; i < pluginsLength; i++) {
+                    extra_debug_info = extra_debug_info + "|" + i + ":" + navigator.plugins[i].filename + (navigator.plugins[i].version ? navigator.plugins[i].version : "");
+                  }
+                }
+                extra_debug_info = extra_debug_info + "/MimeTypes:" + navigator.mimeTypes.length;
+              }
+              catch (exc) {}
+              var firstNameAskedStr = "0x";
+              var androidAppNotifShownStr = "0x";
+              var firstAccessIdStr = "-";
+              if (typeof(Storage) !== 'undefined') {
+                if (localStorage.firstnameAsked) {
+                  firstNameAskedStr = localStorage.firstnameAsked + "x"; // (past game counter to simplify)
+                }
+                if (localStorage.androidAppNotifShown) {
+                  androidAppNotifShownStr = localStorage.androidAppNotifShown + "x" + "(" + ((!android_appli) && mobileMode && androidMode) + ")";
+                }
+                if (localStorage.firstaccessid) {
+                  firstAccessIdStr = localStorage.firstaccessid;
+                }
+              }
+              document.getElementById('form_debuginfo_id').value = guessUserId() + "/" + getLocation() + (modernDisplay ? '/ThM' : '/ThL' + legacyDisplayVariant) + '/Screen:' + screen.width + '*' + screen.height + ',' + screen.colorDepth + '/Inner:' + window.innerWidth + "*" + window.innerHeight + '/' + html_compatibility_game_version + '/FirstNameAsked:' + firstNameAskedStr + '/androidAppNotifShown:' + androidAppNotifShownStr + '/FirstAccessId:' + firstAccessIdStr + '/NbGamesWon: ' + nbGamesPlayedAndWon + '/NbLocationURLAccesses:' + nb_locationURL_accesses + ((gameInv != 0) ? '/GameInv: ' +  gameInv : "") + '/nbDonationRequests: ' + (localStorage.nbDonationRequestsT ? localStorage.nbDonationRequestsT : 'NA') + extra_debug_info;
+
+              document.getElementById('form_rankings_id').value = '-';
+              document.getElementById('form_list_id').value = '-';
+
+              var form_to_be_submitted = true;
+              if (typeof(Storage) !== 'undefined') {
+                if ( (!localStorage.firstname)
+                     && (gamesok >= 6) // (coherent with "history_clear_advice")
+                     && (attempts >= 4) // (game not too easy)
+                     && ((gamesok == 6) || ((gamesok % 2) == 1)) // (do not ask first name too often if not filled / ignore 1 result out of 2)
+                     && ( ((nbcolumns == 4) && (score >= 55)) || ((nbcolumns == 5) && (score >= 60)) || ((nbcolumns == 6) && (score >= 110)) || ((nbcolumns == 7) && (score >= 150))
+                          || ((gamesok >= 9) && (score >= 55))
+                          || ((gamesok >= 13) && (score >= 45))
+                          || ((gamesok >= 17) && (score >= 33)) ) ) { // (experienced player)
+                  try {
+                    // ***** Modal-based version does not work with android appli due to zoom issues:
+                    // modal_mode = 1;
+                    // // set modal content
+                    // // NOTE: vw unit is used instead of vh for font-size due to interactive smartphone keyboards which reduce window height
+                    // modal.setContent("<div style='-webkit-touch-callout: none; /* iOS Safari */ -webkit-user-select: none; /* Safari */ -khtml-user-select: none; /* Konqueror HTML */ -moz-user-select: none; /* Firefox */ -ms-user-select: none; /* Internet Explorer/Edge */ user-select: none; /* Non-prefixed version, currently supported by Chrome and Opera */'>"
+                    //                 + "<hr style='height:3.0vh;padding:0;margin:0;visibility:hidden;'><font style='font-size:calc(18px + .34vw);'><b>You seem to be an experienced player!<br>"
+                    //                 + "Please enter your first name, it will be used to store your scores</b></font><hr style='height:3.0vh;padding:0;margin:0;visibility:hidden;'>"
+                    //                 + "<font style='font-size:calc(15px + .34vw)'>Your first name (between 3 and 11 letters, no spaces):</font><hr style='height:1.0vh;padding:0;margin:0;visibility:hidden;'>"
+                    //                 + "<input id='firstname_input' type='text' value='Sherlock?' maxlength='11' style='font-size:calc(18px + .34vw)'></input><hr style='height:3.0vh;padding:0;margin:0;visibility:hidden;'>"
+                    //                 + (android_appli ? "" : "<font style='font-size:calc(15px + .34vw)'>To store your future scores properly (with your first name), make sure that your browser does not clear cookies/site data when exited</font><br>")
+                    //                 + "<font style='font-size:calc(15px + .34vw)'>Close this dialog to skip this step</font><hr style='height:3.0vh;padding:0;margin:0;visibility:hidden;'>"
+                    //                 + "</div>");
+                    // // open modal
+                    // modal.open();
+                    // form_to_be_submitted = false; // form to be submitted when modal is closed
+
+                    // ***** Prompt-based version:
+                    let firstname_entered = prompt("Please enter your first name, it will be used to store your future scores (between 3 and 11 letters, no spaces):", "Sherlock?");
+                    if (firstname_entered != null) { // (a first name was entered)
+                      firstname_entered = firstname_entered.trim();
+                      if ( (firstname_entered.length >= 3) && (firstname_entered.length <= 11) && (/^[A-Za-zÀ-ÿ'-]+$/.test(firstname_entered)) /* (only letters) */ && isCorrect(firstname_entered) ) {
+                        if (typeof(Storage) !== 'undefined') {
+                          localStorage.firstname = capitalizeFirstLetters(firstname_entered);
+                        }
+                      }
+                      else {
+                        if (typeof(Storage) !== 'undefined') {
+                          localStorage.previousfirstname = firstname_entered;
+                        }
+                        alert("Invalid first name: " + firstname_entered);
+                      }
+                    }
+
+                    if (typeof(Storage) !== 'undefined') {
+                      if (!localStorage.firstnameAsked) {
+                        localStorage.firstnameAsked = 0;
+                      }
+                      localStorage.firstnameAsked = Number(localStorage.firstnameAsked) + 1;
+                      if (localStorage.firstname) {
+                        console.log("new firstname: " + localStorage.firstname);
+                        document.getElementById('form_firstname_id').value = localStorage.firstname;
+                      }
+                    }
+
+                  }
+                  catch (exc) {
+                    throw new Error("first name entry error: " + exc + ": " + exc.stack);
+                  }
+                }
+              }
+
+              if (form_to_be_submitted) {
+                submitForm();
+              }
+              else {
+                console.log("(form submission skipped)");
+              }
+
+            }, // setFormInfoWithValidLocationData
+
+            setFormInfoByOtherMeans: function() {
+
+              // Regularly attempt HTML geolocation
+              // **********************************
+
+              if (typeof(Storage) !== 'undefined') {
+                // Subject to user acceptance => not done systematically because may prevent all future requests in case of initial rejection
+                // Done at most once out of 2 to allow usage of previously stored location data without repetitive HTML geolocation attempt(s)
+                if (localStorage.gamesok && (Number(localStorage.gamesok) >= (android_appli ? 1 : 8)) && (Number(localStorage.gamesok) > html_geoloc_next_gamesok + 40)) {
+                  html_geoloc_next_gamesok = Number(localStorage.gamesok) + 1; // (*)
+                  if ( ((!localStorage.html_geoloc_status) || (localStorage.html_geoloc_status.indexOf('ok') != 0))
+                       && (!android_appli) ) {
+                    alert("If you accept to share your location, your country and city names will be used to store your future scores (location sharing is part of your browser settings)");
+                  }
+                  attempt_HTML_geolocation(); // Subject to user acceptance
+                }
+              }
+              // (*) To simplify, this geolocation will be taken into account at next calls if accepted by the user (localStorage.xxx values will be updated)
+
+              // Use previously stored location data if any
+              // ******************************************
+
+              if (localStorage.latitude && localStorage.longitude && localStorage.countryname && localStorage.region && localStorage.city && localStorage.ip && localStorage.location_id) { // (condition duplicated)
+                let stored_location_data = { latitude: localStorage.latitude, // (below code duplicated)
+                                             longitude: localStorage.longitude,
+                                             country_name: localStorage.countryname,
+                                             region: localStorage.region,
+                                             city: localStorage.city,
+                                             ip: localStorage.ip };
+                if (!isLocationDataValid(stored_location_data)) {
+                  throw new Error("setFormInfoByOtherMeans: invalid stored location data: " + JSON.stringify(stored_location_data));
+                }
+                geolocation_handler.setFormInfoWithValidLocationData(stored_location_data, localStorage.location_id, "ST");
+              }
+              else {
+                alert("Oops... your score could not be stored properly due to geolocation failure!");
+                let dummy_location_data = { latitude: '0.0',
+                                            longitude: '0.0',
+                                            country_name: ((bestEffortCountryNameFound != null) ? bestEffortCountryNameFound : getCountryNameFromBrowserLanguage('unknown')),
+                                            region: 'unknown',
+                                            city: 'unknown',
+                                            ip: ((bestEffortIpAddressFound != null) ? bestEffortIpAddressFound : '0.0.0.' + Math.floor(Math.random() * 9999999)) }; // 9999999 dummy ip addresses (will then stay stored in localStorage.ip if not reset)
+                if (!isLocationDataValid(dummy_location_data)) {
+                  throw new Error("setFormInfoByOtherMeans: invalid dummy location data: " + JSON.stringify(dummy_location_data));
+                }
+                geolocation_handler.setFormInfoWithValidLocationData(dummy_location_data, 0, "DU");
+              }
+
+            }, // setFormInfoByOtherMeans
+
+            setFormInfo: function() {
+
+              // Use precise location data if any
+              // ********************************
+
+              if (precise_location_data != null) {
+                if (isLocationDataValid(precise_location_data)) {
+                  geolocation_handler.setFormInfoWithValidLocationData(precise_location_data, nbLocationURLs + 11, "P (" + Math.round(precise_location_data.accuracy) + ")");
+                  return;
+                }
+              }
+
+              // Use last valid location data if any
+              // ***********************************
+
+              if ((id_of_last_location_data_used > 0) && isLocationDataValid(last_location_data_used)) {
+                geolocation_handler.setFormInfoWithValidLocationData(last_location_data_used, id_of_last_location_data_used, "LA");
+                return;
+              }
+
+              // Fetch location data from distant sites
+              // **************************************
+
+              if (geolocation_handler.nb_JSON_queries_posted >= nbLocationURLs) {
+                throw new Error("setFormInfo: inconsistent nb_JSON_queries_posted value: " + geolocation_handler.nb_JSON_queries_posted + ", " + nbLocationURLs);
+              }
+              let locationURL = null;
+              if (nb_locationURL_accesses < 2*nbLocationURLs) {
+                if ( (nb_locationURL_accesses == 0) // New session shortly after previous one
+                     && localStorage.last_locationURL_access && ((new Date()).getTime() - localStorage.last_locationURL_access < 1.5*3600*1000) // (1.5 hour)
+                     && (localStorage.latitude && localStorage.longitude && localStorage.countryname && localStorage.region && localStorage.city && localStorage.ip && localStorage.location_id) ) { // (condition duplicated)
+                  let stored_location_data = { latitude: localStorage.latitude, // (below code duplicated)
+                                               longitude: localStorage.longitude,
+                                               country_name: localStorage.countryname,
+                                               region: localStorage.region,
+                                               city: localStorage.city,
+                                               ip: localStorage.ip };
+                  if (!isLocationDataValid(stored_location_data)) {
+                    throw new Error("setFormInfo: invalid stored location data: " + JSON.stringify(stored_location_data));
+                  }
+                  geolocation_handler.setFormInfoWithValidLocationData(stored_location_data, localStorage.location_id, "NS");
+                  return;
+                }
+                else {
+                  nb_locationURL_accesses++;
+                  locationURL = locationURLs[geolocation_handler.nb_JSON_queries_posted];
+                  localStorage.last_locationURL_access = (new Date()).getTime();
+                }
+              }
+              else {
+                locationURL = "NO_MORE_URL_ACCESSED_" + geolocation_handler.nb_JSON_queries_posted + "_" + nb_locationURL_accesses;
+              }
+
+              geolocation_handler.nb_JSON_queries_posted++;
+              let current_nb_JSON_queries_posted = geolocation_handler.nb_JSON_queries_posted;
+              debug_game_state = 20;
+              $.getJSON(locationURL)
+              .done(function(data) { // Success case
+                debug_game_state = 21;
+                let converted_data = geolocation_handler.convertLocationData(data, current_nb_JSON_queries_posted);
+                if (isLocationDataValid(converted_data)) {
+                  geolocation_handler.setFormInfoWithValidLocationData(converted_data, current_nb_JSON_queries_posted, "");
+                }
+                else {
+                  var errorStr = "invalid geolocation #" + current_nb_JSON_queries_posted + ": " + JSON.stringify(data);
+                  console.log(errorStr);
+                  if (current_nb_JSON_queries_posted < nbLocationURLs) {
+                    geolocation_handler.setFormInfo(); // (recursive call)
+                  }
+                  else {
+                    geolocation_handler.setFormInfoByOtherMeans();
+                  }
+                }
+                debug_game_state = 22;
+              })
+              .fail(function(jqxhr, textStatus, error) { // (jqxhr: XMLHTTPRequest)
+                debug_game_state = 23;
+                var errorStr = ("geolocation failure #" + current_nb_JSON_queries_posted + ": " + textStatus + " " + error + " " + str_from_jqxhr(jqxhr)).trim();
+                console.log(errorStr);
+                if (current_nb_JSON_queries_posted < nbLocationURLs) {
+                  geolocation_handler.setFormInfo(); // (recursive call)
+                }
+                else {
+                  geolocation_handler.setFormInfoByOtherMeans();
+                }
+                debug_game_state = 24;
+              })
+              .always(function() {
+                debug_game_state = 25;
+                console.log("(getJSON completed #" + current_nb_JSON_queries_posted + ")");
+                debug_game_state = 26;
+              });
+
+            } // setFormInfo
+
+          } // geolocation_handler
+
+          geolocation_handler.setFormInfo(); // (main call)
+
+          console.log("(store player info exit)");
+          debug_game_state = 101;
+        }
+        catch (exc) {
+          debug_game_state = 102;
+          console.log("internal error while storing scores: " + exc);
+          if (nb_errors_submitted == 0) {
+            // alert("Oops... an internal error occurred: " + exc);
+            var errorStr = "";
+            if (typeof(Storage) !== 'undefined') {
+              if (localStorage.firstname) {
+                errorStr = errorStr + " for " + localStorage.firstname;
+              }
+              if (localStorage.firstaccessid) {
+                errorStr = errorStr + " for first access id " + localStorage.firstaccessid;
+              }
+            }
+            errorStr = errorStr + " on " + navigator.platform + " / " + userAgentStr + " / " + decodeURI(location.href);
+            submitForm("internal error while storing scores" + errorStr + ": " + exc, true);
+            nb_errors_submitted++;
+          }
+          debug_game_state = 103;
+        }
+
+      } // store_player_info
+
+      var attempt_HTML_geolocation_already_done = false;
+      var last_time_attempt_HTML_geolocation_if_needed = -1;
+      function attempt_HTML_geolocation_if_needed() {
+        if (android_appli) { // only applied to android appli because popups otherwise / ACCESS_FINE_LOCATION is requested in android appli (subject to user acceptance)
+          if ( scriptsFullyLoaded
+               && ((!attempt_HTML_geolocation_already_done) || (versionCodeInt >= 6))
+               && ((new Date()).getTime() - last_time_attempt_HTML_geolocation_if_needed > 1.5*3600*1000) ) { // geolocation refresh after 1.5 hour on user action (no setTimeout() due to UE sleeping phases)
+            setTimeout("attempt_HTML_geolocation();", 44);
+            attempt_HTML_geolocation_already_done = true;
+            last_time_attempt_HTML_geolocation_if_needed = (new Date()).getTime(); // time in milliseconds
+          }
+        }
+      }
+
+      // *********************************************
+      // Load GameSolver and Super Master Mind scripts
+      // *********************************************
+
+      function loadSuperMasterMindScript() {
+        debug_game_state = 60;
+        jQuery.ajax({
+          url: "SuperMasterMind.js",
+          method: "GET",
+          dataType: "script",
+          mimeType: "application/javascript",
+          timeout: 1800000, // 30 minutes (very high timeout value to attempt to avoid the error "GAME UNHANDLEDREJECTION ERROR / reason: SyntaxError: The string did not match the expected pattern." in some browsers without/before fail() function being entered - Note: timeout = 0 does not solve it)
+          xhr: function() {
+            var xhr = new window.XMLHttpRequest();
+            // Upload progress
+            xhr.upload.addEventListener("progress", function(evt) {
+              if (evt.lengthComputable && (evt.total > 0)) {
+                var ratioComplete = evt.loaded / evt.total;
+                console.log("progress upload: " + ratioComplete);
+              }
+              else {
+                console.log("progress upload: " + evt.lengthComputable + ", " + evt.loaded + ", " + evt.total);
+              }
+            }, false);
+            // Download progress
+            xhr.addEventListener("progress", function(evt) {
+              // if (evt.lengthComputable) { -> works in Firefox but always false in Chrome when the HTML page is distant
+              if (evt.loaded > 0) {
+                var ratioComplete;
+                var ratioDebugStr;
+                if (evt.lengthComputable && (evt.total > 0)) {
+                  ratioComplete = evt.loaded / evt.total;
+                  ratioDebugStr = "";
+                }
+                else {
+                  ratioComplete = Math.min(1.0, evt.loaded / loaded_sizes[2]); // (simplification useful for Chrome when the HTML page is distant)
+                  ratioDebugStr = " (s)";
+                }
+                var globalProgress = getGlobalProgress(ratioComplete, 2);
+                console.log("current progress: " + globalProgress + "%" + ratioDebugStr); // !WARNING! -> this console text will be read by the android appli so shall not be modified
+                if (globalProgress > 0) {
+                  $("#game_loading_id").html("<img src='img/loading.gif' style='height:12%;'><br>Loading (" + globalProgress + "%)"); // (not rem unit as no viewport! / duplicated code)
+                }
+              }
+              else {
+                console.log("progress: " + evt.lengthComputable + ", " + evt.loaded + ", " + evt.total);
+              }
+            }, false);
+            return xhr;
+          }
+        })
+        .fail(function(jqxhr, textStatus, error) { // (jqxhr: XMLHTTPRequest)
+          debug_game_state = 61;
+          var errorStr = ("SuperMasterMind script load failure: " + textStatus + " " + error + " " + str_from_jqxhr(jqxhr)).trim();
+          console.log(errorStr);
+          alert("Oops... a network error occurred!\nPlease retry...\n\n" + "(" + errorStr + ")");
+          debug_game_state = 62;
+        })
+        .always(function() {
+          debug_game_state = 63;
+          scriptsFullyLoaded = true;
+          console.log("(on scripts load)"); // !WARNING! -> this console text will be read by the android appli so shall not be modified
+          $(".game_loading").fadeOut("slow"); // game_loading div fades out
+          debug_game_state = 64;
+          // $("#my_all_scripts_loaded_form").submit(); // (dummy form submission for android appli's web view)
+          debug_game_state = 65;
+        });
+      }
+
+      var globalProgressForHTMLGame3 = getGlobalProgress(0.99 /* (rough value) */, 0);
+      console.log("current progress: " + globalProgressForHTMLGame3 + "% (g)"); // !WARNING! -> this console text will be read by the android appli so shall not be modified
+      if (globalProgressForHTMLGame3 > 0) {
+        $("#game_loading_id").html("<img src='img/loading.gif' style='height:12%;'><br>Loading (" + globalProgressForHTMLGame3 + "%)"); // (not rem unit as no viewport! / duplicated code)
+      }
+
+      let gamesolver_blob = null;
+      let gamesolver_blob_error = "NA";
+      debug_game_state = 70;
+      jQuery.ajax({
+        url: "GameSolver.js",
+        method: "GET",
+        dataType: "script",
+        mimeType: "application/javascript",
+        timeout: 1800000, // 30 minutes (very high timeout value to attempt to avoid the error "GAME UNHANDLEDREJECTION ERROR / reason: SyntaxError: The string did not match the expected pattern." in some browsers without/before fail() function being entered - Note: timeout = 0 does not solve it)
+        xhr: function() {
+          var xhr = new window.XMLHttpRequest();
+          // Upload progress
+          xhr.upload.addEventListener("progress", function(evt) {
+            if (evt.lengthComputable && (evt.total > 0)) {
+              var ratioComplete = evt.loaded / evt.total;
+              console.log("progress upload: " + ratioComplete);
+            }
+            else {
+              console.log("progress upload: " + evt.lengthComputable + ", " + evt.loaded + ", " + evt.total);
+            }
+          }, false);
+          // Download progress
+          xhr.addEventListener("progress", function(evt) {
+            // if (evt.lengthComputable) { -> works in Firefox but always false in Chrome when the HTML page is distant
+            if (evt.loaded > 0) {
+              var ratioComplete;
+              var ratioDebugStr;
+              if (evt.lengthComputable && (evt.total > 0)) {
+                ratioComplete = evt.loaded / evt.total;
+                ratioDebugStr = "";
+              }
+              else {
+                ratioComplete = Math.min(1.0, evt.loaded / loaded_sizes[1]); // (simplification useful for Chrome when the HTML page is distant)
+                ratioDebugStr = " (s)";
+              }
+              var globalProgress = getGlobalProgress(ratioComplete, 1);
+              console.log("current progress: " + globalProgress + "%" + ratioDebugStr); // !WARNING! -> this console text will be read by the android appli so shall not be modified
+              if (globalProgress > 0) {
+                $("#game_loading_id").html("<img src='img/loading.gif' style='height:12%;'><br>Loading (" + globalProgress + "%)"); // (not rem unit as no viewport! / duplicated code)
+              }
+            }
+            else {
+              console.log("progress: " + evt.lengthComputable + ", " + evt.loaded + ", " + evt.total);
+            }
+          }, false);
+          return xhr;
+        }
+      })
+      .done(function(data) { // Success case
+        debug_game_state = 71;
+        // console.log(data); // data contains GameSolver script contents
+        if (data.indexOf("nicorn") != -1) {
+          github_unicorn_error = true;
+        }
+        if ( (data.indexOf("<html") != -1) || (data.indexOf("<HTML") != -1) || (data.indexOf("<body") != -1) || (data.indexOf("<BODY") != -1) ) {
+          github_html_error = true;
+        }
+        if ( (data.indexOf("too long to load") != -1) || (data.indexOf("did not respond") != -1)
+             || (data.indexOf("o server is currently available") != -1) /* 'o' for 'no' */
+             || (data.indexOf("emporarily Offline") != -1)  || (data.indexOf("emporarily offline") != -1) ) {
+          github_load_error = true;
+        }
+        gamesolver_blob = new Blob([data], {type: "application/javascript"});
+        // Super Master Mind script is only loaded once GameSolver script has been loaded successfully
+        setTimeout("loadSuperMasterMindScript();", 44);
+        debug_game_state = 72;
+      })
+      .fail(function(jqxhr, textStatus, error) { // (jqxhr: XMLHTTPRequest)
+        debug_game_state = 73;
+        var errorStr = ("GameSolver script load failure: " + textStatus + " " + error + " " + str_from_jqxhr(jqxhr)).trim();
+        console.log(errorStr);
+        gamesolver_blob_error = errorStr;
+        // Super Master Mind script is loaded and will raise an error because GameSolver script has not been loaded successfully
+        // setTimeout("loadSuperMasterMindScript();", 44);
+        alert("Oops... a network error occurred!\nPlease retry...\n\n" + "(" + errorStr + ")");
+        $(".game_loading").fadeOut("slow"); // game_loading div fades out
+        debug_game_state = 74;
+      });
+
+    </script>
+
+    <p id='traces_id' style='color:#AAAAAA;'></p>
+
+  </body>
+
+</html>

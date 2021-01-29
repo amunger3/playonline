@@ -31,33 +31,28 @@
       // 2') Defense timeout to allow interactions with the page
       setTimeout("console.log('(on load timeout)');$('.loading').fadeOut('slow');", 5000); // loading div fades out
 
-        function makeid() {
-          let text = "";
-          let possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
-          for (let i = 0; i < 5; i++) {
-            text += possible.charAt(Math.floor(Math.random() * possible.length));
-          }
-          return text;
+      function makeid() {
+        let text = "";
+        let possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+        for (let i = 0; i < 5; i++) {
+          text += possible.charAt(Math.floor(Math.random() * possible.length));
         }
+        return text;
+      }
 
-        let firstHomePageAccess = false;
-        if (typeof(Storage) !== 'undefined') {
-          if (!localStorage.firsthomepageaccessdone) {
-            localStorage.firsthomepageaccessdone = "first home page access done";
-            firstHomePageAccess = false; // (mechanism disabled)
-          }
-          if (!localStorage.firstaccessid) {
-            let firstaccessid = 'HP - ' + makeid() + ' - ' + new Date();
-            localStorage.firstaccessid = firstaccessid;
-          }
+      if (typeof(Storage) !== 'undefined') {
+        if (!localStorage.firstaccessid) {
+          let firstaccessid = 'HP - ' + makeid() + ' - ' + new Date();
+          localStorage.firstaccessid = firstaccessid;
         }
+      }
 
-        var firstaccessgeoloc = "fa";
+      var firstaccessgeoloc = "fa";
     </script>
 
   </head>
 
-  <body onunload="console.log('exit...');storeFirstHomePageAccess('home', 444, 777 /* (a too low value here will not work) */, 'debug-out');">
+  <body onunload="console.log('exit...');">
 
     <div class="loading">
       <img src="img/loading.gif" style='width:5.5rem'><br>
@@ -140,170 +135,6 @@
       <!-- FOOTER -->
       <div id="footer">
       </div>
-
-      <script>
-
-        // ***********************
-        // Handle page access info
-        // ***********************
-
-        function dummy_handle_rsp(e) {
-        }
-
-        var last_location_data_used = null;
-        var initial_time = new Date().getTime();
-        function submitHomePageAccessForm(data, access_type, debug_info) {
-          var final_time = new Date().getTime();
-          if (final_time - initial_time > 999000) { // 15min+delta max - See (**)
-            return;
-          }
-          var timeStr = String(Math.floor((final_time - initial_time)/1000));
-          if (access_type.indexOf(" in") != -1) {
-            timeStr = "";
-          }
-          var countryNameStr = "-";
-          if ((data != null) && (typeof data.country_name != 'undefined') && (data.country_name != null)) {
-            countryNameStr = String(data.country_name).trim();
-          }
-          var regionNameStr = "-";
-          if ((data != null) && (typeof data.region != 'undefined') && (data.region != null)) {
-            regionNameStr = String(data.region).trim();
-          }
-          var cityNameStr = "-";
-          if ((data != null) && (typeof data.city != 'undefined') && (data.city != null)) {
-            cityNameStr = String(data.city).trim();
-          }
-          var ipAddressStr = "-";
-          if ((data != null) && (typeof data.ip != 'undefined') && (data.ip != null)) {
-            ipAddressStr = String(data.ip).trim();
-          }
-          var firstAccessIdStr = "-";
-          if (typeof(Storage) !== 'undefined') {
-            if (localStorage.firstaccessid) {
-              firstAccessIdStr = localStorage.firstaccessid;
-            }
-          }
-          var debugStr = "firstgeoloc:" + firstaccessgeoloc + "/" + navigator.userAgent + "/initial: " + initial_time + "/final: " + final_time + "/debug_info:" + debug_info;
-          let formStr = 'page=' + access_type + '&' + 'timeonpage=' + timeStr + '&' + 'country=' + countryNameStr + '&region=' + regionNameStr + '&city=' + cityNameStr + '&nbgameswon=' + "" + '&nbgames=' + '&nbcodes=' + '&ipaddress=' + ipAddressStr + '&firstaccessid=' + firstAccessIdStr + '&debug=' + debugStr;
-          let my_form_url = 'https://script.google.com/macros/s/AKfycbwHJh1Tz7idd8VQJNdWIqWd-6jMxInhRtqY_O96NN7OvEKiY_ox/exec' + '?';
-          my_form_url = my_form_url + formStr + '&';
-          my_form_url = my_form_url + 'my_callback_fct=dummy_handle_rsp';
-          // console.log(my_form_url);
-          // Submit form
-          console.log("(jQuery.ajax get/jsonp)");
-          jQuery.ajax({
-            crossDomain: true,
-            url: my_form_url,
-            method: "GET",
-            dataType: "jsonp"
-          })
-        }
-
-        function storeFirstHomePageAccess(access_type, timeToWait1, timeToWait2, debug_info) {
-          if (firstHomePageAccess) {
-            // Keep some time between the 2 potential calls to submitHomePageAccessForm()
-            let now = new Date().getTime();
-            while(new Date().getTime() < now + timeToWait1){}; // (interface is frozen during this short time)
-            if (last_location_data_used != null) {
-              submitHomePageAccessForm(last_location_data_used, access_type, debug_info);
-            }
-            else {
-              submitHomePageAccessForm(null, access_type, debug_info);
-            }
-            // Keep some time between the 2 potential calls to submitHomePageAccessForm()
-            now = new Date().getTime();
-            while(new Date().getTime() < now + timeToWait2){}; // (interface is frozen during this short time)
-          }
-        }
-
-        function firstHomePageAccessGeolocFailure(jqxhr, textStatus, error) {
-          var errorStr = ("first home page access geolocation failure: " + textStatus + " " + error).trim();
-          console.log(errorStr);
-          $.getJSON('https://TBC2', function(data_p) { // (mechanism disabled)
-            firstaccessgeoloc = "fa2";
-            /* ipinfodb.com response format:
-               - SUCCESS case:
-                statusCode	"OK"
-                statusMessage	""
-                ipAddress	"94.239.111.222"
-                countryCode	"FR"
-                countryName	"France"
-                regionName	"Ile-de-France"
-                cityName	"Paris"
-                zipCode	"75000"
-                latitude	"48.8534"
-                longitude	"2.3488"
-                timeZone	"+01:00"
-              - FAILURE case:
-                statusCode	"ERROR"
-                statusMessage	"Invalid IP Address."
-                ipAddress	"994.239.111.222"
-                countryCode	""
-                countryName	""
-                regionName	""
-                cityName	""
-                zipCode	""
-                latitude	"0"
-                longitude	"0"
-                timeZone	""
-            */
-            let converted_data = JSON.stringify(data_p);
-
-            // latitude -> latitude
-            // longitude -> longitude
-            // countryName -> country_name
-            converted_data = converted_data.replace("\"countryName\":", "\"country_name\":");
-            // regionName -> region
-            converted_data = converted_data.replace("\"regionName\":", "\"region\":");
-            // cityName -> city
-            converted_data = converted_data.replace("\"cityName\":", "\"city\":");
-            // ipAddress -> ip
-            converted_data = converted_data.replace("\"ipAddress\":", "\"ip\":");
-
-            last_location_data_used = JSON.parse(converted_data);
-            //storeFirstHomePageAccess('home', 444, 444 /* (a too low value here will not work) */, 'debug-ok2');
-          })
-          .fail(function(jqxhr, textStatus, error) { // (jqxhr: XMLHTTPRequest)
-            firstaccessgeoloc = "faerr2";
-            var errorStr = ("first home page access geolocation retry failure: " + textStatus + " " + error).trim();
-            console.log(errorStr);
-            //storeFirstHomePageAccess('home', 444, 444 /* (a too low value here will not work) */, 'debug-fail');
-          })
-          .always(function() {
-            console.log("(getJSON completed #2)");
-          });
-        }
-
-        if (firstHomePageAccess) {
-          $.getJSON('https://TBC', function(data) { // (mechanism disabled)
-            firstaccessgeoloc = "fatmp1";
-            last_location_data_used = data;
-            if ( ((typeof data.ip != 'undefined') && (data.ip != null) && (String(data.ip).trim().length >= 7 /* 0.0.0.0 */)) // (redundant lines)
-                 && ((typeof data.city != 'undefined') && (data.city != null) && (String(data.city).trim().length >= 2)) ) { // (redundant lines)
-              firstaccessgeoloc = "fa1";
-              //storeFirstHomePageAccess('home', 444, 444 /* (a too low value here will not work) */, 'debug-ok1');
-            }
-            else {
-              firstaccessgeoloc = "faerr1a";
-              return firstHomePageAccessGeolocFailure("", "manual first home page access geolocation retry due to invalid geolocation data", "");
-            }
-          }) // to simplify, failure cases are not handled in a more complex way
-          .fail(function(jqxhr, textStatus, error) { // (jqxhr: XMLHTTPRequest)
-            firstaccessgeoloc = "faerr1b";
-            firstHomePageAccessGeolocFailure(jqxhr, textStatus, error);
-          })
-          .always(function() {
-            console.log("(getJSON completed #1)");
-          });
-          setTimeout("storeFirstHomePageAccess('home', 0, 0, 'debug-30s')",     30000);
-          setTimeout("storeFirstHomePageAccess('home', 0, 0, 'debug-1min')",    60000);
-          setTimeout("storeFirstHomePageAccess('home', 0, 0, 'debug-2min')",   120000);
-          setTimeout("storeFirstHomePageAccess('home', 0, 0, 'debug-5min')",   300000);
-          setTimeout("storeFirstHomePageAccess('home', 0, 0, 'debug-10min')",  600000);
-          setTimeout("storeFirstHomePageAccess('home', 0, 0, 'debug-15min')",  900000); // See (**)
-        }
-
-      </script>
 
     </div>
 

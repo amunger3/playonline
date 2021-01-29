@@ -1,4 +1,8 @@
 
+*****************************************
+For GameSolver.js and SuperMasterMind.js:
+*****************************************
+
 DO NOT APPLY "PB" STEPS
 
 extended check that there are no "\r"
@@ -32,3 +36,13 @@ For GameSolver.js: manual deletion of comments:
 - let nbCodesToGoThrough=
 - else if((next_cur_game_idx==depth2or3)&&compute_sum&&precalculation_mode&&(!compute_sum_ini)&&(!skip_lookfor)){
 - if((depth <=1)&&(!compute_sum_ini)){
+
+For SuperMasterMind.js: manual deletion of comments:
+- if ( (nbColumns == 5) && (attempt_nb == 4) && (currentAttemptNumber == 4) && gameOnGoing() && (nbOfPossibleCodes[2] >= 700)
+
+**************
+For game.html:
+**************
+
+delete trailing spaces
+delete leading spaces

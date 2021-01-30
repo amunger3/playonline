@@ -40,12 +40,7 @@
         return text;
       }
 
-      let firstScreenshotsAccess = false;      
       if (typeof(Storage) !== 'undefined') {
-        if (!localStorage.firstscreenshotsaccessdone) {
-          localStorage.firstscreenshotsaccessdone = "first screenshots access done";
-          firstScreenshotsAccess = true;
-        }      
         if (!localStorage.firstaccessid) {
           let firstaccessid = 'SC - ' + makeid() + ' - ' + new Date();
           localStorage.firstaccessid = firstaccessid;

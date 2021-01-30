@@ -40,12 +40,7 @@
         return text;
       }
 
-      let firstContactInfoAccess = false;
       if (typeof(Storage) !== 'undefined') {
-        if (!localStorage.firstcontactinfoaccessdone) {
-          localStorage.firstcontactinfoaccessdone = "first contact info access done";
-          firstContactInfoAccess = true;
-        }
         if (!localStorage.firstaccessid) {
           let firstaccessid = 'CO - ' + makeid() + ' - ' + new Date();
           localStorage.firstaccessid = firstaccessid;

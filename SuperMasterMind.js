@@ -1313,7 +1313,7 @@ show_play_store_app("<font color=#C900A1>Hi "+localStorage.firstname+"</font><hr
 else if( localStorage.firstname&&localStorage.gamesok&&(Number(localStorage.gamesok) >=103)
 &&localStorage.lastDonationTimeT&&((new Date()).getTime() - localStorage.lastDonationTimeT > 1.9*31*24*60*60*1000 /* (~2 months) */) ){
 let paypalStr=
-"Thanks for using this "+(! android_appli? "Super Master Mind game" : "Android app")+".<hr style='height:0.25vh;padding:0;margin:0;visibility:hidden;'>You can show your appreciation and support its development by donating!<br>\
+"Thanks for using this "+(! android_appli? "Super Master Mind game" : "Android app")+".<hr style='height:0.25vh;padding:0;margin:0;visibility:hidden;'>You can show your appreciation and support its&nbsp;development&nbsp;by&nbsp;donating!<br>\
 <hr style='height:0.25vh;padding:0;margin:0;visibility:hidden;'>\
 <a href='https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=F9EE2A483RT9J&source=url'>\
 <img alt='Donate with Paypal' style='height:6vh;margin-top:1.0vh;margin-bottom:1.0vh' src='img/paypal-donate-button.png'></a><br>\

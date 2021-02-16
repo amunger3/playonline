@@ -1601,11 +1601,10 @@ let mark_tmp2b={nbBlacks:0, nbWhites:0};
 smmCodeHandler.fillMark(codesPlayed[0], codesPlayed[1], mark_tmp1);
 smmCodeHandler.fillMark(codesPlayed[0], codesPlayed[2], mark_tmp2a);
 smmCodeHandler.fillMark(codesPlayed[1], codesPlayed[2], mark_tmp2b);
-if( (!smmCodeHandler.marksEqual(mark_tmp2a, marks[0]) ||!smmCodeHandler.marksEqual(mark_tmp2b, marks[1]))
-&&(!((marks[1].nbBlacks==0)&&(marks[1].nbWhites==0))
-||((mark_tmp1.nbBlacks==0)&&(mark_tmp1.nbWhites==0)) )
-){
-console.log("invert game rows");
+if(!smmCodeHandler.marksEqual(mark_tmp2a, marks[0]) ||!smmCodeHandler.marksEqual(mark_tmp2b, marks[1])){
+if(!((marks[1].nbBlacks==0)&&(marks[1].nbWhites==0))
+||((mark_tmp1.nbBlacks==0)&&(mark_tmp1.nbWhites==0)) ){
+console.log("invert game rows #1");
 next_code1=codesPlayed[1];
 next_code2=codesPlayed[0];
 next_code3=codesPlayed[2];
@@ -1615,6 +1614,20 @@ displayGUIError("unexpected gameInv loop (1): "+gameInv, new Error().stack);
 }
 else{
 setTimeout("if(currentAttemptNumber==4){newGameButtonClick_delayed("+nbColumns+");}", 14);
+}
+}
+else if(!((marks[2].nbBlacks==0)&&(marks[2].nbWhites==0))){
+console.log("invert game rows #2");
+next_code1=codesPlayed[2];
+next_code2=codesPlayed[0];
+next_code3=codesPlayed[1];
+next_scode=sCode;
+if((typeof gameInv!=='undefined')&&(gameInv!=0)){
+displayGUIError("unexpected gameInv loop (2): "+gameInv, new Error().stack);
+}
+else{
+setTimeout("if(currentAttemptNumber==4){newGameButtonClick_delayed("+nbColumns+");}", 14);
+}
 }
 }
 }

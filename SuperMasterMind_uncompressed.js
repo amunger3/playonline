@@ -1882,7 +1882,7 @@ function writeNbOfPossibleCodes(nbOfPossibleCodes_p, colorsFoundCode_p, minNbCol
   main_graph_update_needed = true;
   draw_graphic(false);
 
-  // Likely unknown performance at 3rd attempt of Super Master Mind game => invert first 2 attempts
+  // Likely unknown performance at 3rd attempt of Super Master Mind game => invert some attempts
   // Game row inversion could allow to better evaluate performances asymmetrically
   // (Future improvement could make precalculations [more] symmetrical)
   if ( (nbColumns == 5) && (attempt_nb == 4) && (currentAttemptNumber == 4) && gameOnGoing() && (nbOfPossibleCodes[2] >= 700)
@@ -1896,21 +1896,34 @@ function writeNbOfPossibleCodes(nbOfPossibleCodes_p, colorsFoundCode_p, minNbCol
     smmCodeHandler.fillMark(codesPlayed[0], codesPlayed[1], mark_tmp1);
     smmCodeHandler.fillMark(codesPlayed[0], codesPlayed[2], mark_tmp2a);
     smmCodeHandler.fillMark(codesPlayed[1], codesPlayed[2], mark_tmp2b);
-    if ( (!smmCodeHandler.marksEqual(mark_tmp2a, marks[0]) || !smmCodeHandler.marksEqual(mark_tmp2b, marks[1])) // Impossible 3rd code
-          && ( !((marks[1].nbBlacks == 0) && (marks[1].nbWhites == 0))
-               || ((mark_tmp1.nbBlacks == 0) && (mark_tmp1.nbWhites == 0)) ) // worst mark condition avoiding obviously impossible color replay
-       ) {
-        console.log("invert game rows");
-        next_code1 = codesPlayed[1];
-        next_code2 = codesPlayed[0];
-        next_code3 = codesPlayed[2];
-        next_scode = sCode;
-        if ((typeof gameInv !== 'undefined') && (gameInv != 0)) { // defense against loops
-          displayGUIError("unexpected gameInv loop (1): " + gameInv, new Error().stack);
-        }
-        else {
-          setTimeout("if (currentAttemptNumber == 4) {newGameButtonClick_delayed(" + nbColumns + ");}", 14);
-        }
+    if (!smmCodeHandler.marksEqual(mark_tmp2a, marks[0]) || !smmCodeHandler.marksEqual(mark_tmp2b, marks[1])) { // Impossible 3rd code
+      if ( !((marks[1].nbBlacks == 0) && (marks[1].nbWhites == 0))
+           || ((mark_tmp1.nbBlacks == 0) && (mark_tmp1.nbWhites == 0)) ) { // worst mark condition avoiding obviously impossible color replay
+          console.log("invert game rows #1");
+          next_code1 = codesPlayed[1];
+          next_code2 = codesPlayed[0];
+          next_code3 = codesPlayed[2];
+          next_scode = sCode;
+          if ((typeof gameInv !== 'undefined') && (gameInv != 0)) { // defense against loops
+            displayGUIError("unexpected gameInv loop (1): " + gameInv, new Error().stack);
+          }
+          else {
+            setTimeout("if (currentAttemptNumber == 4) {newGameButtonClick_delayed(" + nbColumns + ");}", 14);
+          }
+      }
+      else if (!((marks[2].nbBlacks == 0) && (marks[2].nbWhites == 0))) { // no impossible color detected at 3rd code
+          console.log("invert game rows #2");
+          next_code1 = codesPlayed[2];
+          next_code2 = codesPlayed[0];
+          next_code3 = codesPlayed[1];
+          next_scode = sCode;
+          if ((typeof gameInv !== 'undefined') && (gameInv != 0)) { // defense against loops
+            displayGUIError("unexpected gameInv loop (2): " + gameInv, new Error().stack);
+          }
+          else {
+            setTimeout("if (currentAttemptNumber == 4) {newGameButtonClick_delayed(" + nbColumns + ");}", 14);
+          }
+      }
     }
   }
 

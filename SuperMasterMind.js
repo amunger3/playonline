@@ -1616,7 +1616,8 @@ else{
 setTimeout("if(currentAttemptNumber==4){newGameButtonClick_delayed("+nbColumns+");}", 14);
 }
 }
-else if(!((marks[2].nbBlacks==0)&&(marks[2].nbWhites==0))){
+else if ( !((marks[2].nbBlacks==0)&&(marks[2].nbWhites==0))
+||((mark_tmp2a.nbBlacks==0)&&(mark_tmp2a.nbWhites==0)&&(mark_tmp2b.nbBlacks==0)&&(mark_tmp2b.nbWhites==0)) ){
 console.log("invert game rows #2");
 next_code1=codesPlayed[2];
 next_code2=codesPlayed[0];

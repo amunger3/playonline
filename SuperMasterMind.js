@@ -1859,7 +1859,7 @@ extra_precalculated_str="";
 return res;
 }
 function completePrecalculatedGamesOnTheFly(code_str_1, mark_str_1, code_str_2, mark_str_2, code_1, code_2){
-let ontheflytimeout=15000;
+let ontheflytimeout=25000;
 if(gamesolver_buffered_msg_status==0){
 gamesolver_buffered_msg_status=1;
 gamesolver_buffered_msg_action_str="if((game_cnt=="+game_cnt+")&&(gamesolver_buffered_msg_status!=2)){try{ let precalculated_games=get_and_check_extra_precalculated_str();if(gameSolver!==undefined){gameSolver.postMessage({'smm_buffer_messages': 'no', 'smm_req_type': 'DEBUFFER', 'precalculated_games': precalculated_games, 'game_id': "+game_cnt+"});}} catch(err){} gamesolver_buffered_msg_status=2;}";

@@ -223,8 +223,15 @@
           <hr style="height:0.5rem; visibility:hidden;" />
           For Super Master Mind games (5 columns, 8 colors, 8<sup>5</sup>&nbsp;=&nbsp;<b>32768 codes</b>, <font color=#CC0099><b>optimal logical strategy</b></font> applied), <b>the optimal code to play at first attempt is 12233</b> (or any other equivalent code with "2 doubles + 1 different color") with an average number of attempts to find secret codes of <b><sup>179929</sup>&frasl;<sub>8<sup>5</sup></sub>&nbsp;&asymp;&nbsp;5.491</b> and a maximal number of attempts of <b>8</b>.
           <hr style="height:0.5rem; visibility:hidden;" />
-          It is very close to the average number of attempts of <b>12344</b> as first attempt: <b><sup>180053</sup>&frasl;<sub>8<sup>5</sup></sub>&nbsp;&asymp;&nbsp;5.495</b>. In the online game, as their difference is&nbsp;<&nbsp;0.005, both 12233 and 12344 will be indicated as "optimal" first codes, even if only 12233 is actually (optimality indication with &plusmn;0.005&nbsp;precision to simplify).
-
+          It is very close to the average number of attempts of <b>12344</b> (or any other equivalent code with "1 double + 3 other different colors") as first attempt: <b><sup>180053</sup>&frasl;<sub>8<sup>5</sup></sub>&nbsp;&asymp;&nbsp;5.495</b>. In the online game, as their difference is&nbsp;<&nbsp;0.005, both 12233 and 12344 will be indicated as "optimal" first codes, even if only 12233 is actually (optimality indication with &plusmn;0.005&nbsp;precision to simplify).
+          <hr style="height:0.5rem; visibility:hidden;" />
+          About mathematically optimal strategies: processing times to evaluate them are out of reach. With <b>impossible/illogical codes allowed at second attempt</b> (with obviously impossible colors forbidden to simplify, i.e. colors present in first code when "0 black + 0 white peg" mark for it) <b>and then the <font color=#CC0099>optimal logical strategy</font> applied from third attempt</b>, the best codes to play at first attempt are:
+          <ul style='margin:0'>
+            <li style='list-style-type:disc'><b>12344</b> with an average number of attempts to find secret codes of <b><sup>179274</sup>&frasl;<sub>8<sup>5</sup></sub>&nbsp;&asymp;&nbsp;5.471</b></li>
+            <li style='list-style-type:disc'><b>12233</b> with an average number of attempts to find secret codes of <b><sup>179330</sup>&frasl;<sub>8<sup>5</sup></sub>&nbsp;&asymp;&nbsp;5.473</b></li>
+          </ul>
+          That implies mathematically optimal strategies to have an optimal performance lower than 5.471, likely in the range [5.45, 5.47] with 12344 or 12233 as optimal first code.
+            
           <h3>Strategy performances:</h3>
           <ul style='margin:0'>
             <li style='list-style-type:disc'>With a mathematically optimal strategy (like Koyama and Lai's for Master Mind games), &Delta; values (i.e. performances of codes played relative to the performance of optimal code(s)) are always in the range <b>[-1;0]</b>. That rule applies whichever numbers of columns and colors.</li>

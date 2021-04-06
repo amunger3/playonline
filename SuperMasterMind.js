@@ -883,7 +883,7 @@ let mouse_y=e.clientY - rect.top - 2.0 /* (correction) */;
 if(dsCode){
 displayGUIError("dsCode error", new Error().stack);
 }
-else if( (!showPossibleCodesMode)&&((nbGamesPlayedAndWon <=2)||(localStorage.gamesok&&(Number(localStorage.gamesok) <=5)))
+else if( (!showPossibleCodesMode)&&((nbGamesPlayedAndWon <=1)||(localStorage.gamesok&&(Number(localStorage.gamesok) <=32)))
 &&((mouse_x > get_x_pixel(x_min))
 &&(mouse_x < get_x_pixel(x_min+x_step*(attempt_nb_width+(70*(nbColumns+1))/100)))
 &&(mouse_y > get_y_pixel(y_min+y_step*(nbMaxAttempts-nb_attempts_not_displayed+transition_height+scode_height+transition_height+nbColors)))
@@ -914,7 +914,7 @@ catch (exc){
 throw new Error("modal error ("+modal_mode+"):"+exc+": "+exc.stack);
 }
 }
-else if( (!showPossibleCodesMode)&&((nbGamesPlayedAndWon <=2)||(localStorage.gamesok&&(Number(localStorage.gamesok) <=5)))
+else if( (!showPossibleCodesMode)&&((nbGamesPlayedAndWon <=1)||(localStorage.gamesok&&(Number(localStorage.gamesok) <=32)))
 &&((mouse_x > get_x_pixel(x_min))
 &&(mouse_x < get_x_pixel(x_min+x_step*(attempt_nb_width+(70*(nbColumns+1))/100)))
 &&(mouse_y > get_y_pixel(y_min+y_step*(nbMaxAttempts-nb_attempts_not_displayed+transition_height+scode_height+transition_height+nbColors-1)))
@@ -2674,7 +2674,7 @@ redColor, backgroundColor, ctx, false, true, 0, true, 0);
 let HintsThreshold=5;
 if(!showPossibleCodesMode){
 ctx.font=medium3_bold_font;
-if( (nbGamesPlayedAndWon <=2)||(localStorage.gamesok&&(Number(localStorage.gamesok) <=5)) ){
+if( (nbGamesPlayedAndWon <=1)||(localStorage.gamesok&&(Number(localStorage.gamesok) <=32)) ){
 let themesFullyDisplayed=true;
 let themeStr1="Display";
 let themeStr2="Disp";

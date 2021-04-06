@@ -1071,7 +1071,7 @@ function mouseClick(e) {
   // Display rules
   // *************
 
-  else if ( (!showPossibleCodesMode) && ((nbGamesPlayedAndWon <= 2) || (localStorage.gamesok && (Number(localStorage.gamesok) <= 5))) // (condition duplicated)
+  else if ( (!showPossibleCodesMode) && ((nbGamesPlayedAndWon <= 1) || (localStorage.gamesok && (Number(localStorage.gamesok) <= 32))) // (condition duplicated)
             && ((mouse_x > get_x_pixel(x_min))
                && (mouse_x < get_x_pixel(x_min+x_step*(attempt_nb_width+(70*(nbColumns+1))/100)))
                && (mouse_y > get_y_pixel(y_min+y_step*(nbMaxAttempts-nb_attempts_not_displayed+transition_height+scode_height+transition_height+nbColors)))
@@ -1112,7 +1112,7 @@ function mouseClick(e) {
   // Switch theme
   // ************
 
-  else if ( (!showPossibleCodesMode) && ((nbGamesPlayedAndWon <= 2) || (localStorage.gamesok && (Number(localStorage.gamesok) <= 5))) // (condition duplicated)
+  else if ( (!showPossibleCodesMode) && ((nbGamesPlayedAndWon <= 1) || (localStorage.gamesok && (Number(localStorage.gamesok) <= 32))) // (condition duplicated)
             && ((mouse_x > get_x_pixel(x_min))
                 && (mouse_x < get_x_pixel(x_min+x_step*(attempt_nb_width+(70*(nbColumns+1))/100)))
                 && (mouse_y > get_y_pixel(y_min+y_step*(nbMaxAttempts-nb_attempts_not_displayed+transition_height+scode_height+transition_height+nbColors-1)))
@@ -3149,7 +3149,7 @@ function draw_graphic_bis() {
         // *************
 
         ctx.font = medium3_bold_font;
-        if ( (nbGamesPlayedAndWon <= 2) || (localStorage.gamesok && (Number(localStorage.gamesok) <= 5)) ) { // (condition duplicated for mouse click management)
+        if ( (nbGamesPlayedAndWon <= 1) || (localStorage.gamesok && (Number(localStorage.gamesok) <= 32)) ) { // (condition duplicated for mouse click management)
           let themesFullyDisplayed = true;
           let themeStr1 = "Display";
           let themeStr2 = "Disp";

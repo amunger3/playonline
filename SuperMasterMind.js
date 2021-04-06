@@ -10,7 +10,7 @@ console.log("Running SuperMasterMind.js...");
 // *************************************************************************
 // Main game variables
 // *******************
-let version="";
+let version="v4.0";
 let nominalGameNbColumns=5;
 let nominalGameNbColors=8;
 let nominalGameNbMaxAttempts=12;
@@ -2697,7 +2697,7 @@ displayString("\u2009\u2B50\u2009", 0, nbMaxAttemptsToDisplay+transition_height+
 darkGray, backgroundColor_2, ctx, false, true, 1, true, 0);
 }
 }
-if((!CompressedDisplayMode)&&(optimal_width > 0)&&(tick_width > 0)){
+if(false /* (skip it) */&&(!CompressedDisplayMode)&&(optimal_width > 0)&&(tick_width > 0)){
 ctx.font=very_small_font;
 displayString(version, attempt_nb_width+(70*(nbColumns+1))/100+nbColumns*2+nb_possible_codes_width+optimal_width+tick_width-5, nbMaxAttemptsToDisplay+transition_height+scode_height+transition_height+nbColors-0.07, 5,
 (modernDisplay ? lightGray : darkGray), backgroundColor_2, ctx, false, true, 2, true, 1, true /* (ignoreRanges) */);

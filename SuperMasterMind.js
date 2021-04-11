@@ -3319,7 +3319,7 @@ document.getElementById("columnslabel_5").className="radio";
 document.getElementById("columnslabel_6").className="radio";
 document.getElementById("columnslabel_7").className="radio";
 }
-document.getElementById("playRandomCodeButton").disabled=(!gameOnGoing()||(currentAttemptNumber >=Math.min(nbMaxAttempts-1,10)) /* (from last but one attempt) */);
+document.getElementById("playRandomCodeButton").disabled=(!gameOnGoing()||(currentAttemptNumber >=nbMaxAttempts-1) /* (from last but one attempt) */);
 if(document.getElementById("playRandomCodeButton").disabled){
 document.getElementById("playRandomCodeButton").className="button disabled";
 }

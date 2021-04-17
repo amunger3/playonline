@@ -2271,7 +2271,7 @@ best_sum=sum;
 if(depth <=1){
 let appliedMaxPerformanceEvaluationTime=maxPerformanceEvaluationTime;
 if(areCurrentGameOrCodePrecalculated >=0){
-appliedMaxPerformanceEvaluationTime=appliedMaxPerformanceEvaluationTime * 1.20;
+appliedMaxPerformanceEvaluationTime=appliedMaxPerformanceEvaluationTime * 1.10;
 }
 if(first_call){
 if((!compute_sum_ini)&&(nbCodes > 100)){
@@ -2592,7 +2592,7 @@ lookForCodeInPrecalculatedGamesClassIdsTable=null;
 break;
 case 5:
 nbMaxMarks=20;
-maxPerformanceEvaluationTime=baseOfMaxPerformanceEvaluationTime*(beginner_mode ? 33 : 44)/30;
+maxPerformanceEvaluationTime=baseOfMaxPerformanceEvaluationTime*(beginner_mode ? 33 : 55)/30;
 nbOfCodesForSystematicEvaluation=Math.min(refNbOfCodesForSystematicEvaluation, initialNbPossibleCodes);
 nbOfCodesForSystematicEvaluation_AllCodesEvaluated=Math.min(refNbOfCodesForSystematicEvaluation_AllCodesEvaluated, initialNbPossibleCodes);
 nbOfCodesForSystematicEvaluation_ForMemAlloc=initialNbPossibleCodes;

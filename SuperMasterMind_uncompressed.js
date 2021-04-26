@@ -1567,7 +1567,7 @@ function resetGameAttributes(nbColumnsSelected) {
     else if ( localStorage.firstname && localStorage.gamesok && (Number(localStorage.gamesok) >= 77)
               && localStorage.lastDonationTimeT && ((new Date()).getTime() - localStorage.lastDonationTimeT > 1.0*31*24*60*60*1000 /* (~1.0 month) */) ) {
       let paypalStr =
-        "Thanks for using this " + (! android_appli? "Super Master Mind game" : "Android app") + ".<hr style='height:0.25vh;padding:0;margin:0;visibility:hidden;'>You can show your appreciation by&nbsp;donating<hr style='height:1.5vh;padding:0;margin:0;visibility:hidden;'>Suggested amount: 3&nbsp;&euro; / year<br>if you play many games<br>\
+        "Thanks for using this " + (! android_appli? "Super Master Mind game" : "Android app") + ".<hr style='height:0.25vh;padding:0;margin:0;visibility:hidden;'>You can show your appreciation by&nbsp;donating<hr style='height:1.5vh;padding:0;margin:0;visibility:hidden;'>Suggested amount: 3&nbsp;&euro;&nbsp;/&nbsp;year<br>if you play many games<br>\
         <hr style='height:0.25vh;padding:0;margin:0;visibility:hidden;'>\
         <a href='https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=F9EE2A483RT9J&source=url'>\
         <img alt='Donate with Paypal' style='height:6vh;margin-top:1.0vh;margin-bottom:1.0vh' src='img/paypal-donate-button.png'></a><br>\

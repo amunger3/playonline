@@ -1752,7 +1752,7 @@ function resetGameAttributes(nbColumnsSelected) {
     }
   }
 
-  gameSolverInitMsgContents = {'smm_buffer_messages': 'no', 'smm_req_type': 'INIT', 'nbColumns': nbColumns, 'nbColors': nbColors, 'nbMaxAttempts': nbMaxAttempts, 'nbMaxPossibleCodesShown': nbMaxPossibleCodesShown, 'first_session_game': first_session_game, 'beginner_mode': (!localStorage.gamesok) || (Number(localStorage.gamesok) <= 25) || (!localStorage.nbgamesstarted5) || (Number(localStorage.nbgamesstarted5) <= 12), 'game_id': game_cnt, 'debug_mode': debug_mode};
+  gameSolverInitMsgContents = {'smm_buffer_messages': 'no', 'smm_req_type': 'INIT', 'nbColumns': nbColumns, 'nbColors': nbColors, 'nbMaxAttempts': nbMaxAttempts, 'nbMaxPossibleCodesShown': nbMaxPossibleCodesShown, 'first_session_game': first_session_game, 'beginner_mode': (!localStorage.gamesok) || (Number(localStorage.gamesok) <= 25) || (!localStorage.nbgamesstarted5) || (Number(localStorage.nbgamesstarted5) <= 10), 'game_id': game_cnt, 'debug_mode': debug_mode};
   gameSolverConfigDbg = JSON.stringify(gameSolverInitMsgContents);
   game_id_for_gameSolverConfig = game_cnt;
   setTimeout("postInitMessageToGameSolver(" + game_id_for_gameSolverConfig + ");", ((mobileMode && (game_cnt == 1)) ? 2222 : 1111)); // delay number of possible codes display (better than a "blocking while loop" till time has elapsed)

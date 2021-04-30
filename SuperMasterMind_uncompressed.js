@@ -1513,6 +1513,7 @@ function resetGameAttributes(nbColumnsSelected) {
     game_cnt = 1;
   }
   worst_mark_alert_already_displayed = false;
+  precalculatedFileFetched = "ok";
 
   // Clear gameSolver worker if necessary
   gameSolverDbg = 0;
@@ -2218,6 +2219,7 @@ function completePrecalculatedGamesOnTheFly(code_str_1, mark_str_1, code_str_2, 
     setTimeout(gamesolver_buffered_msg_action_str, 44); // (as shifted in time, may be run in a next game with a different game_id, which will have no effect as game_id is checked)
   })
   .fail(function(jqxhr, textStatus, error) { // (jqxhr: XMLHTTPRequest)
+    precalculatedFileFetched = jqxhr.status;
     // Trigger debuffering immediately
     setTimeout(gamesolver_buffered_msg_action_str, 44); // (as shifted in time, may be run in a next game with a different game_id, which will have no effect as game_id is checked)
     if (jqxhr.status != 200) { // Note: covers the 404 status which corresponds to the error "Loading failed for the <script> with source https://..."

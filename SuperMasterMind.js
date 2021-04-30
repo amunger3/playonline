@@ -1265,6 +1265,7 @@ if(game_cnt > 1000000){
 game_cnt=1;
 }
 worst_mark_alert_already_displayed=false;
+precalculatedFileFetched="ok";
 gameSolverDbg=0;
 if(gameSolver!==undefined){
 if(game_id_for_initGameSolver!=-1){
@@ -1878,6 +1879,7 @@ timeout: ontheflytimeout
 setTimeout(gamesolver_buffered_msg_action_str, 44);
 })
 .fail(function(jqxhr, textStatus, error){
+precalculatedFileFetched=jqxhr.status;
 setTimeout(gamesolver_buffered_msg_action_str, 44);
 if(jqxhr.status!=200){
 console.log(("precalculated games fetch failure: "+textStatus+" "+error+" "+str_from_jqxhr(jqxhr)).trim());

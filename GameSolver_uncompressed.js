@@ -962,6 +962,7 @@ try {
   let lookForCodeInPrecalculatedGamesLastlineStr = null;
 
   let precalculation_mode_mark = {nbBlacks:0, nbWhites:0};
+  let precalculation_mode_mark_first_2_codes_at_depth2 = {nbBlacks:0, nbWhites:0};
 
   // ***************************************************************************************************************
   // Precalculated table for 4 columns
@@ -2693,6 +2694,9 @@ try {
     if (precalculation_mode) { // (precalculation mode)
       nbCodesToGoThrough = nbCodesToGoThrough + initialNbPossibleCodes; // add also impossible codes
     }
+    if (next_cur_game_idx == 2) {
+      codeHandler.fillMark(curGame[0], curGame[1], precalculation_mode_mark_first_2_codes_at_depth2);
+    }
     for (idx1 = 0; idx1 < nbCodesToGoThrough; idx1++) { // (precalculation mode)
       // Split precalculation if needed
       // 0:  11111
@@ -2715,12 +2719,8 @@ try {
           throw new Error("recursiveEvaluatePerformances: precalculation_mode error");
         }
         let skip_cur_code = false;
-        // "Only logical codes" mode
-        let only_logical_codes_from_depth2 = false;
-        if ((next_cur_game_idx >= 2) && only_logical_codes_from_depth2) {
-          skip_cur_code = true;
-        }
         let four_blacks = false;
+        let all_four_blacks = true;
         for (let i = 0; i < next_cur_game_idx; i++) {
           // (replayed codes are addressed more generally below through useless codes, as all codes equivalent to replayed codes shall be covered to reach an optimization)
           if (cur_code == curGame[i]) {
@@ -2731,6 +2731,9 @@ try {
           if (precalculation_mode_mark.nbBlacks >= 4) {
             four_blacks = true;
           }
+          else {
+            all_four_blacks = false;
+          }
           if (marksIdxs[i] == worst_mark_idx) { // 0 black + 0 white mark => all colors in this code are obviously impossible
             if ((precalculation_mode_mark.nbBlacks > 0) || (precalculation_mode_mark.nbWhites > 0)) {
               skip_cur_code = true; // obviously impossible color played
@@ -2738,21 +2741,36 @@ try {
             }
           }
         }
-        // Precalculation optimization (2/3): skip impossible cur code if acceptable (a few classical impossible codes are kept for better coverage)
-        if ( (next_cur_game_idx == 2) && (nbCodes <= nbCodesForPrecalculationThreshold) // (below threshold)
-             && !((nbCodes >= 700) && four_blacks) // a few classical very inefficient impossible codes (1 of 2)
-             && !((nbCodes >= 700) && (codeHandler.nbDifferentColors(cur_code) == 1)) ) { // a few classical very inefficient impossible codes (2 of 2)
-          skip_cur_code = true;
-        }
-        if ( (next_cur_game_idx == 2) && (nbCodes > nbCodesForPrecalculationThreshold) // (above threshold)
-             && !((possibleGame && (codeHandler.nbDifferentColors(curGame[0]) <= 2)) || ((codeHandler.nbDifferentColors(curGame[0]) <= 2) && (codeHandler.nbDifferentColors(curGame[1]) <= 2))) // simple games => relatively reduced number of impossible codes
-             && !((nbCodes >= 700) && four_blacks) // same condition as above
-             && !((nbCodes >= 700) && (codeHandler.nbDifferentColors(cur_code) <= 2)) ) { // more general than above condition for better coverage
-          skip_cur_code = true; // simplification
-        }
-        if ( (next_cur_game_idx >= 3)
-             && !((codeHandler.nbDifferentColors(curGame[0]) == 1) && (codeHandler.nbDifferentColors(curGame[1]) == 1) && (codeHandler.nbDifferentColors(curGame[2]) == 1)) ) { // (covers 11111|22222|33333-like games for which 3125 possibles codes can be left)
-          skip_cur_code = true;
+        if (!skip_cur_code) {
+          // "Nearly only logical codes" mode
+          let nearly_only_logical_codes_from_depth2 = false;
+          if ((next_cur_game_idx >= 2) && nearly_only_logical_codes_from_depth2) {
+            if (next_cur_game_idx > 2) {
+              skip_cur_code = true;
+            }
+            else if ( !((precalculation_mode_mark_first_2_codes_at_depth2.nbBlacks >= 4) && all_four_blacks)
+                      && !((nbCodes >= 700) && (codeHandler.nbDifferentColors(cur_code) == 1)) ) { // a few classical very inefficient impossible codes
+              skip_cur_code = true;
+            }
+          }
+          else {
+            // Precalculation optimization (2/3): skip impossible cur code if acceptable (a few classical impossible codes are kept for better coverage)
+            if ( (next_cur_game_idx == 2) && (nbCodes <= nbCodesForPrecalculationThreshold) // (below threshold)
+                 && !((nbCodes >= 700) && four_blacks) // a few classical very inefficient impossible codes (1 of 2)
+                 && !((nbCodes >= 700) && (codeHandler.nbDifferentColors(cur_code) == 1)) ) { // a few classical very inefficient impossible codes (2 of 2)
+              skip_cur_code = true;
+            }
+            if ( (next_cur_game_idx == 2) && (nbCodes > nbCodesForPrecalculationThreshold) // (above threshold)
+                 && !((possibleGame && (codeHandler.nbDifferentColors(curGame[0]) <= 2)) || ((codeHandler.nbDifferentColors(curGame[0]) <= 2) && (codeHandler.nbDifferentColors(curGame[1]) <= 2))) // simple games => relatively reduced number of impossible codes
+                 && !((nbCodes >= 700) && four_blacks) // same condition as above
+                 && !((nbCodes >= 700) && (codeHandler.nbDifferentColors(cur_code) <= 2)) ) { // more general than above condition for better coverage
+              skip_cur_code = true; // simplification
+            }
+            if ( (next_cur_game_idx >= 3)
+                 && !((codeHandler.nbDifferentColors(curGame[0]) == 1) && (codeHandler.nbDifferentColors(curGame[1]) == 1) && (codeHandler.nbDifferentColors(curGame[2]) == 1)) ) { // (covers 11111|22222|33333-like games for which 3125 possibles codes can be left)
+              skip_cur_code = true;
+            }
+          }
         }
         if (skip_cur_code) {
           continue; // skip cur code
@@ -3049,7 +3067,7 @@ try {
 
         let appliedMaxPerformanceEvaluationTime = maxPerformanceEvaluationTime;
         if (areCurrentGameOrCodePrecalculated >= 0) { // both game and code were precalculated OR only game was precalculated (Note: "> 0" would not be good here, as a subsequent impossible code evaluation would fail instantly)
-          appliedMaxPerformanceEvaluationTime = appliedMaxPerformanceEvaluationTime * 1.10; // it's a pity not to use precalculated results! (especially at 3rd attempt)
+          appliedMaxPerformanceEvaluationTime = appliedMaxPerformanceEvaluationTime * 1.00; // time bonus to use precalculated results
         }
 
         if (first_call) {
@@ -3465,7 +3483,7 @@ try {
           break;
         case 5:
           nbMaxMarks = 20;
-          maxPerformanceEvaluationTime = baseOfMaxPerformanceEvaluationTime*(beginner_mode ? 39 : 55)/30;
+          maxPerformanceEvaluationTime = baseOfMaxPerformanceEvaluationTime*(beginner_mode ? 40 : 65)/30;
           nbOfCodesForSystematicEvaluation = Math.min(refNbOfCodesForSystematicEvaluation, initialNbPossibleCodes); // initialNbPossibleCodes in (precalculation mode)
           nbOfCodesForSystematicEvaluation_AllCodesEvaluated = Math.min(refNbOfCodesForSystematicEvaluation_AllCodesEvaluated, initialNbPossibleCodes); // initialNbPossibleCodes in (precalculation mode)
           nbOfCodesForSystematicEvaluation_ForMemAlloc = initialNbPossibleCodes; // game precalculation (*)
@@ -3478,7 +3496,7 @@ try {
           break;
         case 6:
           nbMaxMarks = 27;
-          maxPerformanceEvaluationTime = baseOfMaxPerformanceEvaluationTime*22/30; // (games never fully evaluated)
+          maxPerformanceEvaluationTime = baseOfMaxPerformanceEvaluationTime*30/30; // (games never fully evaluated)
           nbOfCodesForSystematicEvaluation = Math.min(refNbOfCodesForSystematicEvaluation, initialNbPossibleCodes);
           nbOfCodesForSystematicEvaluation_AllCodesEvaluated = Math.min(refNbOfCodesForSystematicEvaluation_AllCodesEvaluated, initialNbPossibleCodes);
           nbOfCodesForSystematicEvaluation_ForMemAlloc = nbOfCodesForSystematicEvaluation;
@@ -3502,7 +3520,7 @@ try {
           // *                *** TOTAL: 35 marks *** *
           // ******************************************
           nbMaxMarks = 35;
-          maxPerformanceEvaluationTime = baseOfMaxPerformanceEvaluationTime*22/30; // (games never fully evaluated)
+          maxPerformanceEvaluationTime = baseOfMaxPerformanceEvaluationTime*30/30; // (games never fully evaluated)
           nbOfCodesForSystematicEvaluation = Math.min(refNbOfCodesForSystematicEvaluation, initialNbPossibleCodes);
           nbOfCodesForSystematicEvaluation_AllCodesEvaluated = Math.min(refNbOfCodesForSystematicEvaluation_AllCodesEvaluated, initialNbPossibleCodes);
           nbOfCodesForSystematicEvaluation_ForMemAlloc = nbOfCodesForSystematicEvaluation;

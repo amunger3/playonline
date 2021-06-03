@@ -2763,6 +2763,7 @@ try {
             if ( (next_cur_game_idx == 2) && (nbCodes > nbCodesForPrecalculationThreshold) // (above threshold)
                  && !(possibleGame && (codeHandler.nbDifferentColors(curGame[0]) <= 2)) // possible games
                  && !((codeHandler.nbDifferentColors(curGame[0]) <= 2) && (codeHandler.nbDifferentColors(curGame[1]) <= 2)) // simple games => relatively reduced number of impossible codes
+                 && !((nbCodes >= 700) && (codeHandler.nbDifferentColors(curGame[0]) == 1) && (codeHandler.nbDifferentColors(curGame[1]) > 2))
                  && !((nbCodes >= 700) && four_blacks) // same condition as above
                  && !((nbCodes >= 700) && (codeHandler.nbDifferentColors(cur_code) <= 2)) ) { // more general than above condition for better coverage
               skip_cur_code = true; // simplification

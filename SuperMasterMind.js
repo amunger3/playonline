@@ -88,6 +88,7 @@ let next_code1=0;
 let next_code2=0;
 let next_code3=0;
 let next_scode=0;
+let next_gameinvid=0;
 let isWorkerAlive=-2;
 let workerCreationTime=-1;
 let workerTerminationTime=-1;
@@ -1265,7 +1266,7 @@ if(game_cnt > 1000000){
 game_cnt=1;
 }
 worst_mark_alert_already_displayed=false;
-if(typeof precalculatedFileFetched !== 'undefined'){precalculatedFileFetched="ok";}
+if(typeof precalculatedFileFetched!=='undefined'){precalculatedFileFetched="ok";}
 gameSolverDbg=0;
 if(gameSolver!==undefined){
 if(game_id_for_initGameSolver!=-1){
@@ -1314,7 +1315,7 @@ show_play_store_app("<font color=#C900A1>Hi "+localStorage.firstname+"</font><hr
 else if( localStorage.firstname&&localStorage.gamesok&&(Number(localStorage.gamesok) >=77)
 &&localStorage.lastDonationTimeT&&((new Date()).getTime() - localStorage.lastDonationTimeT > 1.0*31*24*60*60*1000 /* (~1.0 month) */) ){
 let paypalStr=
-"Thanks for using this "+(! android_appli? "Super Master Mind game" : "Android app")+".<hr style='height:0.25vh;padding:0;margin:0;visibility:hidden;'>You can show your appreciation by&nbsp;donating<hr style='height:1.5vh;padding:0;margin:0;visibility:hidden;'>Suggested amount: 3&nbsp;&euro;&nbsp;/&nbsp;year<br>if you play many games<br>\
+"Thanks for using this "+(! android_appli? "Super Master Mind game" : "Android app")+".<hr style='height:0.25vh;padding:0;margin:0;visibility:hidden;'>You can show your appreciation by&nbsp;donating<hr style='height:1.5vh;padding:0;margin:0;visibility:hidden;'>Suggested amount: 2&nbsp;&euro;&nbsp;/&nbsp;year<br>if you play regularly<br>\
 <hr style='height:0.25vh;padding:0;margin:0;visibility:hidden;'>\
 <a href='https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=F9EE2A483RT9J&source=url'>\
 <img alt='Donate with Paypal' style='height:6vh;margin-top:1.0vh;margin-bottom:1.0vh' src='img/paypal-donate-button.png'></a><br>\
@@ -1488,22 +1489,23 @@ if((next_code1!=0)&&(next_code2!=0)&&(next_code3==0)&&(next_scode!=0)){
 throw new Error("unexpected null next_code3");
 worst_mark_alert_already_displayed=true;
 sCode=next_scode;
-if(typeof gameInv!=='undefined'){gameInv=1;}
+gameInv=next_gameinvid;
 setTimeout("playACodeAutomatically("+next_code1+");playACodeAutomatically("+next_code2+");updateAndStoreNbGamesStarted(-1);", 44);
 }
 else if((next_code1!=0)&&(next_code2!=0)&&(next_code3!=0)&&(next_scode!=0)){
 worst_mark_alert_already_displayed=true;
 sCode=next_scode;
-if(typeof gameInv!=='undefined'){gameInv=2;}
+gameInv=next_gameinvid;
 setTimeout("playACodeAutomatically("+next_code1+");playACodeAutomatically("+next_code2+");playACodeAutomatically("+next_code3+");updateAndStoreNbGamesStarted(-1);", 44);
 }
 else{
-if(typeof gameInv!=='undefined'){gameInv=0;}
+gameInv=0;
 }
 next_code1=0;
 next_code2=0;
 next_code3=0;
 next_scode=0;
+next_gameinvid=0;
 }
 function checkArraySizes(){
 if(codesPlayed.length > nbMaxAttempts){displayGUIError("array is wider than expected (1)", new Error().stack);}
@@ -1591,18 +1593,18 @@ return false;
 nbOfStatsFilled_NbPossibleCodes=attempt_nb;
 main_graph_update_needed=true;
 draw_graphic(false);
-if( (nbColumns==5)&&(attempt_nb==4)&&(currentAttemptNumber==4)&&gameOnGoing()&&(nbOfPossibleCodes[2] >=700)
-&&(smmCodeHandler.nbDifferentColors(codesPlayed[0]) > 2)
-&&(smmCodeHandler.nbDifferentColors(codesPlayed[1]) <=2)
-&&(smmCodeHandler.nbDifferentColors(codesPlayed[2]) <=2)
-){
+if( (nbColumns==5)&&(attempt_nb==4)&&(currentAttemptNumber==4)&&gameOnGoing()&&(nbOfPossibleCodes[2] >=700) ){
 let mark_tmp1={nbBlacks:0, nbWhites:0};
 let mark_tmp2a={nbBlacks:0, nbWhites:0};
 let mark_tmp2b={nbBlacks:0, nbWhites:0};
 smmCodeHandler.fillMark(codesPlayed[0], codesPlayed[1], mark_tmp1);
 smmCodeHandler.fillMark(codesPlayed[0], codesPlayed[2], mark_tmp2a);
 smmCodeHandler.fillMark(codesPlayed[1], codesPlayed[2], mark_tmp2b);
-if(!smmCodeHandler.marksEqual(mark_tmp2a, marks[0]) ||!smmCodeHandler.marksEqual(mark_tmp2b, marks[1])){
+if( (!smmCodeHandler.marksEqual(mark_tmp2a, marks[0]) ||!smmCodeHandler.marksEqual(mark_tmp2b, marks[1]))
+&&!((mark_tmp1.nbBlacks==4)&&(mark_tmp2a.nbBlacks==4)&&(mark_tmp2b.nbBlacks==4)) ){
+if( (smmCodeHandler.nbDifferentColors(codesPlayed[0]) > 2)
+&&(smmCodeHandler.nbDifferentColors(codesPlayed[1]) <=2)
+&&(smmCodeHandler.nbDifferentColors(codesPlayed[2])==2) ){
 if(!((marks[1].nbBlacks==0)&&(marks[1].nbWhites==0))
 ||((mark_tmp1.nbBlacks==0)&&(mark_tmp1.nbWhites==0)) ){
 console.log("invert game rows #1");
@@ -1610,25 +1612,83 @@ next_code1=codesPlayed[1];
 next_code2=codesPlayed[0];
 next_code3=codesPlayed[2];
 next_scode=sCode;
-if((typeof gameInv!=='undefined')&&(gameInv!=0)){
+next_gameinvid=10;
+if(gameInv!=0){
 displayGUIError("unexpected gameInv loop (1): "+gameInv, new Error().stack);
 }
 else{
 setTimeout("if(currentAttemptNumber==4){newGameButtonClick_delayed("+nbColumns+");}", 14);
 }
 }
-else if ( !((marks[2].nbBlacks==0)&&(marks[2].nbWhites==0))
+else if(!((marks[2].nbBlacks==0)&&(marks[2].nbWhites==0))
 ||((mark_tmp2a.nbBlacks==0)&&(mark_tmp2a.nbWhites==0)&&(mark_tmp2b.nbBlacks==0)&&(mark_tmp2b.nbWhites==0)) ){
 console.log("invert game rows #2");
 next_code1=codesPlayed[2];
 next_code2=codesPlayed[0];
 next_code3=codesPlayed[1];
 next_scode=sCode;
-if((typeof gameInv!=='undefined')&&(gameInv!=0)){
+next_gameinvid=20;
+if(gameInv!=0){
 displayGUIError("unexpected gameInv loop (2): "+gameInv, new Error().stack);
 }
 else{
 setTimeout("if(currentAttemptNumber==4){newGameButtonClick_delayed("+nbColumns+");}", 14);
+}
+}
+}
+else if( (smmCodeHandler.nbDifferentColors(codesPlayed[0]) > 2)
+&&(smmCodeHandler.nbDifferentColors(codesPlayed[1])==1)
+&&(smmCodeHandler.nbDifferentColors(codesPlayed[2]) > 2) ){
+if(!((marks[2].nbBlacks==0)&&(marks[2].nbWhites==0))
+||((mark_tmp2b.nbBlacks==0)&&(mark_tmp2b.nbWhites==0)) ){
+console.log("invert game rows #3");
+next_code1=codesPlayed[0];
+next_code2=codesPlayed[2];
+next_code3=codesPlayed[1];
+next_scode=sCode;
+next_gameinvid=30;
+if(gameInv!=0){
+displayGUIError("unexpected gameInv loop (3): "+gameInv, new Error().stack);
+}
+else{
+setTimeout("if(currentAttemptNumber==4){newGameButtonClick_delayed("+nbColumns+");}", 14);
+}
+}
+}
+else if( (gameInv==0)
+&&( ((smmCodeHandler.nbDifferentColors(codesPlayed[0]) >=2)
+&&(smmCodeHandler.nbDifferentColors(codesPlayed[1]) > 2)
+&&(smmCodeHandler.nbDifferentColors(codesPlayed[2]) > 2))
+||
+((smmCodeHandler.nbDifferentColors(codesPlayed[0]) > 2)
+&&(smmCodeHandler.nbDifferentColors(codesPlayed[1]) >=2)
+&&(smmCodeHandler.nbDifferentColors(codesPlayed[2]) > 2))
+||
+((smmCodeHandler.nbDifferentColors(codesPlayed[0]) > 2)
+&&(smmCodeHandler.nbDifferentColors(codesPlayed[1]) > 2)
+&&(smmCodeHandler.nbDifferentColors(codesPlayed[2]) >=2)) )
+&&smmCodeHandler.sameColorsReused(codesPlayed[0], codesPlayed[1])
+&&(nbOfPossibleCodes[2] >=1900)
+&&( ((mark_tmp1.nbBlacks+mark_tmp1.nbWhites==5)&&(mark_tmp2a.nbBlacks+mark_tmp2a.nbWhites==5)&&(3*marks[2].nbBlacks+marks[2].nbWhites >=3*marks[1].nbBlacks+marks[1].nbWhites+3))
+||((mark_tmp1.nbBlacks+mark_tmp1.nbWhites==5) &&!smmCodeHandler.sameColorsReused(codesPlayed[0], codesPlayed[2]))
+||((mark_tmp1.nbBlacks+mark_tmp1.nbWhites <=4) &&!smmCodeHandler.sameColorsReused(codesPlayed[0], codesPlayed[2])
+&&(marks[1].nbBlacks==0)&&(marks[1].nbWhites <=2)&&((smmCodeHandler.nbDifferentColors(codesPlayed[1])==2) ||(marks[1].nbWhites > 0))&&(3*marks[2].nbBlacks+marks[2].nbWhites >=3*marks[1].nbBlacks+marks[1].nbWhites+2))
+)
+){
+if(!((marks[2].nbBlacks==0)&&(marks[2].nbWhites==0))
+||((mark_tmp2b.nbBlacks==0)&&(mark_tmp2b.nbWhites==0)) ){
+console.log("invert game rows #4");
+next_code1=codesPlayed[0];
+next_code2=codesPlayed[2];
+next_code3=codesPlayed[1];
+next_scode=sCode;
+next_gameinvid=40;
+if(gameInv!=0){
+displayGUIError("unexpected gameInv loop (4): "+gameInv, new Error().stack);
+}
+else{
+setTimeout("if(currentAttemptNumber==4){newGameButtonClick_delayed("+nbColumns+");}", 14);
+}
 }
 }
 }
@@ -1879,7 +1939,7 @@ timeout: ontheflytimeout
 setTimeout(gamesolver_buffered_msg_action_str, 44);
 })
 .fail(function(jqxhr, textStatus, error){
-if(typeof precalculatedFileFetched !== 'undefined'){precalculatedFileFetched=jqxhr.status;}
+if(typeof precalculatedFileFetched!=='undefined'){precalculatedFileFetched=jqxhr.status;}
 setTimeout(gamesolver_buffered_msg_action_str, 44);
 if(jqxhr.status!=200){
 console.log(("precalculated games fetch failure: "+textStatus+" "+error+" "+str_from_jqxhr(jqxhr)).trim());

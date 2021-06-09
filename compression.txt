@@ -14,7 +14,6 @@ normal replace " || " by "||"
 normal replace " && " by "&&"
 normal replace "if (" by "if("
 normal replace "; " by ";"
-add a space after &#x1F381;
   normal replace ", " by "," // PB: &nbsp; to be used in strings!
 normal replace " + " by "+"
 normal replace " {" by "{"

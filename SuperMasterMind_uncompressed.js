@@ -107,6 +107,7 @@ let next_code1 = 0; // (empty code)
 let next_code2 = 0; // (empty code)
 let next_code3 = 0; // (empty code)
 let next_scode = 0; // (empty code)
+let next_gameinvid = 0;
 
 let isWorkerAlive = -2; // (debug value)
 let workerCreationTime = -1; // (debug value)
@@ -1568,7 +1569,7 @@ function resetGameAttributes(nbColumnsSelected) {
     else if ( localStorage.firstname && localStorage.gamesok && (Number(localStorage.gamesok) >= 77)
               && localStorage.lastDonationTimeT && ((new Date()).getTime() - localStorage.lastDonationTimeT > 1.0*31*24*60*60*1000 /* (~1.0 month) */) ) {
       let paypalStr =
-        "Thanks for using this " + (! android_appli? "Super Master Mind game" : "Android app") + ".<hr style='height:0.25vh;padding:0;margin:0;visibility:hidden;'>You can show your appreciation by&nbsp;donating<hr style='height:1.5vh;padding:0;margin:0;visibility:hidden;'>Suggested amount: 3&nbsp;&euro;&nbsp;/&nbsp;year<br>if you play many games<br>\
+        "Thanks for using this " + (! android_appli? "Super Master Mind game" : "Android app") + ".<hr style='height:0.25vh;padding:0;margin:0;visibility:hidden;'>You can show your appreciation by&nbsp;donating<hr style='height:1.5vh;padding:0;margin:0;visibility:hidden;'>Suggested amount: 2&nbsp;&euro;&nbsp;/&nbsp;year<br>if you play regularly<br>\
         <hr style='height:0.25vh;padding:0;margin:0;visibility:hidden;'>\
         <a href='https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=F9EE2A483RT9J&source=url'>\
         <img alt='Donate with Paypal' style='height:6vh;margin-top:1.0vh;margin-bottom:1.0vh' src='img/paypal-donate-button.png'></a><br>\
@@ -1767,24 +1768,25 @@ function resetGameAttributes(nbColumnsSelected) {
     throw new Error("unexpected null next_code3");
     worst_mark_alert_already_displayed = true; // (avoid multiple alerts)
     sCode = next_scode;
-    if (typeof gameInv !== 'undefined') {gameInv = 1;}
+    gameInv = next_gameinvid;
     // To simplify, impact on game duration (reduction) is ignored in those rare cases
     setTimeout("playACodeAutomatically(" + next_code1 + ");playACodeAutomatically(" + next_code2 + ");updateAndStoreNbGamesStarted(-1);", 44);
   }
   else if ((next_code1 != 0) && (next_code2 != 0) && (next_code3 != 0) && (next_scode != 0)) {
     worst_mark_alert_already_displayed = true; // (avoid multiple alerts)
     sCode = next_scode;
-    if (typeof gameInv !== 'undefined') {gameInv = 2;}
+    gameInv = next_gameinvid;
     // To simplify, impact on game duration (reduction) is ignored in those rare cases
     setTimeout("playACodeAutomatically(" + next_code1 + ");playACodeAutomatically(" + next_code2 + ");playACodeAutomatically(" + next_code3 + ");updateAndStoreNbGamesStarted(-1);", 44);
   }
   else {
-    if (typeof gameInv !== 'undefined') {gameInv = 0;}
+    gameInv = 0;
   }
   next_code1 = 0; // (empty code)
   next_code2 = 0; // (empty code)
   next_code3 = 0; // (empty code)
   next_scode = 0; // (empty code)
+  next_gameinvid = 0;
 
 }
 
@@ -1883,52 +1885,110 @@ function writeNbOfPossibleCodes(nbOfPossibleCodes_p, colorsFoundCode_p, minNbCol
   main_graph_update_needed = true;
   draw_graphic(false);
 
-  // Likely unknown performance at 3rd attempt of Super Master Mind game => invert some attempts
+  // [Likely] unknown performance at 3rd attempt of Super Master Mind game => invert some attempts
   // Game row inversion could allow to better evaluate performances asymmetrically
   // (Future improvement could make precalculations [more] symmetrical)
-  if ( (nbColumns == 5) && (attempt_nb == 4) && (currentAttemptNumber == 4) && gameOnGoing() && (nbOfPossibleCodes[2] >= 700)
-       && (smmCodeHandler.nbDifferentColors(codesPlayed[0]) > 2)
-       && (smmCodeHandler.nbDifferentColors(codesPlayed[1]) <= 2)
-       && (smmCodeHandler.nbDifferentColors(codesPlayed[2]) <= 2) // code at 3rd attempt has less than 2 colors
-     ) {
+  if ( (nbColumns == 5) && (attempt_nb == 4) && (currentAttemptNumber == 4) && gameOnGoing() && (nbOfPossibleCodes[2] >= 700) ) {
     let mark_tmp1 = {nbBlacks:0, nbWhites:0};
     let mark_tmp2a = {nbBlacks:0, nbWhites:0};
     let mark_tmp2b = {nbBlacks:0, nbWhites:0};
     smmCodeHandler.fillMark(codesPlayed[0], codesPlayed[1], mark_tmp1);
     smmCodeHandler.fillMark(codesPlayed[0], codesPlayed[2], mark_tmp2a);
     smmCodeHandler.fillMark(codesPlayed[1], codesPlayed[2], mark_tmp2b);
-    if (!smmCodeHandler.marksEqual(mark_tmp2a, marks[0]) || !smmCodeHandler.marksEqual(mark_tmp2b, marks[1])) { // Impossible 3rd code
-      if ( !((marks[1].nbBlacks == 0) && (marks[1].nbWhites == 0))
-           || ((mark_tmp1.nbBlacks == 0) && (mark_tmp1.nbWhites == 0)) ) { // worst mark condition avoiding obviously impossible color replay
-          console.log("invert game rows #1");
-          next_code1 = codesPlayed[1];
-          next_code2 = codesPlayed[0];
-          next_code3 = codesPlayed[2];
-          next_scode = sCode;
-          if ((typeof gameInv !== 'undefined') && (gameInv != 0)) { // defense against loops
-            displayGUIError("unexpected gameInv loop (1): " + gameInv, new Error().stack);
-          }
-          else {
-            setTimeout("if (currentAttemptNumber == 4) {newGameButtonClick_delayed(" + nbColumns + ");}", 14);
-          }
+    if ( (!smmCodeHandler.marksEqual(mark_tmp2a, marks[0]) || !smmCodeHandler.marksEqual(mark_tmp2b, marks[1])) // Impossible 3rd code (possible codes are fully assessed)
+         && !((mark_tmp1.nbBlacks == 4) && (mark_tmp2a.nbBlacks == 4) && (mark_tmp2b.nbBlacks == 4)) ) { // (such codes are fully assessed))
+      if ( (smmCodeHandler.nbDifferentColors(codesPlayed[0]) > 2)
+           && (smmCodeHandler.nbDifferentColors(codesPlayed[1]) <= 2)
+           && (smmCodeHandler.nbDifferentColors(codesPlayed[2]) == 2) ) { // code at 3rd attempt has 2 colors (11111-like codes are fully assessed)
+        if ( !((marks[1].nbBlacks == 0) && (marks[1].nbWhites == 0))
+             || ((mark_tmp1.nbBlacks == 0) && (mark_tmp1.nbWhites == 0)) ) { // worst mark condition avoiding obviously impossible color replay
+            console.log("invert game rows #1");
+            next_code1 = codesPlayed[1];
+            next_code2 = codesPlayed[0];
+            next_code3 = codesPlayed[2];
+            next_scode = sCode;
+            next_gameinvid = 10;
+            if (gameInv != 0) { // defense against loops
+              displayGUIError("unexpected gameInv loop (1): " + gameInv, new Error().stack);
+            }
+            else {
+              setTimeout("if (currentAttemptNumber == 4) {newGameButtonClick_delayed(" + nbColumns + ");}", 14);
+            }
+        }
+        else if ( !((marks[2].nbBlacks == 0) && (marks[2].nbWhites == 0))
+                  || ((mark_tmp2a.nbBlacks == 0) && (mark_tmp2a.nbWhites == 0) && (mark_tmp2b.nbBlacks == 0) && (mark_tmp2b.nbWhites == 0)) ) { // worst mark condition avoiding obviously impossible color replay
+            console.log("invert game rows #2");
+            next_code1 = codesPlayed[2];
+            next_code2 = codesPlayed[0];
+            next_code3 = codesPlayed[1];
+            next_scode = sCode;
+            next_gameinvid = 20;
+            if (gameInv != 0) { // defense against loops
+              displayGUIError("unexpected gameInv loop (2): " + gameInv, new Error().stack);
+            }
+            else {
+              setTimeout("if (currentAttemptNumber == 4) {newGameButtonClick_delayed(" + nbColumns + ");}", 14);
+            }
+        }
       }
-      else if ( !((marks[2].nbBlacks == 0) && (marks[2].nbWhites == 0))
-                || ((mark_tmp2a.nbBlacks == 0) && (mark_tmp2a.nbWhites == 0) && (mark_tmp2b.nbBlacks == 0) && (mark_tmp2b.nbWhites == 0)) ) { // worst mark condition avoiding obviously impossible color replay
-          console.log("invert game rows #2");
-          next_code1 = codesPlayed[2];
-          next_code2 = codesPlayed[0];
-          next_code3 = codesPlayed[1];
-          next_scode = sCode;
-          if ((typeof gameInv !== 'undefined') && (gameInv != 0)) { // defense against loops
-            displayGUIError("unexpected gameInv loop (2): " + gameInv, new Error().stack);
-          }
-          else {
-            setTimeout("if (currentAttemptNumber == 4) {newGameButtonClick_delayed(" + nbColumns + ");}", 14);
-          }
+      else if ( (smmCodeHandler.nbDifferentColors(codesPlayed[0]) > 2)
+                && (smmCodeHandler.nbDifferentColors(codesPlayed[1]) == 1)
+                && (smmCodeHandler.nbDifferentColors(codesPlayed[2]) > 2) ) {
+        if ( !((marks[2].nbBlacks == 0) && (marks[2].nbWhites == 0))
+             || ((mark_tmp2b.nbBlacks == 0) && (mark_tmp2b.nbWhites == 0)) ) { // worst mark condition avoiding obviously impossible color replay
+              console.log("invert game rows #3");
+              next_code1 = codesPlayed[0];
+              next_code2 = codesPlayed[2];
+              next_code3 = codesPlayed[1];
+              next_scode = sCode;
+              next_gameinvid = 30;
+              if (gameInv != 0) { // defense against loops
+                displayGUIError("unexpected gameInv loop (3): " + gameInv, new Error().stack);
+              }
+              else {
+                setTimeout("if (currentAttemptNumber == 4) {newGameButtonClick_delayed(" + nbColumns + ");}", 14);
+              }
+        }
       }
-    }
+      else if ( (gameInv == 0)
+                && ( ((smmCodeHandler.nbDifferentColors(codesPlayed[0]) >= 2)
+                     && (smmCodeHandler.nbDifferentColors(codesPlayed[1]) > 2)
+                     && (smmCodeHandler.nbDifferentColors(codesPlayed[2]) > 2))
+                     ||
+                     ((smmCodeHandler.nbDifferentColors(codesPlayed[0]) > 2)
+                     && (smmCodeHandler.nbDifferentColors(codesPlayed[1]) >= 2)
+                     && (smmCodeHandler.nbDifferentColors(codesPlayed[2]) > 2))
+                     ||
+                     ((smmCodeHandler.nbDifferentColors(codesPlayed[0]) > 2)
+                     && (smmCodeHandler.nbDifferentColors(codesPlayed[1]) > 2)
+                     && (smmCodeHandler.nbDifferentColors(codesPlayed[2]) >= 2)) )
+                // classical simplistic ways of playing (involving the case where the same 5 colors are replayed in a different order): attempt inversion is acceptable/understandable
+                && smmCodeHandler.sameColorsReused(codesPlayed[0], codesPlayed[1]) // (obviously strongly correlated codes + simplistic way of playing when codes are played in this order)
+                && (nbOfPossibleCodes[2] >= 1900) // inefficient way of playing
+                && ( ((mark_tmp1.nbBlacks + mark_tmp1.nbWhites == 5) && (mark_tmp2a.nbBlacks + mark_tmp2a.nbWhites == 5) && (3*marks[2].nbBlacks + marks[2].nbWhites >= 3*marks[1].nbBlacks + marks[1].nbWhites + 3))
+                     || ((mark_tmp1.nbBlacks + mark_tmp1.nbWhites == 5) && !smmCodeHandler.sameColorsReused(codesPlayed[0], codesPlayed[2]))
+                     || ((mark_tmp1.nbBlacks + mark_tmp1.nbWhites <= 4) && !smmCodeHandler.sameColorsReused(codesPlayed[0], codesPlayed[2]) 
+                         && (marks[1].nbBlacks == 0) && (marks[1].nbWhites <= 2) && ((smmCodeHandler.nbDifferentColors(codesPlayed[1]) == 2) ||(marks[1].nbWhites > 0)) && (3*marks[2].nbBlacks + marks[2].nbWhites >= 3*marks[1].nbBlacks + marks[1].nbWhites + 2))
+                   )
+              ) {
+        if ( !((marks[2].nbBlacks == 0) && (marks[2].nbWhites == 0))
+             || ((mark_tmp2b.nbBlacks == 0) && (mark_tmp2b.nbWhites == 0)) ) { // worst mark condition avoiding obviously impossible color replay
+              console.log("invert game rows #4");
+              next_code1 = codesPlayed[0];
+              next_code2 = codesPlayed[2];
+              next_code3 = codesPlayed[1];
+              next_scode = sCode;
+              next_gameinvid = 40;
+              if (gameInv != 0) { // defense against loops
+                displayGUIError("unexpected gameInv loop (4): " + gameInv, new Error().stack);
+              }
+              else {
+                setTimeout("if (currentAttemptNumber == 4) {newGameButtonClick_delayed(" + nbColumns + ");}", 14);
+              }
+        }
+      }
+    } // Impossible 3rd code & co
   }
-
   return true;
 }
 

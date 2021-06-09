@@ -21,8 +21,18 @@ public class extractPrecalculatedPerfs {
   // ***********
 
   private static String[] file_table =
-    // NEW PERFS 4
+    // NEW PERFS 5 - FILES IN WHICH INVERT DIMS
     {
+      "STAGE2 - RESULTS_11111_270_1300_2s_plus_depth3only_270_1300_2.7sec.txt",
+      "STAGE2 - RESULTS_11112_270_1300_2s_plus_depth3only_270_1300_4.4sec.txt",
+      "STAGE2 - RESULTS_11122_270_1500_2s_plus_depth3only_270_1500_4.4sec.txt",
+      "STAGE2 - RESULTS_11123_depth2_nearlyonlylogicalcodesfromdepth2_270_32000_2.2s.txt",
+      "STAGE2 - RESULTS_11223_depth2_nearlyonlylogicalcodesfromdepth2_270_32000_2.2s.txt",
+      "STAGE2 - RESULTS_11234_depth2_nearlyonlylogicalcodesfromdepth2_270_32000_2.2s.txt",
+      "STAGE2 - RESULTS_12345_depth2_nearlyonlylogicalcodesfromdepth2_270_32000_2.2s.txt"
+    };
+    // NEW PERFS 4
+    /* {
       "STAGE2 - RESULTS_11111_270_1300_2s_plus_depth3only_270_1300_2.7sec.txt",
       "STAGE2 - RESULTS_11112_270_1300_2s_plus_depth3only_270_1300_4.4sec.txt",
       "STAGE2 - RESULTS_11122_270_1500_2s_plus_depth3only_270_1500_4.4sec.txt",
@@ -30,7 +40,7 @@ public class extractPrecalculatedPerfs {
       "STAGE2 - RESULTS_11223_depth2_onlylogicalcodesatdepth2_270_32000_2.7s.txt",
       "STAGE2 - RESULTS_11234_depth2_onlylogicalcodesatdepth2_270_32000_2.7s.txt",
       "STAGE2 - RESULTS_12345_depth2_onlylogicalcodesatdepth2_270_32000_2.7s.txt"
-    };
+    }; */
     /*
     // NEW PERFS 3
     {
@@ -315,6 +325,9 @@ public class extractPrecalculatedPerfs {
                 bw.write("+" + line.replace(" +","") + "\n");
               }
               bw.close();
+            }
+            else {
+              System.out.println("(non matching line: -" + line + "-)");
             }
           } // end while
         }

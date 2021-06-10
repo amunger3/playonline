@@ -1964,9 +1964,9 @@ function writeNbOfPossibleCodes(nbOfPossibleCodes_p, colorsFoundCode_p, minNbCol
                      && (smmCodeHandler.nbDifferentColors(codesPlayed[2]) >= 2)) )
                 // classical simplistic ways of playing (involving the case where the same 5 colors are replayed in a different order): attempt inversion is acceptable/understandable
                 && smmCodeHandler.sameColorsReused(codesPlayed[0], codesPlayed[1]) // (obviously strongly correlated codes + simplistic way of playing when codes are played in this order)
-                && (nbOfPossibleCodes[2] >= 1900) // inefficient way of playing
-                && ( ((mark_tmp1.nbBlacks + mark_tmp1.nbWhites == 5) && (mark_tmp2a.nbBlacks + mark_tmp2a.nbWhites == 5) && (3*marks[2].nbBlacks + marks[2].nbWhites >= 3*marks[1].nbBlacks + marks[1].nbWhites + 3))
-                     || ((mark_tmp1.nbBlacks + mark_tmp1.nbWhites == 5) && !smmCodeHandler.sameColorsReused(codesPlayed[0], codesPlayed[2]))
+                && (nbOfPossibleCodes[2] >= 2000) // inefficient way of playing
+                && ( ((nbOfPossibleCodes[2] >= 2250) && (mark_tmp1.nbBlacks + mark_tmp1.nbWhites == 5) && (mark_tmp2a.nbBlacks + mark_tmp2a.nbWhites == 5) && (3*marks[2].nbBlacks + marks[2].nbWhites >= 3*marks[1].nbBlacks + marks[1].nbWhites + 3))
+                     || ((nbOfPossibleCodes[2] >= 2250) && (mark_tmp1.nbBlacks + mark_tmp1.nbWhites == 5) && !smmCodeHandler.sameColorsReused(codesPlayed[0], codesPlayed[2]))
                      || ((mark_tmp1.nbBlacks + mark_tmp1.nbWhites <= 4) && !smmCodeHandler.sameColorsReused(codesPlayed[0], codesPlayed[2]) 
                          && (marks[1].nbBlacks == 0) && (marks[1].nbWhites <= 2) && ((smmCodeHandler.nbDifferentColors(codesPlayed[1]) == 2) ||(marks[1].nbWhites > 0)) && (3*marks[2].nbBlacks + marks[2].nbWhites >= 3*marks[1].nbBlacks + marks[1].nbWhites + 2))
                    )

@@ -1375,6 +1375,7 @@ throw new Error("inconsistent nbMinPossibleCodesShown and nbMaxPossibleCodesShow
 nbPossibleCodesShown=-1;
 currentPossibleCodeShown=-1;
 disableMouseMoveEffects=false;
+nbColorSelections = 0;
 currentCode=0;
 codesPlayed=new Array(nbMaxAttempts);
 for (i=0;i < nbMaxAttempts;i++){

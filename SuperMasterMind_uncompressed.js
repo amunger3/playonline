@@ -1634,6 +1634,7 @@ function resetGameAttributes(nbColumnsSelected) {
   currentPossibleCodeShown = -1;
   disableMouseMoveEffects = false;
 
+  nbColorSelections = 0;
   currentCode = 0;
   codesPlayed = new Array(nbMaxAttempts);
   for (i = 0; i < nbMaxAttempts; i++) {

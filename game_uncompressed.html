@@ -38,10 +38,10 @@
         padding: 0;
         border: 2px solid purple; /* (may be modified in SuperMasterMind.js) */
         background: transparent;
-        width: 99%;
-        height: 95%;
+        height: 98.5%;
         border-radius: 1.5%;
         zoom: 1.0; /* (used by Chrome, ignored by Firefox) */
+        position: fixed;
       }
       /* *** Classes for button styling using CSS *** */
       .button {
@@ -445,7 +445,7 @@
 
     <!-- HTML controls and canvas -->
 
-    <table id='my_table' style='width:75%;height:90%;position:absolute;left:12.5%;top:2%;border:0px ridge orange;border-radius:1%;margin:0;padding:0;'>
+    <table id='my_table' style='width:100%;height:100%;position:absolute;left:0%;top:0%;border:none;border-radius:0%;margin:0;padding:0;'>
       <tr style='height:100%;'>
         <td style='width:0.1%;margin:0;padding:0;'></td>
         <td style='width:6.2%;margin:0;padding:0;vertical-align:middle;text-align:center;white-space:nowrap'>
@@ -463,7 +463,7 @@
           <input id='showPossibleCodesButton' class='button disabled' type='button' value='Show possible codes' title='Show possible codes at each stage of the game (when game is over)' onfocus='this.blur()' onclick='showPossibleCodesButtonClick()' disabled>
         </td>
         <td style='width:0.1%;margin:0;padding:0;'></td>
-        <td style='width:93.6%;margin:0;padding:0;vertical-align:middle;align:right;text-align:left;'><canvas id='my_canvas'><font color=red>Error: HTML canvas are not supported!</font></canvas></td>
+        <td style='width:93.6%;margin:0;padding:0;vertical-align:top;align:left;text-align:left;' id='my_canvas_cell'><canvas id='my_canvas'><font color=red>Error: HTML canvas are not supported!</font></canvas></td>
       </tr>
     </table>
 
@@ -518,7 +518,7 @@
     <!-- Initializations -->
 
     <script>
-      let html_compatibility_game_version = "Ver_ON3";
+      let html_compatibility_game_version = "Ver_ON5";
       let nb_errors_submitted = 0;
       let mobileMode = false;
       let androidMode = false;

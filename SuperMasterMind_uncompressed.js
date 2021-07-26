@@ -131,13 +131,6 @@ let showPossibleCodesButtonBackToGameCompressedName = "\u25c0";
 
 let randomCodesHintToBeDisplayed = true;
 
-let tableIniWidth = document.getElementById("my_table").style.width;
-let tableIniLeft = document.getElementById("my_table").style.left;
-let tableIniHeight = document.getElementById("my_table").style.height;
-let tableIniTop = document.getElementById("my_table").style.top;
-let tableIniBorder = document.getElementById("my_table").style.border;
-let tableIniBorderRadius = document.getElementById("my_table").style["border-radius"];
-
 let CompressedDisplayMode = false;
 let CompressedDisplayMode_compressWidth = 477;
 let CompressedDisplayMode_uncompressWidth = 944;
@@ -2483,17 +2476,21 @@ function drawRoundedRect(ctx, x, y, width, height, radius, fill, stroke) {
 function draw_graphic(fullMode = true) {
   let gameOnGoingIni = gameOnGoing();
   let currentAttemptNumberIni = currentAttemptNumber;
-  draw_graphic_bis();
+  
+  let common_width = document.getElementById("my_canvas_cell").offsetWidth;
+  let common_height = document.getElementById("my_canvas_cell").offsetHeight;
+  
+  draw_graphic_bis(common_width, common_height);
   if ( (gameOnGoingIni != gameOnGoing()) || (currentAttemptNumber != currentAttemptNumberIni) ) {
    updateGameSizes();
-   draw_graphic_bis();
+   draw_graphic_bis(common_width, common_height);
   }
   if (fullMode) {
-    draw_graphic_bis(); // sometimes improves the display  - not perfect but best solution found
+    draw_graphic_bis(common_width, common_height); // sometimes improves the display  - not perfect but best solution found
   }
 }
 
-function draw_graphic_bis() {
+function draw_graphic_bis(common_width, common_height) {
 
   let canvas = document.getElementById("my_canvas");
   let ctx = canvas.getContext("2d");
@@ -2517,13 +2514,16 @@ function draw_graphic_bis() {
 
     let resize_detected = false;
     let resize_cnt = 0;
+
     do {
 
       resize_detected = false;
       let width;
       let height;
-      width = canvas.clientWidth;
-      height = canvas.clientHeight;
+      width = common_width;     
+      height = common_height;      
+      // width = canvas.clientWidth;
+      // height = canvas.clientHeight;
       // (Alternate sizes:
       //  width = canvas.offsetWidth - 2*2; // 2*2px (canvas' border = 2px) (2nd best solution - not perfect)
       //  height = canvas.offsetHeight - 2*2; // 2*2px (canvas' border = 2px) (2nd best solution - not perfect)
@@ -2583,12 +2583,6 @@ function draw_graphic_bis() {
           document.getElementById("playRandomCodeButton").value = "\u266C";
           document.getElementById("revealSecretColorButton").value = "?";
           document.getElementById("showPossibleCodesButton").value = showPossibleCodesButtonCompressedName;
-          document.getElementById("my_table").style.width = "100%";
-          document.getElementById("my_table").style.left = "0%";
-          document.getElementById("my_table").style.height = "100%";
-          document.getElementById("my_table").style.top = "0%";
-          document.getElementById("my_table").style.border = "none";
-          document.getElementById("my_table").style["border-radius"] = "0%";
 
           try { // (try/catch because optional pictures)
             document.getElementById("img_1").style.display = 'none';
@@ -2611,12 +2605,6 @@ function draw_graphic_bis() {
           document.getElementById("playRandomCodeButton").value = playRandomCodeButtonIniName;
           document.getElementById("revealSecretColorButton").value = revealSecretColorButtonIniName;
           document.getElementById("showPossibleCodesButton").value = showPossibleCodesButtonIniName;
-          document.getElementById("my_table").style.width = tableIniWidth;
-          document.getElementById("my_table").style.left = tableIniLeft;
-          document.getElementById("my_table").style.height = tableIniHeight;
-          document.getElementById("my_table").style.top = tableIniTop;
-          document.getElementById("my_table").style.border = tableIniBorder;
-          document.getElementById("my_table").style["border-radius"] = tableIniBorderRadius;
 
           try { // (try/catch because optional pictures)
             document.getElementById("img_1").style.display = 'inline';
@@ -2656,7 +2644,7 @@ function draw_graphic_bis() {
 
       }
 
-    } while (resize_detected && (resize_cnt <= 16)); // several iterative calls are necessary to redraw the canvas with proper width and height on window resize
+    } while (false && resize_detected && (resize_cnt <= 16)); // several iterative calls are necessary to redraw the canvas with proper width and height on window resize => reason was "relative canvas position" / no longer applicable
 
     // Set adaptative widths
     if (window.innerWidth < 0.70*window.innerHeight) {

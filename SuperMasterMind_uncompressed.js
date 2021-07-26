@@ -137,8 +137,6 @@ let tableIniHeight = document.getElementById("my_table").style.height;
 let tableIniTop = document.getElementById("my_table").style.top;
 let tableIniBorder = document.getElementById("my_table").style.border;
 let tableIniBorderRadius = document.getElementById("my_table").style["border-radius"];
-let myCanvasIniWidth = document.getElementById("my_canvas").style.width;
-let myCanvasIniHeight = document.getElementById("my_canvas").style.height;
 
 let CompressedDisplayMode = false;
 let CompressedDisplayMode_compressWidth = 477;
@@ -1968,7 +1966,7 @@ function writeNbOfPossibleCodes(nbOfPossibleCodes_p, colorsFoundCode_p, minNbCol
                 && (nbOfPossibleCodes[2] > 2599) // inefficient way of playing + code never assessed
                 && ( ((mark_tmp1.nbBlacks + mark_tmp1.nbWhites == 5) && (mark_tmp2a.nbBlacks + mark_tmp2a.nbWhites == 5) && (3*marks[2].nbBlacks + marks[2].nbWhites >= 3*marks[1].nbBlacks + marks[1].nbWhites + 3))
                      || ((mark_tmp1.nbBlacks + mark_tmp1.nbWhites == 5) && !smmCodeHandler.sameColorsReused(codesPlayed[0], codesPlayed[2]))
-                     || ((mark_tmp1.nbBlacks + mark_tmp1.nbWhites <= 4) && !smmCodeHandler.sameColorsReused(codesPlayed[0], codesPlayed[2]) 
+                     || ((mark_tmp1.nbBlacks + mark_tmp1.nbWhites <= 4) && !smmCodeHandler.sameColorsReused(codesPlayed[0], codesPlayed[2])
                          && (marks[1].nbBlacks == 0) && (marks[1].nbWhites <= 2) && ((smmCodeHandler.nbDifferentColors(codesPlayed[1]) == 2) ||(marks[1].nbWhites > 0)) && (3*marks[2].nbBlacks + marks[2].nbWhites >= 3*marks[1].nbBlacks + marks[1].nbWhites + 2))
                    )
               ) {
@@ -2591,12 +2589,11 @@ function draw_graphic_bis() {
           document.getElementById("my_table").style.top = "0%";
           document.getElementById("my_table").style.border = "none";
           document.getElementById("my_table").style["border-radius"] = "0%";
-          document.getElementById("my_canvas").style.width = "99%";
           if (firefoxMode) {
-            document.getElementById("my_canvas").style.height = "95%";
+            document.getElementById("my_canvas").style.height = "95%"; // (higher values do not work with Firefox)
           }
           else {
-            document.getElementById("my_canvas").style.height = "99.25%"; // (does not work with Firefox)
+            document.getElementById("my_canvas").style.height = "97%"; // (higher values do not work with Chrome / appli)
           }
 
           try { // (try/catch because optional pictures)
@@ -2626,8 +2623,7 @@ function draw_graphic_bis() {
           document.getElementById("my_table").style.top = tableIniTop;
           document.getElementById("my_table").style.border = tableIniBorder;
           document.getElementById("my_table").style["border-radius"] = tableIniBorderRadius;
-          document.getElementById("my_canvas").style.width = myCanvasIniWidth;
-          document.getElementById("my_canvas").style.height = myCanvasIniHeight;
+          document.getElementById("my_canvas").style.height = "93%";
 
           try { // (try/catch because optional pictures)
             document.getElementById("img_1").style.display = 'inline';

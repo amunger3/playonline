@@ -113,8 +113,6 @@ let tableIniHeight=document.getElementById("my_table").style.height;
 let tableIniTop=document.getElementById("my_table").style.top;
 let tableIniBorder=document.getElementById("my_table").style.border;
 let tableIniBorderRadius=document.getElementById("my_table").style["border-radius"];
-let myCanvasIniWidth=document.getElementById("my_canvas").style.width;
-let myCanvasIniHeight=document.getElementById("my_canvas").style.height;
 let CompressedDisplayMode=false;
 let CompressedDisplayMode_compressWidth=477;
 let CompressedDisplayMode_uncompressWidth=944;
@@ -2205,12 +2203,11 @@ document.getElementById("my_table").style.height="100%";
 document.getElementById("my_table").style.top="0%";
 document.getElementById("my_table").style.border="none";
 document.getElementById("my_table").style["border-radius"]="0%";
-document.getElementById("my_canvas").style.width="99%";
 if(firefoxMode){
 document.getElementById("my_canvas").style.height="95%";
 }
 else{
-document.getElementById("my_canvas").style.height="99.25%";
+document.getElementById("my_canvas").style.height="97%";
 }
 try{
 document.getElementById("img_1").style.display='none';
@@ -2236,8 +2233,7 @@ document.getElementById("my_table").style.height=tableIniHeight;
 document.getElementById("my_table").style.top=tableIniTop;
 document.getElementById("my_table").style.border=tableIniBorder;
 document.getElementById("my_table").style["border-radius"]=tableIniBorderRadius;
-document.getElementById("my_canvas").style.width=myCanvasIniWidth;
-document.getElementById("my_canvas").style.height=myCanvasIniHeight;
+document.getElementById("my_canvas").style.height="93%";
 try{
 document.getElementById("img_1").style.display='inline';
 document.getElementById("img_2").style.display='inline';

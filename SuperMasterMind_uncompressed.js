@@ -2593,7 +2593,7 @@ function draw_graphic_bis() {
             document.getElementById("my_canvas").style.height = "95%"; // (higher values do not work with Firefox)
           }
           else {
-            document.getElementById("my_canvas").style.height = "97%"; // (higher values do not work with Chrome / appli)
+            document.getElementById("my_canvas").style.height = "95%"; // (higher values do not work with Chrome / appli)
           }
 
           try { // (try/catch because optional pictures)

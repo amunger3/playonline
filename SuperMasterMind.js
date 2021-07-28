@@ -2144,8 +2144,8 @@ do{
 resize_detected=false;
 let width;
 let height;
-width=document.getElementById("my_canvas_cell").offsetWidth-2*2;
-height=document.getElementById("my_canvas_cell").offsetHeight-2*2;
+width=document.getElementById("my_canvas_cell").offsetWidth-2*2-1;
+height=document.getElementById("my_canvas_cell").offsetHeight-2*2-1;
 if( (current_width!=width)||(current_height!=height) ){
 resize_detected=true;
 resize_cnt++;

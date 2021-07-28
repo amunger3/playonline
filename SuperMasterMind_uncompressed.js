@@ -2516,8 +2516,8 @@ function draw_graphic_bis() {
       resize_detected = false;
       let width;
       let height;
-      width = document.getElementById("my_canvas_cell").offsetWidth-2*2; // 2 * 2px border
-      height = document.getElementById("my_canvas_cell").offsetHeight-2*2; // 2 * 2px border;
+      width = document.getElementById("my_canvas_cell").offsetWidth-2*2-1; // 2 * 2px border
+      height = document.getElementById("my_canvas_cell").offsetHeight-2*2-1; // 2 * 2px border;
       // width = canvas.clientWidth;
       // height = canvas.clientHeight;
       // (Alternate sizes:

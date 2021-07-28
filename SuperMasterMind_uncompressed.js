@@ -217,7 +217,7 @@ function setLightGray() {
 }
 function updateThemeAttributes() {
   document.getElementById("my_table").style.backgroundColor = (modernDisplay ? "#E3E3E3" : legacy_backgroundColor_2_base_color);
-  document.getElementById("my_canvas").style.border = (modernDisplay ? "2px solid purple" : "2px solid black");
+  document.getElementById("my_canvas_cell").style.border = (modernDisplay ? "2px solid purple" : "2px solid black");
   let allButtons = document.getElementsByClassName("button");
   for (let i = 0; i < allButtons.length; i++) {
     allButtons[i].style.border = (modernDisplay ? "2px solid purple" : "2px solid black");
@@ -2476,21 +2476,17 @@ function drawRoundedRect(ctx, x, y, width, height, radius, fill, stroke) {
 function draw_graphic(fullMode = true) {
   let gameOnGoingIni = gameOnGoing();
   let currentAttemptNumberIni = currentAttemptNumber;
-  
-  let common_width = document.getElementById("my_canvas_cell").offsetWidth;
-  let common_height = document.getElementById("my_canvas_cell").offsetHeight;
-  
-  draw_graphic_bis(common_width, common_height);
+  draw_graphic_bis();
   if ( (gameOnGoingIni != gameOnGoing()) || (currentAttemptNumber != currentAttemptNumberIni) ) {
    updateGameSizes();
-   draw_graphic_bis(common_width, common_height);
+   draw_graphic_bis();
   }
   if (fullMode) {
-    draw_graphic_bis(common_width, common_height); // sometimes improves the display  - not perfect but best solution found
+    draw_graphic_bis(); // sometimes improves the display  - not perfect but best solution found
   }
 }
 
-function draw_graphic_bis(common_width, common_height) {
+function draw_graphic_bis() {
 
   let canvas = document.getElementById("my_canvas");
   let ctx = canvas.getContext("2d");
@@ -2520,8 +2516,8 @@ function draw_graphic_bis(common_width, common_height) {
       resize_detected = false;
       let width;
       let height;
-      width = common_width;     
-      height = common_height;      
+      width = document.getElementById("my_canvas_cell").offsetWidth-2*2; // 2 * 2px border
+      height = document.getElementById("my_canvas_cell").offsetHeight-2*2; // 2 * 2px border;
       // width = canvas.clientWidth;
       // height = canvas.clientHeight;
       // (Alternate sizes:
@@ -2583,6 +2579,10 @@ function draw_graphic_bis(common_width, common_height) {
           document.getElementById("playRandomCodeButton").value = "\u266C";
           document.getElementById("revealSecretColorButton").value = "?";
           document.getElementById("showPossibleCodesButton").value = showPossibleCodesButtonCompressedName;
+          document.getElementById("my_table").style.width = "100%";
+          document.getElementById("my_table").style.height = "100%";
+          document.getElementById("my_table").style.left = "0";
+          document.getElementById("my_table").style.top = "0";
 
           try { // (try/catch because optional pictures)
             document.getElementById("img_1").style.display = 'none';
@@ -2605,6 +2605,10 @@ function draw_graphic_bis(common_width, common_height) {
           document.getElementById("playRandomCodeButton").value = playRandomCodeButtonIniName;
           document.getElementById("revealSecretColorButton").value = revealSecretColorButtonIniName;
           document.getElementById("showPossibleCodesButton").value = showPossibleCodesButtonIniName;
+          document.getElementById("my_table").style.width = "75%";
+          document.getElementById("my_table").style.height = "90%";
+          document.getElementById("my_table").style.left = "12.5%";
+          document.getElementById("my_table").style.top = "2%";
 
           try { // (try/catch because optional pictures)
             document.getElementById("img_1").style.display = 'inline';

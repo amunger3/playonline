@@ -184,7 +184,7 @@ lightGray=darkGray;
 }
 function updateThemeAttributes(){
 document.getElementById("my_table").style.backgroundColor=(modernDisplay ? "#E3E3E3" : legacy_backgroundColor_2_base_color);
-document.getElementById("my_canvas").style.border=(modernDisplay ? "2px solid purple" : "2px solid black");
+document.getElementById("my_canvas_cell").style.border=(modernDisplay ? "2px solid purple" : "2px solid black");
 let allButtons=document.getElementsByClassName("button");
 for (let i=0;i < allButtons.length;i++){
 allButtons[i].style.border=(modernDisplay ? "2px solid purple" : "2px solid black");
@@ -2115,18 +2115,16 @@ ctx.stroke();
 function draw_graphic(fullMode=true){
 let gameOnGoingIni=gameOnGoing();
 let currentAttemptNumberIni=currentAttemptNumber;
-let common_width=document.getElementById("my_canvas_cell").offsetWidth;
-let common_height=document.getElementById("my_canvas_cell").offsetHeight;
-draw_graphic_bis(common_width, common_height);
+draw_graphic_bis();
 if( (gameOnGoingIni!=gameOnGoing())||(currentAttemptNumber!=currentAttemptNumberIni) ){
 updateGameSizes();
-draw_graphic_bis(common_width, common_height);
+draw_graphic_bis();
 }
 if(fullMode){
-draw_graphic_bis(common_width, common_height);
+draw_graphic_bis();
 }
 }
-function draw_graphic_bis(common_width, common_height){
+function draw_graphic_bis(){
 let canvas=document.getElementById("my_canvas");
 let ctx=canvas.getContext("2d");
 let res;
@@ -2146,8 +2144,8 @@ do{
 resize_detected=false;
 let width;
 let height;
-width=common_width;
-height=common_height;
+width=document.getElementById("my_canvas_cell").offsetWidth-2*2;
+height=document.getElementById("my_canvas_cell").offsetHeight-2*2;
 if( (current_width!=width)||(current_height!=height) ){
 resize_detected=true;
 resize_cnt++;
@@ -2193,6 +2191,10 @@ document.getElementById("resetCurrentCodeButton").value="\u2718";
 document.getElementById("playRandomCodeButton").value="\u266C";
 document.getElementById("revealSecretColorButton").value="?";
 document.getElementById("showPossibleCodesButton").value=showPossibleCodesButtonCompressedName;
+document.getElementById("my_table").style.width = "100%";
+document.getElementById("my_table").style.height = "100%";
+document.getElementById("my_table").style.left = "0";
+document.getElementById("my_table").style.top = "0";
 try{
 document.getElementById("img_1").style.display='none';
 document.getElementById("img_2").style.display='none';
@@ -2211,6 +2213,10 @@ document.getElementById("resetCurrentCodeButton").value=resetCurrentCodeButtonIn
 document.getElementById("playRandomCodeButton").value=playRandomCodeButtonIniName;
 document.getElementById("revealSecretColorButton").value=revealSecretColorButtonIniName;
 document.getElementById("showPossibleCodesButton").value=showPossibleCodesButtonIniName;
+document.getElementById("my_table").style.width = "75%";
+document.getElementById("my_table").style.height = "90%";
+document.getElementById("my_table").style.left = "12.5%";
+document.getElementById("my_table").style.top = "2%";
 try{
 document.getElementById("img_1").style.display='inline';
 document.getElementById("img_2").style.display='inline';

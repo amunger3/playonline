@@ -28,7 +28,6 @@
         font-family: 'Verdana';
         margin: 0%;
         padding: 0%;
-        /* border: thin solid white; */
         color: #777777;
         font-size: calc(7px + .34vw);
         background: black;
@@ -36,9 +35,8 @@
       #my_canvas {
         margin: 0;
         padding: 0;
-        border: 2px solid purple; /* (may be modified in SuperMasterMind.js) */
         background: transparent;
-        height: 98.5%;
+        border: none;
         border-radius: 1.5%;
         zoom: 1.0; /* (used by Chrome, ignored by Firefox) */
         position: fixed;
@@ -48,6 +46,7 @@
         font-family: Verdana;
         background-color: white;
         border: 2px solid purple; /* (may be modified in SuperMasterMind.js) */
+        border-radius: 20%;
         color: black;
         padding: 1.0vh 0.5vw 1.0vh 0.5vw; /* top right bottom left */
         text-align: center;
@@ -59,7 +58,6 @@
         display: block;
         margin-top: 1.0vh;
         margin-bottom: 1.0vh;
-        border-radius: 20%;
         -webkit-backface-visibility: visible;
       }
       .button:hover {
@@ -445,8 +443,8 @@
 
     <!-- HTML controls and canvas -->
 
-    <table id='my_table' style='width:100%;height:100%;position:absolute;left:0%;top:0%;border:none;border-radius:0%;margin:0;padding:0;'>
-      <tr style='height:100%;'>
+    <table id='my_table' style='width:100%;height:100%;position:absolute;left:0;top:0;border:none;border-radius:0%;margin:0;padding:0;'>
+      <tr>
         <td style='width:0.1%;margin:0;padding:0;'></td>
         <td style='width:6.2%;margin:0;padding:0;vertical-align:middle;text-align:center;white-space:nowrap'>
           <input id='newGameButton' class='button disabled' type='button' value='NEW GAME' title='Start a new game' onclick='newGameButtonClick(0)' onfocus='this.blur()' style='margin-bottom:0.5vh;' disabled>
@@ -463,7 +461,7 @@
           <input id='showPossibleCodesButton' class='button disabled' type='button' value='Show possible codes' title='Show possible codes at each stage of the game (when game is over)' onfocus='this.blur()' onclick='showPossibleCodesButtonClick()' disabled>
         </td>
         <td style='width:0.1%;margin:0;padding:0;'></td>
-        <td style='width:93.6%;margin:0;padding:0;vertical-align:top;align:left;text-align:left;' id='my_canvas_cell'><canvas id='my_canvas'><font color=red>Error: HTML canvas are not supported!</font></canvas></td>
+        <td style='width:93.6%;margin:0;padding:0;vertical-align:top;align:left;text-align:left;border:2px solid black;border-radius:1.5%;' id='my_canvas_cell'><canvas id='my_canvas'><font color=red>Error: HTML canvas are not supported!</font></canvas></td>
       </tr>
     </table>
 
@@ -518,7 +516,7 @@
     <!-- Initializations -->
 
     <script>
-      let html_compatibility_game_version = "Ver_ON5";
+      let html_compatibility_game_version = "Ver_ON6";
       let nb_errors_submitted = 0;
       let mobileMode = false;
       let androidMode = false;
